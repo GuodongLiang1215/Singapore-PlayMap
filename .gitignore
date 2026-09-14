@@ -1,0 +1,15 @@
+# Never commit runtime secrets or local environments
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.sqlite3-*
+reports/
+data/raw/
+data/manifests/
+# Only the curated Stage1C deployment snapshot is included.
+data/processed/*
+!data/processed/stage1c_current.json
+!data/processed/stage1c/
+!data/processed/stage1c/**

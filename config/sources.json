@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "reviewed_on": "2026-09-14",
+  "scope": "Singapore nationwide",
+  "sources": [
+    {
+      "key": "stb_attractions",
+      "title": "Tourist Attractions",
+      "agency": "STB",
+      "dataset_id": "d_0f2f47515425404e6c9d2a040dd87354",
+      "catalogue_url": "https://data.gov.sg/datasets/d_0f2f47515425404e6c9d2a040dd87354/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_0f2f47515425404e6c9d2a040dd87354/poll-download",
+      "format": "geojson",
+      "role": "candidate_places",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Jun 2018",
+      "catalogue_updated_date": "2025-12-02",
+      "catalogue_updated_note": "Absolute date shown by source",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "景点候选；原始资料时期较早，需要更新营业状态、名称、入口与开放条件。",
+      "cautions": [
+        "不代表当前所有景点的完整名单",
+        "旧开放时间不得自动视为当前可用",
+        "不批量下载或转载来源照片"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nparks_parks",
+      "title": "Parks",
+      "agency": "NPARKS",
+      "dataset_id": "d_0542d48f0991541706b58059381a6eca",
+      "catalogue_url": "https://data.gov.sg/datasets/d_0542d48f0991541706b58059381a6eca/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_0542d48f0991541706b58059381a6eca/poll-download",
+      "format": "geojson",
+      "role": "candidate_places",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Nov 2025",
+      "catalogue_updated_date": null,
+      "catalogue_updated_note": "Source shows relative update time; not converted to an exact timestamp",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "公园候选点；官方说明为指示性管理区域代表点，不是入口。",
+      "cautions": [
+        "代表点不得直接用作已核验导航入口",
+        "同名记录和关联边界必须单独核对"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nparks_boundaries",
+      "title": "NParks Parks and Nature Reserves",
+      "agency": "NPARKS",
+      "dataset_id": "d_77d7ec97be83d44f61b85454f844382f",
+      "catalogue_url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_77d7ec97be83d44f61b85454f844382f/poll-download",
+      "format": "geojson",
+      "role": "context_layer",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Nov 2025",
+      "catalogue_updated_date": null,
+      "catalogue_updated_note": "Source shows relative update time; not converted to an exact timestamp",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Polygon",
+        "MultiPolygon"
+      ],
+      "purpose": "公园及自然保护区范围，用于背景展示、地点关联和后续内部访问分析。",
+      "cautions": [
+        "不是新加坡国界",
+        "管理范围不是对公众开放范围",
+        "多边形数量不等于景点数量"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nhb_historic_sites",
+      "title": "Historic Sites (GEOJSON)",
+      "agency": "NHB",
+      "dataset_id": "d_31e16b12809e66673e90d8b04fdee1b2",
+      "catalogue_url": "https://data.gov.sg/datasets/d_31e16b12809e66673e90d8b04fdee1b2/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_31e16b12809e66673e90d8b04fdee1b2/poll-download",
+      "format": "geojson",
+      "role": "candidate_places",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Mar 2021",
+      "catalogue_updated_date": "2026-04-16",
+      "catalogue_updated_note": "Absolute date shown by source",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "历史地点和纪念标识候选，含名称、位置、描述及官方详情链接。",
+      "cautions": [
+        "部分历史建筑可能已经不存在",
+        "纪念标识不等于可入内参观的场馆",
+        "访问条件待核验"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nhb_monuments",
+      "title": "Monuments (GEOJSON)",
+      "agency": "NHB",
+      "dataset_id": "d_b29c230ec6b609e29ed42f71ca9a8767",
+      "catalogue_url": "https://data.gov.sg/datasets/d_b29c230ec6b609e29ed42f71ca9a8767/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_b29c230ec6b609e29ed42f71ca9a8767/poll-download",
+      "format": "geojson",
+      "role": "candidate_places",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Mar 2021",
+      "catalogue_updated_date": "2026-04-16",
+      "catalogue_updated_note": "Absolute date shown by source",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "国家古迹候选；可用于建筑文化探索，但须区分外部观赏与内部参观。",
+      "cautions": [
+        "列入古迹不代表对公众开放",
+        "不能自动设为免费或全天可进入",
+        "须与其他来源去重但保留全部来源"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nea_hawker_centres",
+      "title": "Hawker Centres (GEOJSON)",
+      "agency": "NEA",
+      "dataset_id": "d_4a086da0a5553be1d89383cd90d07ecd",
+      "catalogue_url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_4a086da0a5553be1d89383cd90d07ecd/poll-download",
+      "format": "geojson",
+      "role": "candidate_places",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Nov 2025",
+      "catalogue_updated_date": null,
+      "catalogue_updated_note": "Source shows relative update time; not converted to an exact timestamp",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "本地休闲与餐饮停留候选，含位置、名称及状态等字段。",
+      "cautions": [
+        "市场与熟食中心需要区分",
+        "中心位置不代表所有摊位营业",
+        "不能将静态状态视为实时营业或价格信息"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nparks_facilities",
+      "title": "Park Facilities",
+      "agency": "NPARKS",
+      "dataset_id": "d_14d807e20158338fd578c2913953516e",
+      "catalogue_url": "https://data.gov.sg/datasets/d_14d807e20158338fd578c2913953516e/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_14d807e20158338fd578c2913953516e/poll-download",
+      "format": "geojson",
+      "role": "amenity_layer",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Nov 2025",
+      "catalogue_updated_date": null,
+      "catalogue_updated_note": "Source shows relative update time; not converted to an exact timestamp",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "Point"
+      ],
+      "purpose": "公园配套设施；保留CLASS及原始属性，不把所有设施作为景点。",
+      "cautions": [
+        "设施代表点不是入口保证",
+        "无障碍属性缺失不得自动补齐",
+        "缺失名称保留为未知"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    },
+    {
+      "key": "nparks_tracks",
+      "title": "NParks Tracks",
+      "agency": "NPARKS",
+      "dataset_id": "d_306cc1018cb733346681883ee6d73054",
+      "catalogue_url": "https://data.gov.sg/datasets/d_306cc1018cb733346681883ee6d73054/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_306cc1018cb733346681883ee6d73054/poll-download",
+      "format": "geojson",
+      "role": "context_layer",
+      "geographic_scope": "SG nationwide source coverage; no project area subset",
+      "download_policy": "full_dataset_no_spatial_or_row_filter",
+      "source_period_label": "Aug 2025",
+      "catalogue_updated_date": "2025-12-25",
+      "catalogue_updated_note": "Absolute date shown by source",
+      "reviewed_on": "2026-09-14",
+      "review_level": "official_catalogue_and_preview_reviewed",
+      "runtime_download_verified": false,
+      "expected_geometry_types": [
+        "LineString",
+        "MultiLineString"
+      ],
+      "purpose": "公园步道与Park Connector Networks，保留步行/骑行允许字段。",
+      "cautions": [
+        "官方提示可能存在位置误差",
+        "不是全新加坡完整可路由步行网络",
+        "线相交不自动表示同层可通行"
+      ],
+      "licence_name": "Singapore Open Data Licence 1.0",
+      "licence_url": "https://data.gov.sg/open-data-licence"
+    }
+  ]
+}

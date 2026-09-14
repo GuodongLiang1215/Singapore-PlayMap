@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Singapore PlayMap · 全岛数据地图</title>
+<link rel="stylesheet" href="/stage1-static/style.css">
+<script src="/stage1-static/map.js" defer></script>
+</head>
+<body>
+<header><div><span class="eyebrow">SINGAPORE PLAYMAP / STAGE 1A</span><h1>全岛地点与空间数据</h1></div><a href="/">阶段0状态页 ↗</a></header>
+<section class="metrics"><div><span>已处理来源</span><strong id="sources">—</strong></div><div><span>全部原始记录</span><strong id="records">—</strong></div><div><span>候选地点记录 · 未去重</span><strong id="places">—</strong></div><div><span>已核验规划入口</span><strong id="entrances">0</strong></div></section>
+<div class="notice">当前用于数据检查，不是游玩规划器。图上可见 ≠ 已确认可进入；尚未接入路线、开放时间核验或LLM。</div>
+<main>
+<aside class="left">
+ <h2>候选地点</h2><label for="search">按源数据名称或地址搜索</label><input id="search" placeholder="例如 Botanic、museum、Orchard" maxlength="160">
+ <label for="category">数据类别</label><select id="category"><option value="">全部候选地点</option value="tourism">景点 · STB</option><option value="nature">公园 · NParks</option><option value="heritage">历史地点 · NHB</option><option value="monument">古迹 · NHB</option><option value="food">熟食中心 · NEA</option></select>
+ <p class="small">类别来自数据来源；搜索不含自动翻译。没有结果不代表现实中没有该地点。</p>
+ <h2>辅助图层</h2>
+ <label class="check"><input type="checkbox" data-layer="parks">公园 / 保护区边界</label>
+ <label class="check"><input type="checkbox" data-layer="facilities">公园设施（完整图层）</label>
+ <label class="check"><input type="checkbox" data-layer="tracks">公园步道（完整图层）</label>
+ <p class="small">设施与步道不是额外景点；较大图层首次载入可能需要等待。按页加载全部记录，不做空间裁剪。</p>
+ <label class="check"><input type="checkbox" id="tiles" checked>在线背景地图</label>
+ <button id="fit">查看全部地点范围</button>
+ <h2>选择起点</h2><label class="check"><input type="checkbox" id="pick">点击地图设置起点</label>
+ <p id="origin" class="small">尚未设置；本页不请求GPS权限。</p><button id="clear-origin" class="subtle">清除起点</button>
+ <h2>匹配列表</h2><p id="list-count" class="small">等待数据…</p><div id="list"></div><button id="more" hidden>再显示100条</button>
+</aside>
+<section class="map-wrap"><div id="map"><div id="map-placeholder">正在准备地图…</div></div><div id="progress" role="status">读取本地数据快照…</div></section>
+<aside class="right"><h2>记录详情</h2><div id="detail"><p class="muted">点击地图或左侧的地点记录，检查名称、来源、坐标类型和待核验信息。</p></div><hr><h2>当前处理原则</h2><p class="small">完整保留源记录。重复候选只生成待核查清单，不自动合并；代表点不转成入口；不补造时长或“全天开放”。</p><a href="/api/stage1/status" target="_blank" rel="noopener">查看数据处理报告 ↗</a></aside>
+</main>
+<footer>地点数据：STB / NParks / NHB / NEA，经 data.gov.sg；来源与许可见每条记录。底图：© OpenStreetMap contributors。</footer>
+</body></html>

@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: singapore-playmap
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-cloud.txt
+    startCommand: uvicorn app.stage2c_main:app --host 0.0.0.0 --port $PORT --workers 1 --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: PLAYMAP_DEPLOYMENT
+        value: render
+      - key: PLAYMAP_MAX_LLM_CONCURRENCY
+        value: "2"
+      - key: PLAYMAP_ACCESS_CODE
+        sync: false
+      - key: PLAYMAP_SESSION_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: LLM_MODEL
+        value: gemini-3.5-flash-lite
+      - key: ONEMAP_EMAIL
+        sync: false
+      - key: ONEMAP_PASSWORD
+        sync: false

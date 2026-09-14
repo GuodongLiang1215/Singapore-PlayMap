@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Singapore PlayMap · Stage 0</title><style>
+:root{font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:#172b35;background:#f3f6f7}
+body{margin:0}main{max-width:1120px;margin:auto;padding:48px 26px}header{border-bottom:1px solid #cedce1;padding-bottom:25px}.eyebrow{letter-spacing:.12em;font-size:12px;color:#397171;font-weight:700}h1{font-size:36px;line-height:1.15;margin:12px 0}h2{font-size:21px}p{line-height:1.75}.lead{max-width:860px;color:#445760}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0}.card{background:#fff;border:1px solid #d8e1e5;border-radius:12px;padding:20px}.value{font-size:27px;font-weight:700;margin-top:10px}.note{background:#fff8e8;border-left:4px solid #c48e26;padding:14px 18px;line-height:1.7}.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px;background:white}th,td{padding:14px 12px;text-align:left;border-bottom:1px solid #e2e8eb;vertical-align:top}th{background:#e8eff1}small{display:block;margin-top:5px;color:#5a6a71;line-height:1.5}a{color:#075b79}code{font-family:Consolas,monospace;background:#e7eef1;padding:2px 5px}button{background:#144d61;color:white;border:0;border-radius:6px;padding:10px 16px;cursor:pointer}footer{margin-top:34px;color:#5c6e76;font-size:12px}.error{color:#b33131}@media(max-width:700px){.cards{grid-template-columns:1fr}h1{font-size:29px}}
+</style></head><body><main>
+<header><div class="eyebrow">GE5226 · ENGINEERING FOUNDATION</div><h1>Singapore PlayMap</h1><p class="lead">阶段0：全新加坡的数据来源、下载状态与程序基础。这里还不是游玩地图，不生成推荐、不计算路线，也不调用LLM。</p></header>
+<section class="cards"><div class="card">项目地理范围<div class="value">全新加坡</div><small>不设置片区pilot，不按行政区裁剪原始数据。</small></div><div class="card">已登记的官方数据层<div id="registered" class="value">—</div><small>来源已核对，不等于数据已下载或完整覆盖所有地点。</small></div><div class="card">本机已下载的数据层<div id="downloaded" class="value">—</div><small>数量来自本机manifest与文件是否存在。</small></div></section>
+<p class="note">没有时间输入时，未来系统将提出可修改的建议时长；有明确时间要求时按条件规划。系统建议、用户要求和已发生的行程进度分别保存。公园代表点不等于入口，未知营业时间不等于全天开放。</p>
+<h2>公开数据登记</h2><p>通过终端执行 <code>python scripts/fetch_open_data.py --all</code> 获取整份数据，再刷新此页。</p><button id="refresh">刷新本机状态</button><p id="message" role="status"></p>
+<div class="table-scroll"><table><thead><tr><th>官方数据</th><th>资料时期</th><th>作用与限制</th><th>本机状态</th><th>原始要素数</th></tr></thead><tbody id="rows"></tbody></table></div>
+<h2>本阶段可用接口</h2><p><a href="/docs">API交互文档</a> · <a href="/health">运行状态</a> · <a href="/api/contracts">数据结构</a> · <a href="/api/project">项目范围与模块状态</a></p>
+<footer>官方数据采用各来源页面标明的许可。使用后需注明数据名称、来源和实际访问日期，并链接至 <a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence</a>。本项目不代表任何政府机构。</footer>
+</main><script>
+const stateNames={not_downloaded:'未下载',downloaded_raw_not_verified_for_planning:'已下载原始数据 · 待核验',manifest_without_file:'文件缺失',invalid_manifest:'记录异常'};
+async function refresh(){
+ const message=document.getElementById('message');message.className='';message.textContent='读取本机状态…';
+ try{const response=await fetch('/api/sources');if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();
+ const rows=document.getElementById('rows');rows.replaceChildren();let n=0;
+ for(const source of data.sources){const tr=document.createElement('tr');const a=document.createElement('a');a.href=source.catalogue_url;a.textContent=source.title;a.target='_blank';a.rel='noopener noreferrer';const title=document.createElement('td');title.appendChild(a);const sub=document.createElement('small');sub.textContent=source.agency+' · '+source.key;title.appendChild(sub);tr.appendChild(title);
+ for(const text of [source.source_period_label,source.purpose,stateNames[source.local.status]||source.local.status,source.local.feature_count==null?'—':String(source.local.feature_count)]){const td=document.createElement('td');td.textContent=text;tr.appendChild(td);}rows.appendChild(tr);if(source.local.status==='downloaded_raw_not_verified_for_planning')n++;}
+ document.getElementById('registered').textContent=data.sources.length;document.getElementById('downloaded').textContent=n;message.textContent='状态已刷新。原始要素数不是去重后的可游玩地点数。';
+ }catch(error){message.className='error';message.textContent='无法读取后端：'+error.message;}}
+document.getElementById('refresh').addEventListener('click',refresh);refresh();
+</script></body></html>

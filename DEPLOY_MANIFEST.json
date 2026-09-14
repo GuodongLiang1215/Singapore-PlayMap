@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14T13:30:17.197015+00:00",
+  "source_project": "D:\\Singapore_PlayMap",
+  "scope": "Singapore nationwide",
+  "stage1c": {
+    "build_id": "20260914T013921075700Z",
+    "entity_display_count": 869,
+    "default_exploration_entity_count": 860,
+    "files": [
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/access_semantic_reviews.json",
+        "bytes": 257935,
+        "sha256": "979ba8f511e5f09d169887fa3a23f7c51c99f24f27b842c4d47df6f4f6266624"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/entities.json",
+        "bytes": 2404375,
+        "sha256": "5b6cfb2037cd1a16d4c2afa603d303c3a0a289566482272e3ebc82ce8b8cdbdc"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/entities.sqlite3",
+        "bytes": 6553600,
+        "sha256": "ad24e38f46db697e4f864298e999f59529eab06744a88cf9d57f5a119352ef1d"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/evidence_config.json",
+        "bytes": 36881,
+        "sha256": "10ea04e02c3a06ed52ff65f798a419f0b5c0ec55fd38dcd3f4f91c5af1710fc0"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/identity_decisions.json",
+        "bytes": 26323,
+        "sha256": "dba1612b347cf2401be74ecbecb40c75b0228a065a054336c8bd51b2e8c06ef0"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/review_findings.md",
+        "bytes": 8463,
+        "sha256": "d2d17ef620beb2aaadb5ac629c68fc5a2bef7c423e84db5a7a9e765c6e571663"
+      },
+      {
+        "path": "data/processed/stage1c/20260914T013921075700Z/stage1c_profile.json",
+        "bytes": 4508,
+        "sha256": "e6013992c9b78f04a1b85655925986908f5b7868926bc93fe88616eec15e16f4"
+      }
+    ]
+  },
+  "secrets_included": false,
+  "raw_data_included": false,
+  "user_reports_included": false,
+  "one_worker_required_for_in_memory_session_state": true
+}

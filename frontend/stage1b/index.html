@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Singapore PlayMap · 全岛目录与入口候选</title>
+<link rel="stylesheet" href="/stage1-static/style.css"><link rel="stylesheet" href="/stage1b-static/style.css">
+<script src="/stage1b-static/map.js" defer></script></head><body>
+<header><div><span class="eyebrow">SINGAPORE PLAYMAP / STAGE 1B</span><h1>全岛目录与入口候选</h1></div><a href="/map-source" target="_blank" rel="noopener">原始数据地图 ↗</a></header>
+<section class="metrics"><div><span>保留全部源记录</span><strong id="records">—</strong></div><div><span>候选地点 · 未去重</span><strong id="places">—</strong></div><div><span>源数据 ACCESS POINT · 非核验入口</span><strong id="access-count">—</strong></div><div><span>待复核重复配对</span><strong id="duplicates">—</strong></div></section>
+<div class="notice">当前用于地点浏览与数据整理。设施按用途分层，ACCESS POINT 仅是入口线索；尚未核验当前开放、入口可达、游玩时长，也未接入路线或LLM。</div>
+<main><aside class="left">
+<h2>候选地点检索</h2><label for="search">源名称、地址或类别词</label><input id="search" maxlength="160" placeholder="例如 Botanic、自然、历史、美食">
+<label for="category">数据类别</label><select id="category"><option value="">全部候选地点</option><option value="tourism">景点 · STB</option><option value="nature">公园 · NParks</option><option value="heritage">历史地点 · NHB</option><option value="monument">古迹 · NHB</option><option value="food">熟食中心 · NEA</option></select>
+<label class="check"><input type="checkbox" id="include-holds">显示来源状态待复核的地点</label><p id="hold-note" class="small">数据尚未加载。</p>
+<p class="small">可按类别中文词搜索，不代表已经翻译所有地名。检索不到不代表现实中不存在。</p>
+<h2>空间与设施图层</h2>
+<label class="check"><input type="checkbox" data-layer="access_points">接入点线索 · 全岛</label>
+<label class="check"><input type="checkbox" data-layer="parks">公园 / 保护区管理边界</label>
+<label class="check"><input type="checkbox" data-layer="facilities">设施图层</label>
+<select id="facility-group" aria-label="设施用途分类"><option value="support">生活配套：洗手间 / 饮水 / 遮蔽等</option><option value="activity">活动设施：健身 / 游乐 / 观景等</option><option value="transport">交通配套：停车 / 接送等</option><option value="information">信息设施：告示 / 地图牌</option><option value="food">餐饮设施</option><option value="unknown">未识别类别</option><option value="">全部设施（含接入点）</option></select>
+<label class="check"><input type="checkbox" data-layer="tracks">完整公园步道</label>
+<p class="small">设施不是额外景点。步道源属性 Y / N / 空值分别显示，不将空值视为允许，不自动拼成导航网络。</p>
+<label class="check"><input type="checkbox" id="tiles" checked>在线背景地图</label><button id="fit">查看全部候选地点范围</button>
+<h2>起点</h2><label class="check"><input type="checkbox" id="pick">点击地图设置临时起点</label><p id="origin" class="small">未设置；不请求GPS，不计算路线。</p><button id="clear-origin" class="subtle">清除</button>
+<h2>匹配列表</h2><p id="list-count" class="small">读取中…</p><div id="list"></div><button id="more" hidden>再显示100条</button>
+</aside><section class="map-wrap"><div id="map"><div id="map-placeholder">正在读取全岛本地数据…</div></div><div id="progress" role="status">读取数据…</div></section>
+<aside class="right"><h2>记录与空间关联证据</h2><div id="detail"><p class="muted">点击地点查看来源、状态及重复线索；点击公园查看候选接入点。没有找到关联时不会强行分配最近入口。</p></div><hr>
+<h2>这一步没有做什么</h2><p class="small">没有自动合并地点；没有用公园中心当入口；没有宣称设施当前开放；没有补造时长或收费。历史状态只用于提示与复核。</p>
+<a href="/api/stage1b/status" target="_blank" rel="noopener">查看实际处理报告 ↗</a></aside></main>
+<footer>数据：STB / NParks / NHB / NEA，经 data.gov.sg；每条记录保留来源及许可。底图：© OpenStreetMap contributors。空间关联为项目计算候选，非通行证明。</footer>
+</body></html>

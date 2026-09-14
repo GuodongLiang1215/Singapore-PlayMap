@@ -1,0 +1,70 @@
+{
+  "project_name": "Singapore PlayMap",
+  "stage": 0,
+  "geographic_scope": "Singapore nationwide",
+  "geographic_subset": null,
+  "timezone": "Asia/Singapore",
+  "storage_crs": "EPSG:4326",
+  "geojson_axis_order": [
+    "longitude",
+    "latitude"
+  ],
+  "display_viewport_is_not_boundary": true,
+  "map_initial_center": {
+    "latitude": 1.3521,
+    "longitude": 103.8198
+  },
+  "data_is_not_exhaustive_inventory": true,
+  "roles": {
+    "user": [
+      "data sourcing and verification",
+      "technical architecture",
+      "coding"
+    ],
+    "teammates": [
+      "real-world experience and testing",
+      "slides and presentation"
+    ]
+  },
+  "principles": [
+    "No mandatory time budget",
+    "Time absent means propose duration, not guess user free time",
+    "User requirements and system assumptions are distinct",
+    "Multi-turn changes retain unchanged constraints",
+    "Raw source records are not routing-ready destinations",
+    "Full source downloads, no fixed pilot area"
+  ],
+  "future_transport_modes": [
+    "walk",
+    "public_transport",
+    "drive",
+    "cycle"
+  ],
+  "live_transport_modes": [],
+  "components": {
+    "data_registry": "implemented",
+    "full_download_script": "implemented_not_live_verified_here",
+    "data_models": "implemented",
+    "sqlite_bootstrap": "implemented",
+    "status_dashboard": "implemented",
+    "map_ui": "not_implemented",
+    "geocoding": "not_connected",
+    "routing": "not_connected",
+    "llm": "not_connected",
+    "planner": "not_implemented",
+    "multi_turn_replanning": "not_implemented"
+  },
+  "api_research": {
+    "onemap": {
+      "docs": "https://www.onemap.gov.sg/apidocs/",
+      "registration": "https://www.onemap.gov.sg/apidocs/register",
+      "auth": "https://www.onemap.gov.sg/apidocs/authentication",
+      "search_requires_token": true,
+      "status": "documentation_checked_not_authenticated"
+    },
+    "data_gov_sg": {
+      "download_guide": "https://guide.data.gov.sg/developer-guide/dataset-apis/download-dataset",
+      "api_key": "optional_for_public_download_higher_limits_if_provided"
+    }
+  }
+}
