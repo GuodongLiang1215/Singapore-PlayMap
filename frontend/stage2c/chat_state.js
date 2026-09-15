@@ -170,6 +170,9 @@
    return t;
   }
   view(id){const t=this.get(id);if(t)this.viewingId=id;return t;}
+  /* Opening an older thread RESUMES it: the user keeps talking in that thread
+     rather than only reading it. New lines append where they left off. */
+  activate(id){const t=this.get(id);if(!t)return null;this.activeId=id;this.viewingId=id;return t;}
   resume(){this.viewingId=this.activeId;return this.active();}
   list(){return this.threads.map(t=>({id:t.id,title:t.title||'（尚未发送）',
    count:t.messages.length,active:t.id===this.activeId,viewing:t.id===this.viewingId}));}

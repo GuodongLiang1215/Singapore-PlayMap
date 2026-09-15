@@ -10,25 +10,31 @@
  function status(text,cls=''){el('chat-status').textContent=text;el('chat-status').className=cls;}
  const log=new PlayMapChatState.ConversationLog();
  function renderLog(){
-  const box=el('chat-log'),past=!log.isViewingActive();
-  box.replaceChildren(...log.viewing().messages.map(m=>{
-   const p=make('div',undefined,'chat-message '+m.role);
-   p.append(make('strong',m.role==='user'?'你':'PlayMap'),make('p',m.text));return p;}));
-  // A past thread is a transcript, not a restorable plan: hide the composer
-  // rather than let a send land in a conversation the user is only reading.
-  el('chat-history-banner').hidden=!past;el('chat-form').hidden=past;
-  if(!past)box.scrollTop=box.scrollHeight;
+  const box=el('chat-log');
+  box.replaceChildren(...log.viewing().messages.map(m=>
+   make('div',m.text,'chat-message '+m.role)));
+  el('chat-history-banner').hidden=true;el('chat-form').hidden=false;
+  box.scrollTop=box.scrollHeight;
  }
  function renderHistory(){
   const box=el('chat-history');box.replaceChildren();
   for(const t of log.list()){
    const b=make('button',t.title,'chat-thread'+(t.viewing?' selected':''));
-   b.type='button';b.append(make('small',t.count+' 条'+(t.active?' · 当前':'')));
-   b.onclick=()=>{if(t.active)log.resume();else log.view(t.id);renderLog();renderHistory();};
+   b.type='button';b.append(make('small',t.count+' 条'));
+   // Opening a past thread resumes it; the user can keep talking in it.
+   b.onclick=()=>{log.activate(t.id);renderLog();renderHistory();status('');};
    box.append(b);
   }
  }
- function message(role,text){log.add(role,text);renderLog();renderHistory();}
+ function message(role,text){
+  log.add(role,text);renderLog();renderHistory();
+  // A new line is the reply the user is waiting for: never leave it behind a
+  // card they closed or folded earlier.
+  const card=document.querySelector('.ov-thread');
+  if(card){card.hidden=false;card.classList.remove('is-collapsed');
+   const b=el('thread-reopen');if(b)b.hidden=true;
+   const c=el('thread-collapse');if(c){c.textContent='▽';c.setAttribute('aria-expanded','true');}}
+ }
  function showPrefs(){const p=preferences;el('chat-preferences').textContent='已采用需求：'+(p.preferred.length?'偏好 '+p.preferred.map(x=>names[x]||x).join('、')+'；':'')+(p.excluded.length?'排除 '+p.excluded.map(x=>names[x]||x).join('、')+'；':'')+(p.notes.length?'待核验 '+p.notes.join('；'):'')+(!p.preferred.length&&!p.excluded.length&&!p.notes.length?'尚无额外偏好':'');}
  async function request(path,body,signal){const r=await fetch('/api/stage2c/'+path,{method:'POST',headers:{'Content-Type':'application/json','X-PlayMap-Client':'stage2c'},body:JSON.stringify(body),signal,cache:'no-store'});let d;try{d=await r.json();}catch{throw Error('本地服务没有返回JSON，请确认新启动入口。');}if(!r.ok){const e=Error(d.detail?.message||'本次请求失败');e.code=d.detail?.code||'REQUEST_FAILED';e.safeDetail=PlayMapChatState.safeErrorDetail(d.detail);throw e;}return d;}
  function cancel(text='已取消等待。已发出的API请求可能仍会计入额度。'){
@@ -83,7 +89,9 @@
  }
  async function send(event){event.preventDefault();
   const text=el('chat-input').value.trim();if(!text)return;
-  if(!el('chat-consent').checked){status('请先阅读并勾选发送说明；测试时只使用公开地点与虚构需求。','warning');return;}
+  // No checkbox to tick: the disclosure is a standing line under the bar
+  // (.chat-notice) so the request still carries consent:true behind something
+  // the user can actually see. #chat-consent stays in the DOM, unused here.
   // Ask BEFORE the model call: candidates are ranked against the origin, so an
   // origin adopted afterwards would not re-anchor this turn's retrieval. Asked at
   // most once per conversation, and declining is a normal answer.
@@ -106,7 +114,17 @@
    metrics.completed++;metrics.calls+=r.usage.generation_requests;metrics.model=r.model;metrics.error=null;metrics.lastAdaptation=r.operation_adaptation||null;
    for(const call of r.usage.calls)for(const [k,v] of Object.entries(call.usage||{}))metrics.tokens[k]=(metrics.tokens[k]||0)+v;
    pending={user_message:((pendingAtStart?.user_message?pendingAtStart.user_message+'\n':'')+text).slice(-3000),interpretation:r.interpretation};
-   message('assistant',r.acknowledgement||'已生成可核对的修改草案。');showProposal(r);el('chat-input').value='';
+   showProposal(r);el('chat-input').value='';
+   // Nothing left to decide -> apply and calculate straight away, so the user
+   // sees an itinerary instead of the machinery. Anything the app could NOT
+   // determine on its own (ambiguous name, no candidate, excluded conflict)
+   // still stops here and asks, rather than letting a guess become the plan.
+   if(r.preview.can_apply&&r.interpretation.actions.length&&chosenEnough()){
+    el('chat-proposal').hidden=true;
+    await adopt();
+   }else{
+    message('assistant',r.acknowledgement||'已生成可核对的修改草案。');
+   }
   }catch(e){if(e.name==='AbortError')return;
    if(!gate.accepts(ticket,bridge.currentRevision(),{base_revision:ticket.revision}))return;
    metrics.failed++;metrics.error=e.code||'NETWORK_OR_CLIENT';metrics.lastFailure=e.safeDetail||null;
@@ -125,10 +143,13 @@
    if(proposal!==r||bridge.currentRevision()!==rev||controller!==local)return;
    applying=true;try{bridge.apply(resolved.draft,rev);preferences=resolved.preferences;}finally{applying=false;}
    showPrefs();metrics.applied++;pending=null;proposal=null;el('chat-proposal').hidden=true;
-   message('assistant','已应用所确认的草案。'+(resolved.ready_to_calculate?'下面使用路径服务计算通行、停留与总时间。':'还缺少起点、停留点或终点信息；可以继续对话或手动补充。'));
+   // The reply is the RESULT, not a description of how it was produced. The
+   // itinerary itself renders below in #result-panel.
+   if(!resolved.ready_to_calculate)
+    message('assistant','还差一个出发点才能算时间。可以点搜索栏旁的定位钮，或直接说出起点名称。');
    status('草案已采用，地图与行程清单已同步。');
    controller=null;el('chat-cancel').disabled=true;el('chat-send').disabled=false;
-   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan)message('assistant','计算完成：'+plan.visits.length+'处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。预算结论与时间范围请查看右侧行程总览；开放条件尚未校验。');else message('assistant','本次尚未获得当前版本的完整路线；请查看行程总览中的原因，草案仍可编辑。');}
+   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan)message('assistant','为你安排了 '+plan.visits.length+' 处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。下面是行程详情；营业与开放条件尚未核验。');else message('assistant','路线本次没能算出来，原因列在下面的行程总览里；行程仍可以继续改。');}
   }catch(e){if(e.name==='AbortError')return;metrics.failed++;metrics.error=e.code||'APPLY_FAILED';metrics.lastFailure=e.safeDetail||PlayMapChatState.safeErrorDetail({request_diagnostic:{phase:'resolve_validation',wire_version:PlayMapChatState.PATCH,generation_attempts:0}});PlayMapChatState.recordFailure(metrics,{generation_attempts:0});status(e.message+(e.code?' ['+e.code+']':''),'error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;el('chat-apply').disabled=!chosenEnough();}}
  }
@@ -137,7 +158,30 @@
  el('chat-form').onsubmit=send;el('chat-apply').onclick=adopt;el('chat-cancel').onclick=()=>cancel();el('chat-export').onclick=download;
  // Starting a new thread only parks the transcript; the adopted itinerary stays.
  el('chat-new').onclick=()=>{cancel(null);pending=null;log.start();renderLog();renderHistory();status('已开始新对话；地图上已采用的行程保留。');};
+ // The conversation card can be folded or dismissed; closing it never touches
+ // the itinerary, and a reply arriving while it is closed reopens it.
+ const thread=()=>document.querySelector('.ov-thread');
+ function showThread(open){
+  thread().hidden=!open;el('thread-reopen').hidden=open;
+  if(open)thread().classList.remove('is-collapsed');
+ }
+ el('thread-close').onclick=()=>showThread(false);
+ el('thread-reopen').onclick=()=>showThread(true);
+ el('thread-collapse').onclick=()=>{
+  const folded=thread().classList.toggle('is-collapsed');
+  el('thread-collapse').textContent=folded?'△':'▽';
+  el('thread-collapse').setAttribute('aria-expanded',String(!folded));
+ };
+ el('editor-toggle').onclick=()=>{
+  const drawer=el('editor-drawer'),open=drawer.hidden;
+  drawer.hidden=!open;el('editor-toggle').setAttribute('aria-expanded',String(open));
+  el('editor-toggle').textContent=open?'收起编辑':'编辑行程';
+ };
  el('chat-resume').onclick=()=>{log.resume();renderLog();renderHistory();};
+ // Grow the bar with the text instead of scrolling it, so no scrollbar arrows.
+ const grow=()=>{const t=el('chat-input');t.style.height='auto';
+  t.style.height=Math.min(t.scrollHeight,76)+'px';};
+ el('chat-input').addEventListener('input',grow);
  el('chat-reset').onclick=async()=>{if(!window.confirm('清除本页对话、偏好和待采用草案？地图中的已采用行程保留；此操作不删除Google已收到的内容。'))return;cancel(null);preferences={preferred:[],excluded:[],notes:[]};prefHistory=[];pending=null;proposal=null;originAsked=false;el('chat-proposal').hidden=true;log.clear();renderLog();renderHistory();showPrefs();try{await request('forget',{session_id:bridge.currentSession()});}catch{}status('本地对话与待采用草案已清理；已有行程保留。');};
  showPrefs();renderHistory();refresh();
 })();

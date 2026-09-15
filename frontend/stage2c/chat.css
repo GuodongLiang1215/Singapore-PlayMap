@@ -5,42 +5,312 @@
 /* In-page conversation list. Memory only; see ConversationLog. */
 .chat-history-block{border-bottom:1px solid #d6e2da;padding-bottom:9px;margin-bottom:10px}.chat-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.chat-history{display:flex;flex-direction:column;gap:4px;max-height:168px;overflow-y:auto}.chat-thread{text-align:left;display:block;width:100%;padding:6px 8px;font-size:12px;line-height:1.35}.chat-thread small{display:block;color:#5d6b63;font-size:11px;margin-top:2px}.chat-thread.selected{background:#e2f0e7;border-color:#397960}#chat-history-banner{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
-/* ===== 2C map-first layout =====================================================
-   Three columns: conversation rail, working panel, map as the hero surface.
-   Scoped to this stylesheet, so /map-2b keeps the validated two-column layout.
-   Every existing element id is preserved; only position and size change.      */
-main{grid-template-columns:186px minmax(0,390px) minmax(0,1fr);align-items:start;gap:12px}
-.history-rail{position:sticky;top:12px;max-height:calc(100vh - 150px);overflow-y:auto;
- background:#fff;border:1px solid #d6e2da;border-radius:9px;padding:10px}
-.history-rail .chat-history-block{border-bottom:0;padding-bottom:0;margin-bottom:0}
+/* ===== 2C: full-bleed map with floating overlays ==============================
+   The map owns the page. Search, itinerary and composer float above it and stay
+   put while the map is panned or zoomed. Scoped to this stylesheet so /map-2b
+   keeps its validated two-column layout. Every element id is preserved; the
+   editing controls move into a drawer instead of being removed.
+   --col/--gap drive every overlay's geometry so nothing overlaps at any width. */
+main.map-shell{display:grid;grid-template-columns:168px minmax(0,1fr);gap:0;
+ max-width:none;margin:0;padding:0;height:calc(100vh - 146px);min-height:540px}
+
+.history-rail{border:0;border-right:1px solid #d6e2da;border-radius:0;position:static;
+ padding:10px 9px;overflow-y:auto;background:#fff;max-height:none}
 .history-rail .chat-history{max-height:none}
 
-/* Working panel: search first, then the conversation, with the composer docked. */
-.left{display:flex;flex-direction:column;max-height:calc(100vh - 150px)}
-.left>section:nth-of-type(2){order:-2}        /* place picker: search box on top */
-.left>section.chat-panel{order:-1}
-.left>#chat-form{order:99;margin-top:auto;position:sticky;bottom:0;background:#fff;
- border:1px solid #d6e2da;border-radius:9px;padding:10px;box-shadow:0 -6px 14px rgba(20,60,45,.07)}
-.left>#chat-form[hidden]{display:none}
-.left>#chat-form textarea{min-height:60px}
-.chat-log{max-height:clamp(160px,26vh,340px)}
+.map-stage{--col:362px;--gap:12px;position:relative;overflow:hidden}
+/* z-index:0 makes the map a stacking context, so Leaflet's own panes
+   (400-1000) stay under the overlays instead of painting over them. */
+.map-stage>.map-panel{position:absolute;inset:0;z-index:0;margin:0;border:0;border-radius:0;box-shadow:none}
+.map-stage #map{position:absolute;inset:0;height:auto!important;border-radius:0}
+#map-placeholder{position:absolute;inset:0;display:grid;place-items:center}
 
-/* Map is the hero; it keeps its own scroll-free box. */
-.workspace{position:sticky;top:12px}
-#map{height:clamp(420px,calc(100vh - 290px),900px)}
+/* Map chrome: one compact row, scrollable rather than tall. */
+.map-stage .map-toolbar{position:absolute;top:var(--gap);right:calc(var(--gap) + 96px);z-index:1100;
+ left:calc(var(--col) + var(--gap)*2);width:auto;margin-left:auto;max-width:max-content;
+ flex-wrap:nowrap;overflow-x:auto;gap:6px 11px;padding:7px 10px;font-size:11px;
+ background:rgba(255,255,255,.97);border-radius:10px;box-shadow:0 2px 10px rgba(20,60,45,.18)}
+.map-stage .map-toolbar>*{flex:0 0 auto}
+.map-stage .map-toolbar .pick-row{flex-basis:auto}
+.map-stage .map-toolbar button{white-space:nowrap}
 
-@media(max-width:1180px){
- /* Rail folds into a horizontal strip above the panel. */
- main{grid-template-columns:minmax(0,370px) minmax(0,1fr)}
- .history-rail{grid-column:1/-1;position:static;max-height:none}
- .history-rail .chat-history{flex-direction:row;overflow-x:auto;padding-bottom:3px}
- .history-rail .chat-thread{width:auto;min-width:148px;flex:0 0 auto}
+.map-stage #basemap-status,.map-stage #map-notice{position:absolute;z-index:1090;margin:0;
+ left:calc(var(--col) + var(--gap)*2);right:var(--gap);bottom:6px;text-align:center;
+ pointer-events:none}
+.map-stage #map-notice{bottom:22px}
+.map-stage>#locate-card{position:absolute;z-index:1120;bottom:calc(var(--gap) + 114px);
+ left:calc(var(--col) + var(--gap)*2);right:var(--gap);width:auto;max-width:540px;margin:0 auto;
+ background:#fff;box-shadow:0 3px 16px rgba(20,60,45,.24)}
+
+.ov{background:#fff;border:1px solid #d6e2da;border-radius:11px;
+ box-shadow:0 3px 14px rgba(20,60,45,.16)}
+
+/* Left column: find-a-place on top, itinerary below. */
+.ov-col{position:absolute;top:var(--gap);left:var(--gap);bottom:var(--gap);z-index:12;
+ width:var(--col);display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.ov-col>*{pointer-events:auto;min-height:0}
+.ov-find{flex:0 0 auto;max-height:44%;overflow-y:auto;padding:11px 12px}
+.ov-thread{flex:1 1 auto;overflow-y:auto;padding:0}
+.ov-find>section,.ov-thread>section{border:0;box-shadow:none;margin:0;background:transparent}
+.ov-thread>section{padding:11px 12px}
+.ov-find h2,.ov-thread h2{font-size:14px;margin:0 0 8px}
+
+/* Composer: centred in the band to the RIGHT of the column, never overlapping it. */
+.ov-chat{position:absolute;z-index:13;bottom:var(--gap);
+ left:calc(var(--col) + var(--gap)*2);right:var(--gap);width:auto;max-width:600px;
+ margin:0 auto;display:flex;flex-direction:column;padding:10px 12px;max-height:60%}
+/* The panel scrolls inside the composer card; without this its content spills
+   over the form below it. Instructional prose is hidden here (still in the DOM
+   for the /map-2b page and for screen readers' document order). */
+.ov-chat>section.chat-panel{border:0;box-shadow:none;margin:0;padding:0;
+ background:transparent;display:flex;flex-direction:column;min-height:0;overflow-y:auto}
+.ov-chat>section.chat-panel>h2{display:none}
+.ov-chat>section.chat-panel>p.small{display:none}
+.ov-chat #chat-model{font-size:10px;color:#5d6b63;margin:0 0 6px;background:rgba(255,255,255,.92);border-radius:7px;padding:2px 9px;width:fit-content;max-width:100%}
+.ov-chat #chat-preferences{font-size:11px;margin:6px 0 0}
+.ov-chat #chat-status{font-size:11px;margin:5px 0 0}
+.ov-chat #chat-form label[for="chat-input"]{font-size:11px}
+.ov-chat .chat-log{max-height:clamp(84px,20vh,240px);flex:1 1 auto;min-height:0}
+.ov-chat #chat-form{margin-top:8px}
+.ov-chat #chat-input{min-height:52px}
+.ov-chat #chat-proposal{max-height:32vh;overflow-y:auto}
+.ov-chat details{margin-top:6px}
+
+/* Editing controls live in a drawer instead of crowding the map. */
+.ov-editbtn{position:absolute;right:var(--gap);top:var(--gap);z-index:12;padding:7px 12px;
+ font-weight:700;background:#fff;cursor:pointer;white-space:nowrap}
+.ov-drawer{position:absolute;right:var(--gap);top:58px;bottom:var(--gap);z-index:15;
+ width:min(346px,calc(100% - var(--col) - var(--gap)*3));overflow-y:auto;padding:11px 12px}
+.ov-drawer>section{border:0;box-shadow:none;margin:0 0 12px;padding:0;background:transparent}
+.ov-drawer[hidden]{display:none}
+
+@media(max-width:1180px){ .map-stage{--col:310px} }
+@media(max-width:940px){
+ /* Not enough width for a column and a composer band: dock the composer under
+    the column and keep the map clear on the right. */
+ .map-stage{--col:296px}
+ .ov-chat{left:var(--gap);right:auto;width:var(--col);max-width:none;bottom:var(--gap);
+  max-height:46%;z-index:16}
+ .ov-col{bottom:auto;max-height:52%}
+ .map-stage .map-toolbar,.map-stage #basemap-status,.map-stage #map-notice,
+ .map-stage #locate-card{left:calc(var(--col) + var(--gap)*2)}
 }
-@media(max-width:680px){
- main{display:flex;flex-direction:column}
- .workspace{order:-2;position:static}
- .left{max-height:none;display:block}
- .left>#chat-form{position:static;box-shadow:none}
- #map{height:clamp(300px,46vh,460px)}
- .history-rail{order:-1}
+@media(max-width:780px){
+ /* Overlays are children of .map-stage, so returning them to normal flow means
+    the stage itself must become a column and stop clipping. The map keeps a
+    fixed height; everything else stacks underneath it. */
+ main.map-shell{display:flex;flex-direction:column;height:auto;min-height:0}
+ .map-stage{order:1;display:flex;flex-direction:column;height:auto;overflow:visible;
+  --col:auto;--gap:10px}
+ .map-stage>.map-panel{position:relative;inset:auto;order:1;
+  height:clamp(300px,46vh,430px);flex:none}
+ .map-stage .map-toolbar,.map-stage #basemap-status,.map-stage #map-notice,
+ .map-stage>#locate-card{left:var(--gap);right:var(--gap);max-width:none;width:auto}
+ .map-stage .map-toolbar{right:calc(var(--gap) + 96px)}
+ .map-stage>#locate-card{top:auto;bottom:8px}
+ .ov-col{position:static;order:2;width:auto;max-height:none;height:auto;
+  padding:10px 10px 0;gap:10px;pointer-events:auto}
+ .ov-find{max-height:none}
+ .ov-thread{flex:none;max-height:none}
+ .ov-chat{position:static;order:3;width:auto;max-width:none;margin:10px;max-height:none}
+ .ov-editbtn{position:static;order:4;margin:0 10px 8px;align-self:flex-start}
+ .ov-reopen{position:static;order:2;margin:10px 10px 0;align-self:flex-start}
+ .ov-drawer{position:static;order:5;width:auto;margin:0 10px 12px;max-height:none}
+ .history-rail{order:2;border-right:0;border-bottom:1px solid #d6e2da}
+ .history-rail .chat-history{flex-direction:row;overflow-x:auto}
+ .history-rail .chat-thread{min-width:150px;flex:0 0 auto;width:auto}
+ body>footer{max-height:none}
 }
+
+/* The map owns the page: the title block is decorative, and the status line and
+   cross-page nav move into the drawer rather than being deleted (app.js writes
+   to #catalogue-status / #credential-status and binds #refresh-status).
+   The footer stays: it carries the OneMap / SLA credit for routing and search. */
+body>header{display:none}
+main.map-shell{height:calc(100vh - 40px)}
+body>footer{padding:5px 12px;font-size:10px;line-height:1.5;max-height:40px;overflow-y:auto}
+.drawer-meta{border-bottom:1px solid #d6e2da;padding-bottom:9px;margin-bottom:11px}
+.drawer-meta .topline{display:flex;flex-wrap:wrap;gap:5px 10px;padding:0;margin:0 0 7px;
+ background:transparent;border:0;font-size:11px}
+.drawer-meta .topline #map-version{margin-left:0}
+.drawer-meta nav{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px}
+@media(max-width:780px){
+ main.map-shell{height:auto}
+ body>footer{max-height:none}
+}
+
+/* ===== Conversation card + composer ==========================================
+   The left card IS the conversation: the user's line, then the itinerary that
+   resulted from it. #result-panel lives inside it so a reply reads as a reply
+   rather than as a separate panel. The card can be collapsed or closed; a small
+   pill brings it back. The composer is one bar, centred under the map.       */
+.ov-thread{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden}
+.ov-thread[hidden]{display:none}
+.thread-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:8px 8px 8px 13px;border-bottom:1px solid #e4ece7;flex:0 0 auto}
+.thread-head strong{font-size:12px}
+.thread-tools{display:flex;gap:2px}
+.thread-tools button{width:26px;height:26px;padding:0;border:0;background:transparent;
+ border-radius:6px;font-size:13px;line-height:1;cursor:pointer;color:#4b5a53}
+.thread-tools button:hover{background:#eff6f1}
+.thread-body{flex:1 1 auto;overflow-y:auto;padding:11px 12px;min-height:0}
+.ov-thread.is-collapsed .thread-body{display:none}
+.ov-thread.is-collapsed{flex:0 0 auto}
+
+.ov-reopen{position:absolute;left:var(--gap);top:var(--gap);z-index:12;padding:7px 14px;font-weight:700;
+ background:#fff;cursor:pointer;white-space:nowrap}
+.ov-reopen[hidden]{display:none}
+
+/* Everything explanatory inside the card is hidden; it is a transcript. */
+.ov-thread>.thread-body>section.chat-panel{border:0;box-shadow:none;margin:0 0 10px;
+ padding:0;background:transparent;display:flex;flex-direction:column}
+.ov-thread section.chat-panel>h2,.ov-thread section.chat-panel>p.small,
+.ov-thread section.chat-panel>details{display:none}
+.ov-thread #chat-model{font-size:10px;color:#5d6b63;margin:0 0 7px}
+.ov-thread .chat-log{max-height:none;margin:0}
+.ov-thread .chat-log:empty,.ov-thread #chat-status:empty,
+.ov-thread #chat-preferences:empty{display:none}
+.ov-thread #chat-status,.ov-thread #chat-preferences{font-size:11px;margin:6px 0 0}
+.ov-thread #result-panel{border:0;box-shadow:none;margin:0;padding:0;background:transparent}
+.ov-thread #result-panel h2{font-size:13px;margin:0 0 7px}
+
+/* The bar: ChatGPT-shaped, centred in the band beside the card. */
+.ov-chat{background:transparent;border:0;box-shadow:none;padding:0;gap:0;
+ max-width:452px;display:block}
+.ov-chat #chat-form{display:flex;align-items:flex-end;gap:7px;margin:0;background:#fff;
+ border:1px solid #d6e2da;border-radius:21px;padding:4px 6px 4px 15px;
+ box-shadow:0 3px 14px rgba(20,60,45,.16)}
+.ov-chat #chat-form>label[for="chat-input"]{position:absolute;width:1px;height:1px;
+ overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ov-chat #chat-form>.chat-consent{display:none}
+.ov-chat #chat-input{flex:1 1 auto;border:0;background:transparent;resize:none;
+ min-height:22px;height:34px;max-height:88px;padding:6px 0;font-size:12.5px;line-height:1.4}
+.ov-chat #chat-input:focus{outline:none}
+.ov-chat .chat-actions{display:flex;gap:6px;flex:0 0 auto;margin:0}
+.ov-chat #chat-send{border-radius:50%;width:30px;height:30px;padding:0;font-size:0;
+ border-color:var(--green);color:transparent;
+ background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M5 12l7-7 7 7'/%3E%3C/svg%3E") center/17px no-repeat}
+.ov-chat #chat-send:disabled{opacity:.45}
+.ov-chat #chat-cancel{border-radius:15px;padding:0 11px;height:30px;font-size:11px}
+.ov-chat #chat-cancel:disabled{display:none}
+.ov-chat .chat-notice{margin:5px auto 0;font-size:10px;color:#5d6b63;
+ background:rgba(255,255,255,.92);border-radius:7px;padding:2px 9px;width:fit-content;
+ max-width:100%}
+
+/* ===== Slim search bar =======================================================
+   Google-shaped: one pill over the map. The tab chrome and the catalogue list
+   are hidden (item 5: search is OneMap, catalogue points are reached by
+   clicking the map), and #pick-map moved to the map toolbar so choosing a
+   start point by hand is still one click. Panes stay in the DOM: app.js binds
+   tab() and writes results into #search-results. */
+.ov-find{background:transparent;border:0;box-shadow:none;padding:0;overflow:visible;
+ max-height:none;flex:0 0 auto}
+.ov-find>section{display:flex;flex-direction:column;gap:8px}
+.ov-find h2,.ov-find .tabs,.ov-find #local-pane,.ov-find #map-pane,
+.ov-find label[for="search-query"],.ov-find #search-pane>p.small{display:none}
+
+.ov-find #search-form{display:flex;align-items:center;gap:4px;margin:0;background:#fff;
+ border:1px solid #d6e2da;border-radius:24px;padding:5px 7px 5px 17px;
+ box-shadow:0 3px 14px rgba(20,60,45,.16)}
+.ov-find #search-query{flex:1 1 auto;min-width:0;border:0;background:transparent;
+ font-size:13px;padding:7px 0}
+.ov-find #search-query:focus{outline:none}
+.ov-find #search-form button{flex:0 0 auto;width:34px;height:34px;padding:0;font-size:0;
+ border:0;border-radius:50%;cursor:pointer;
+ background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d6b63' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4.6-4.6'/%3E%3C/svg%3E") center/19px no-repeat}
+.ov-find #search-form button:hover{background-color:#eff6f1}
+
+/* Results and the picked place read as dropdown cards under the bar. */
+.ov-find #search-results:empty,.ov-find #search-more[hidden]{display:none}
+.ov-find #search-results{background:#fff;border:1px solid #d6e2da;border-radius:11px;
+ box-shadow:0 3px 14px rgba(20,60,45,.16);padding:8px 10px;max-height:38vh;overflow-y:auto}
+.ov-find #selected-place,.ov-find #replacement-notice,.ov-find #input-error{
+ background:#fff;border:1px solid #d6e2da;border-radius:11px;padding:9px 11px;margin:0;
+ box-shadow:0 3px 14px rgba(20,60,45,.16)}
+.ov-find #selected-place{border-top-width:1px}
+
+/* The toolbar scrolls horizontally rather than growing a second row; the bar
+   itself is cosmetic noise over a map, so hide it. */
+.map-stage .map-toolbar{scrollbar-width:none;-ms-overflow-style:none}
+.map-stage .map-toolbar::-webkit-scrollbar{height:0;display:none}
+
+/* GPS sits next to the search bar, the way Google Maps places it. */
+.search-row{display:flex;align-items:center;gap:8px}
+.search-row #search-form{flex:1 1 auto;min-width:0}
+.search-row #locate-me{flex:0 0 auto;width:42px;height:42px;padding:0;font-size:0;border-radius:50%;
+ border:1px solid #d6e2da;box-shadow:0 3px 14px rgba(20,60,45,.16);cursor:pointer;
+ background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23175db5' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='3.4'/%3E%3Cpath d='M12 2v3.2M12 18.8V22M22 12h-3.2M5.2 12H2'/%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E") center/21px no-repeat}
+.search-row #locate-me:hover{background-color:#eff6f1}
+.ov-find #locate-status:empty{display:none}
+.ov-find #locate-status{background:#fff;border:1px solid #d6e2da;border-radius:9px;
+ padding:6px 10px;box-shadow:0 3px 14px rgba(20,60,45,.16);font-size:11px}
+
+/* ===== Map chrome, final pass =================================================
+   Leaflet's own zoom control moves to the bottom-right (it sat under the search
+   bar). The toolbar keeps only the four view/layer controls, as icon buttons the
+   same size as GPS; the basemap picker, the tile switch and manual point-picking
+   moved into the drawer, where they belong for how rarely they are touched.   */
+/* Clear of the composer, which also sits along the bottom edge. */
+.map-stage .leaflet-top.leaflet-left{top:auto;left:auto;bottom:116px;right:10px}
+.map-stage .leaflet-control-zoom{margin:0;box-shadow:0 2px 8px rgba(20,60,45,.2)}
+
+/* Search row starts flush with the toolbar: the section's own padding pushed it
+   17px down, which is what made the top edge look misaligned. */
+.ov-find>section{padding:0;margin:0}
+
+.map-stage .map-toolbar{gap:6px;padding:6px;overflow:visible;max-width:none;
+ right:calc(var(--gap) + 96px);width:auto}
+.map-stage .map-toolbar>*{flex:0 0 auto}
+.map-stage .map-toolbar .toolbar-group{display:flex;gap:6px;margin:0;align-items:center}
+.map-stage .map-toolbar button,
+.map-stage .map-toolbar .check{width:34px;height:34px;padding:0;font-size:0;border-radius:9px;
+ border:1px solid #d6e2da;background-color:#fff;background-repeat:no-repeat;
+ background-position:center;background-size:19px;cursor:pointer;display:block}
+.map-stage .map-toolbar button:hover,
+.map-stage .map-toolbar .check:hover{background-color:#eff6f1}
+.map-stage .map-toolbar button:disabled{opacity:.4;cursor:default}
+.map-stage .map-toolbar .check input{position:absolute;opacity:0;width:0;height:0}
+.map-stage .map-toolbar .check:has(input:checked){background-color:#dcebe2;border-color:#397960}
+.map-stage .map-toolbar #fit{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5a53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9V5a1 1 0 011-1h4M20 9V5a1 1 0 00-1-1h-4M4 15v4a1 1 0 001 1h4M20 15v4a1 1 0 01-1 1h-4'/%3E%3C/svg%3E")}
+.map-stage .map-toolbar #fit-route{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5a53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='19' r='2.4'/%3E%3Ccircle cx='18' cy='5' r='2.4'/%3E%3Cpath d='M8.4 18C13 17 11 12 15.6 11 18 10.5 18 8.6 18 7.4'/%3E%3C/svg%3E")}
+.map-stage .map-toolbar #fit-stops{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5a53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s6.5-5.7 6.5-10.2A6.5 6.5 0 005.5 10.8C5.5 15.3 12 21 12 21z'/%3E%3Ccircle cx='12' cy='10.6' r='2.3'/%3E%3C/svg%3E")}
+.map-stage .map-toolbar .check{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5a53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7' cy='8' r='2'/%3E%3Ccircle cx='16' cy='6.5' r='2'/%3E%3Ccircle cx='9.5' cy='16.5' r='2'/%3E%3Ccircle cx='18' cy='15' r='2'/%3E%3C/svg%3E")}
+
+/* ===== Round 2 of visual feedback ============================================ */
+
+/* 1. Messages read as a conversation: bubbles, no avatars, user on the right. */
+.ov-thread .chat-log{display:flex;flex-direction:column;gap:9px;padding:0;background:transparent;
+ border:0;box-shadow:none}
+.ov-thread .chat-message{max-width:88%;padding:8px 11px;border-radius:14px;font-size:12.5px;
+ line-height:1.6;white-space:pre-wrap;word-break:break-word;border:0;margin:0}
+.ov-thread .chat-message.user{align-self:flex-end;background:#d6f0dc;border-bottom-right-radius:4px}
+.ov-thread .chat-message.assistant{align-self:flex-start;background:#f1f4f2;border-bottom-left-radius:4px}
+.ov-thread .chat-message strong,.ov-thread .chat-message p{display:none}
+
+/* 2. The bar is thinner, not narrower; the textarea grows instead of scrolling,
+      which is what produced those spinner arrows. */
+.ov-chat{max-width:560px}
+/* The base form is a column; the bar must be an explicit single row. */
+.ov-chat #chat-form{padding:3px 5px 3px 15px;border-radius:19px;gap:6px;
+ flex-direction:row;flex-wrap:nowrap;align-items:center}
+/* The base textarea carries margin:10px 0, which is what kept the bar 20px
+   taller than its contents. */
+.ov-chat #chat-input{min-height:20px;height:30px;max-height:76px;margin:0;padding:5px 0;
+ font-size:12.5px;line-height:1.5;overflow-y:auto;scrollbar-width:none}
+.ov-chat #chat-input::-webkit-scrollbar{width:0;display:none}
+.ov-chat #chat-send{width:28px;height:28px;background-size:15px}
+.ov-chat #chat-cancel{height:28px;border-radius:14px;padding:0 10px}
+
+/* 3. The location prompt is a small card, not a panel. */
+.map-stage>#locate-card{max-width:392px;padding:9px 11px}
+.map-stage>#locate-card p{font-size:11px;line-height:1.55;margin:3px 0}
+.map-stage>#locate-card .place-actions{margin:8px 0 2px;gap:6px}
+.map-stage>#locate-card button{font-size:12px;padding:7px 10px;height:auto;width:auto;
+ background-image:none;border-radius:9px}
+.map-stage>#locate-card .primary{margin-top:0}
+
+/* 4. Map controls are separate chips sitting beside GPS, not a white strip. */
+.map-stage .map-toolbar{background:transparent;border:0;box-shadow:none;padding:0;gap:7px;
+ left:calc(var(--col) + var(--gap)*2);right:auto;width:auto;max-width:none;top:var(--gap)}
+.map-stage .map-toolbar button,.map-stage .map-toolbar .check{width:36px;height:36px;
+ border-radius:10px;box-shadow:0 2px 9px rgba(20,60,45,.18);background-size:19px}
