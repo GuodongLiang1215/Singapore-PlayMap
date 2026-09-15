@@ -157,7 +157,8 @@ body>footer{padding:5px 12px;font-size:10px;line-height:1.5;max-height:40px;over
 .ov-thread.is-collapsed .thread-body{display:none}
 .ov-thread.is-collapsed{flex:0 0 auto}
 
-.ov-reopen{position:absolute;left:var(--gap);top:var(--gap);z-index:12;padding:7px 14px;font-weight:700;
+/* Sits where the card would be, not on top of the search bar. */
+.ov-reopen{position:absolute;left:var(--gap);top:calc(var(--gap) + 58px);z-index:12;padding:7px 14px;font-weight:700;
  background:#fff;cursor:pointer;white-space:nowrap}
 .ov-reopen[hidden]{display:none}
 
@@ -314,3 +315,9 @@ body>footer{padding:5px 12px;font-size:10px;line-height:1.5;max-height:40px;over
  left:calc(var(--col) + var(--gap)*2);right:auto;width:auto;max-width:none;top:var(--gap)}
 .map-stage .map-toolbar button,.map-stage .map-toolbar .check{width:36px;height:36px;
  border-radius:10px;box-shadow:0 2px 9px rgba(20,60,45,.18);background-size:19px}
+
+/* Close control on the picked-place card. */
+.ov-find #selected-place{position:relative;padding-right:32px}
+.place-close{position:absolute;top:6px;right:6px;width:24px;height:24px;padding:0;border:0;
+ background:transparent;border-radius:6px;font-size:15px;line-height:1;cursor:pointer;color:#4b5a53}
+.place-close:hover{background:#eff6f1}

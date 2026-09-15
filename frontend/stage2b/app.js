@@ -28,7 +28,11 @@ function beginReplacement(target){replacement=target;const label=target==='origi
 function cancelReplacement(){replacement=null;$('replacement-notice').hidden=true;renderSelected();}
 function selectPlace(point,meta){selected={point,meta};renderSelected();reportError(null);}
 function renderSelected(){
- const box=$('selected-place');box.hidden=!selected;if(!selected)return;const {point:p,meta}=selected;box.replaceChildren(node('h3',p.label),node('p',meta.address||'没有详细地址','small'),node('p',`${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)} · ${SOURCE_LABEL[p.source]||'用户确认候选'}，不是已核验入口。`,'place-source'));
+ const box=$('selected-place');box.hidden=!selected;if(!selected)return;const {point:p,meta}=selected;
+ // Dismissable: picking a place on the map should not pin a card open forever.
+ const close=node('button','×','place-close');close.type='button';close.title='关闭';
+ close.onclick=()=>{selected=null;cancelReplacement();renderSelected();};
+ box.replaceChildren(close,node('h3',p.label),node('p',meta.address||'没有详细地址','small'),node('p',`${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)} · ${SOURCE_LABEL[p.source]||'用户确认候选'}，不是已核验入口。`,'place-source'));
  if(meta.hold)box.append(node('p','旧址或状态待核查。请先搜索当前位置，不直接按旧坐标加入。','warning'));
  const actions=node('div',undefined,'place-actions');
  const use=target=>{if(meta.hold)return;try{
