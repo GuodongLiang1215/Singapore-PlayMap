@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.config import ROOT
 from app.stage1.build import read_json, safe_path
 from app.stage1.normalise import normal_name
-from app.stage1b.build import ro_connect
+from app.db import ro_connect
 
 router = APIRouter(prefix='/api/stage1b',tags=['Stage1B catalogue and candidate associations'])
 LAYERS = {'places':("f.role=?",'candidate_places'),

@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json, re, unicodedata
 from app.stage1c import api as catalogue
-from app.stage1b.build import ro_connect
+from app.db import ro_connect
 from app.stage2a.models import distance_m
 from app.stage2a.transport import ProviderError
 from .retrieval_rules import canonical_spec

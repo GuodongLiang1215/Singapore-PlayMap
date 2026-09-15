@@ -7,7 +7,7 @@
 - 单个 FastAPI / Uvicorn worker（当前聊天草案和路线缓存是进程内状态，不能开启多个 worker）。
 - 每个浏览器生成独立的 32 位会话 ID；路线缓存与待确认草案按 session 隔离。
 - 同一浏览器同一时刻只允许一个 Gemini 请求；共享实例默认最多 2 个并发聊天会话。
-- 全局 Gemini 请求仍由已有的 4.5 秒节流器控制，避免测试阶段瞬间打满免费 RPM。
+- 全局 Gemini 请求由进程内节流器控制，默认间隔 2.0 秒，可用 `PLAYMAP_LLM_MIN_INTERVAL_S` 调整（0–60，异常值回落到 2.0）。这是本项目自定的保守下限，不是实测的服务商额度；被限流时返回 429 并提示稍后重试，不会自动重发。
 - OneMap Token 只缓存于服务器内存；缺失、临近过期或被拒绝时，使用服务端 `ONEMAP_EMAIL` / `ONEMAP_PASSWORD` 最多重新认证一次。
 - 共享网址默认要求 `PLAYMAP_ACCESS_CODE`。组员首次输入访问码后获得 HttpOnly cookie，API Key 不会暴露到浏览器。
 
@@ -52,6 +52,7 @@ ONEMAP_PASSWORD=<你的OneMap密码>
 LLM_PROVIDER=gemini
 LLM_MODEL=gemini-3.5-flash-lite
 PLAYMAP_MAX_LLM_CONCURRENCY=2
+PLAYMAP_LLM_MIN_INTERVAL_S=2.0
 PLAYMAP_DEPLOYMENT=render
 ```
 

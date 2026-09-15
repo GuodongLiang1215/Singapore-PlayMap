@@ -9,7 +9,7 @@ from app.llm_connect.config import load_settings
 from app.llm_connect.errors import LLMConnectionError
 from app.stage2a import api as geo
 from .models import ChatRequest, ResolveRequest, ForgetRequest
-from .engine import prepare, assemble, STORE, ChatError
+from .engine import prepare, assemble, STORE, ChatError, PACER
 from .catalogue import LocalCatalogue
 from .wire_schema import WIRE_VERSION
 
@@ -54,7 +54,7 @@ def status():
     try:
         settings=load_settings(ROOT)
         return {'configured':True,'provider':'gemini','model':settings.model,'live_call_verified':False,
-            'map_chat_integrated':True,'wire_version':WIRE_VERSION,'field_diagnostics':True,'target_position_supported':True,'command_contract':'operation_scoped_commands_v1','time_contract':'partial_time_patch_v1','max_model_calls_per_turn':2,'max_concurrent_chat_sessions':_gate.capacity,'training':False,
+            'map_chat_integrated':True,'wire_version':WIRE_VERSION,'field_diagnostics':True,'target_position_supported':True,'command_contract':'operation_scoped_commands_v1','time_contract':'partial_time_patch_v1','max_model_calls_per_turn':2,'max_concurrent_chat_sessions':_gate.capacity,'min_call_interval_s':PACER.interval,'training':False,
             'notes':'配置可读不证明额度或在线可用；仅点击发送才调用模型。'}
     except LLMConnectionError as e:return {'configured':False,'error':e.public(),'map_chat_integrated':True}
 
@@ -100,7 +100,7 @@ def resolve(body:ResolveRequest):
         record=STORE.get(body.ticket,body.session_id,body.revision)
         cat=LocalCatalogue()
         if cat.build_id!=record['build_id']:raise ChatError('CATALOGUE_CHANGED','目录版本改变，请重新生成草案。',409)
-        result=assemble(record,body.choices,strict=True)
+        result=assemble(record,body.choices,strict=True,cat=cat)
         from .models import Draft
         d=Draft.model_validate(result['draft'])
         for pt in [d.origin,d.finish]+[v.point for v in d.visits]:cat.validate_point(pt)

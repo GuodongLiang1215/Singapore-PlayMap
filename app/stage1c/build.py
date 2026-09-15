@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.stage1.build import BuildError, dump_json, read_json, safe_path
-from app.stage1b.build import ro_connect
+from app.db import ro_connect
 from app.stage1c.review import process
 
 SCHEMA = '''

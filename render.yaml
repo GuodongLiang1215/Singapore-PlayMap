@@ -13,6 +13,8 @@ services:
         value: render
       - key: PLAYMAP_MAX_LLM_CONCURRENCY
         value: "2"
+      - key: PLAYMAP_LLM_MIN_INTERVAL_S
+        value: "2.0"
       - key: PLAYMAP_ACCESS_CODE
         sync: false
       - key: PLAYMAP_SESSION_SECRET

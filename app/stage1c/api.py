@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.config import ROOT
 from app.stage1.build import read_json, safe_path
 from app.stage1.normalise import normal_name
-from app.stage1b.build import ro_connect
+from app.db import ro_connect
 from app.stage1c.review import _hours_view, local_date
 
 router = APIRouter(prefix='/api/stage1c', tags=['Stage1C reviewed entity catalogue'])

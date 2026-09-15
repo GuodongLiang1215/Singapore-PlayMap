@@ -2,7 +2,7 @@
 No model-generated coordinates, silently dropped constraints, online retries or fine-tuning.
 """
 from __future__ import annotations
-import copy, json, re, secrets, threading, time
+import copy, json, os, re, secrets, threading, time
 from datetime import datetime
 from pydantic import ValidationError
 from app.config import ROOT
@@ -27,9 +27,24 @@ class ChatError(Exception):
             result['request_diagnostic']=self.request_diagnostic
         return result
 
+DEFAULT_CALL_INTERVAL=2.0
+
+def call_interval():
+    """Local spacing between provider calls, in seconds.
+
+    A deliberately conservative project guard so a shared test instance cannot
+    burst; it is NOT a measured provider quota and does not promise that a
+    request will be accepted. Any unparsable, negative, non-finite or
+    out-of-range value falls back to the documented default rather than
+    silently becoming zero. A provider 429 is still surfaced, never retried.
+    """
+    try:value=float(os.environ.get('PLAYMAP_LLM_MIN_INTERVAL_S',DEFAULT_CALL_INTERVAL))
+    except (TypeError,ValueError):return DEFAULT_CALL_INTERVAL
+    return value if 0<=value<=60 else DEFAULT_CALL_INTERVAL
+
 class CallPacer:
     """Conservative process-local spacing, not a claim about provider quota."""
-    def __init__(self,interval=4.5):self.interval=interval;self.last=0.;self.lock=threading.Lock()
+    def __init__(self,interval=None):self.interval=call_interval() if interval is None else interval;self.last=0.;self.lock=threading.Lock()
     def wait(self,cancelled):
         with self.lock:
             while (remaining:=self.interval-(time.monotonic()-self.last))>0:
@@ -132,7 +147,22 @@ def merge_time(old, action):
     return resolved_time_update(old, [action]).settings
 
 
-def assemble(record,choices,*,strict=False):
+def excluded_visits(visits,excluded,cat):
+    """Judge an adopted stop by the same rule retrieval used to filter candidates.
+
+    A display label alone cannot prove a place is outside an excluded category,
+    so a catalogue visit is checked against its reviewed source row. Map and
+    geocoder points keep the name-only check: their category is genuinely
+    unknown here and is never guessed.
+    """
+    conflicts=[]
+    for v in visits:
+        e=cat.by_id.get(v.point.entity_id) if cat is not None and v.point.source=='catalogue_representative' else None
+        if blocked(e if e is not None else {'display_title':v.point.label,'categories':[]},excluded):conflicts.append(v.point.label)
+    return conflicts
+
+
+def assemble(record,choices,*,strict=False,cat=None):
     body,parsed=record['body'],record['parsed'];d=body.draft.model_copy(deep=True)
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     d.time=time_update.settings
@@ -180,9 +210,7 @@ def assemble(record,choices,*,strict=False):
     if not d.origin:warnings.append('尚无已确认起点：可以先采用停留草案，然后在地图选起点，或继续说出起点名称。')
     if d.finish_policy=='custom' and not d.finish:warnings.append('还需要明确最后结束位置。')
     if prefs.notes:warnings.append('以下要求仅记录、尚无完整校验能力：'+'；'.join(prefs.notes))
-    conflicts=[]
-    for v in d.visits:
-        if blocked({'display_title':v.point.label,'categories':[]},prefs.excluded):conflicts.append(v.point.label)
+    conflicts=excluded_visits(d.visits,prefs.excluded,cat)
     if conflicts:warnings.append('清单存在可能违反排除要求的地点，请替换或修改偏好：'+'、'.join(conflicts))
     if strict and conflicts:raise ChatError('EXCLUDED_VISIT_REMAINS','清单中仍有被排除类别的可识别地点，请先修改草案或明确允许。')
     return {'draft':d.model_dump(mode='json'),'preferences':prefs.model_dump(),'changes':changes,
@@ -283,7 +311,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
          'new_ids':{i:secrets.token_hex(16) for i,a in enumerate(parsed.actions) if a.op=='add_visit'},
          'build_id':cat.build_id,'calls':call_metadata}
     _trace['phase']='proposal_assembly'
-    preview=assemble(rec,{})
+    preview=assemble(rec,{},cat=cat)
     return rec,{'acknowledgement':acknowledgement(parsed,slots,preview,body.message),'questions':parsed.questions,'slots':slots,
         'preview':preview,'interpretation':parsed.model_dump(mode='json'),
         'base_revision':body.revision,'catalogue_build_id':cat.build_id,

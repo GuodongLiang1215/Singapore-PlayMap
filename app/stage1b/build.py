@@ -9,6 +9,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.db import ro_connect  # Re-exported: existing callers of this module still work.
 from app.stage1.build import BuildError, dump_json, read_json, safe_path, write_csv
 from app.stage1.normalise import duplicate_candidates
 from app.stage1b.rules import interpret, GROUP_LABELS
@@ -38,12 +39,6 @@ CREATE TABLE stage1b_metadata(key TEXT PRIMARY KEY,value_json TEXT NOT NULL);
 
 def j(value):
     return json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))
-
-
-def ro_connect(path):
-    db = sqlite3.connect(Path(path).resolve().as_uri()+'?mode=ro', uri=True)
-    db.row_factory = sqlite3.Row
-    return db
 
 
 def input_snapshot(root):
