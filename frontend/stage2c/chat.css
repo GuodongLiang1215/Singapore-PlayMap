@@ -114,7 +114,6 @@ main.map-shell{display:grid;grid-template-columns:168px minmax(0,1fr);gap:0;
  .ov-thread{flex:none;max-height:none}
  .ov-chat{position:static;order:3;width:auto;max-width:none;margin:10px;max-height:none}
  .ov-editbtn{position:static;order:4;margin:0 10px 8px;align-self:flex-start}
- .ov-reopen{position:static;order:2;margin:10px 10px 0;align-self:flex-start}
  .ov-drawer{position:static;order:5;width:auto;margin:0 10px 12px;max-height:none}
  .history-rail{order:2;border-right:0;border-bottom:1px solid #d6e2da}
  .history-rail .chat-history{flex-direction:row;overflow-x:auto}
@@ -157,9 +156,10 @@ body>footer{padding:5px 12px;font-size:10px;line-height:1.5;max-height:40px;over
 .ov-thread.is-collapsed .thread-body{display:none}
 .ov-thread.is-collapsed{flex:0 0 auto}
 
-/* Sits where the card would be, not on top of the search bar. */
-.ov-reopen{position:absolute;left:var(--gap);top:calc(var(--gap) + 58px);z-index:12;padding:7px 14px;font-weight:700;
- background:#fff;cursor:pointer;white-space:nowrap}
+/* In the column's flow, taking the closed card's place. Absolute positioning
+   only moved the collision from the search bar to whatever sat below it. */
+.ov-reopen{position:static;flex:0 0 auto;align-self:flex-start;padding:7px 14px;
+ font-weight:700;background:#fff;cursor:pointer;white-space:nowrap;pointer-events:auto}
 .ov-reopen[hidden]{display:none}
 
 /* Everything explanatory inside the card is hidden; it is a transcript. */
