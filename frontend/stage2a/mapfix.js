@@ -10,8 +10,13 @@
       attribution,minNativeZoom:11,maxNativeZoom:19,bounds:[[1.16,103.502],[1.56073,104.11475]]},
     'onemap-grey': {label:'OneMap 灰色',url:'https://www.onemap.gov.sg/maps/tiles/Grey_HD/{z}/{x}/{y}.png',
       attribution,minNativeZoom:11,maxNativeZoom:19,bounds:[[1.16,103.502],[1.56073,104.11475]]},
+    // OSM covers the world, this project does not. Bounds mirror the backend
+    // SG_REQUEST_ENVELOPE so the drawn map never extends past where a selected
+    // point would be accepted; a worldwide basemap would imply coverage that
+    // every click outside Singapore then contradicts.
     osm: {label:'OpenStreetMap',url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',minNativeZoom:0,maxNativeZoom:19}
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+      minNativeZoom:0,maxNativeZoom:19,bounds:[[0.9,103.4],[1.7,104.7]]}
   });
   const numeric = value => typeof value === 'number' && Number.isFinite(value);
   const rounded = value => numeric(value) ? Math.round(value * 100) / 100 : null;

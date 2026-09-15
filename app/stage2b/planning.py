@@ -210,6 +210,14 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
     if any(l['diagnostics']['geometry_summary_mismatch'] for l in legs): cautions.append('有路段距离摘要与线形长度差异较大，需要检查；摘要未被静默改写。')
     if any(l['kind']=='same_selected_coordinate' for l in legs): cautions.append('完全相同的选定坐标之间未请求路线，转移时间按0计算；不证明内部不同入口可瞬时到达。')
     if gaps: cautions.append('相邻两段服务商路线在停留点附近可能不衔接；差距及未计入接驳时间已列出。')
+    # A device reading is a measurement with its own error. It is reported, never
+    # used to correct a coordinate, and never folded into a duration estimate.
+    device=[p for p in (prepared['origin'],prepared['finish']) if p is not None and p.source=='device_location']
+    radius=max((p.accuracy_m for p in device if p.accuracy_m is not None),default=None)
+    if device:
+        cautions.append('出发点或结束点来自设备定位'+
+            ('，设备自报误差约 ±'+str(round(radius))+' 米' if radius is not None else '，设备未提供误差半径')+
+            '；该误差没有计入任何距离或时间估计，也不证明你此刻确实位于该点。')
     return {'stage':'2B','schema_version':1,'revision':request.revision,
         'generated_at':datetime.now(timezone.utc).isoformat(),'scope':'Singapore nationwide',
         'origin':prepared['origin'].model_dump(),'visits':visits,
@@ -222,6 +230,8 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
         'budget_check':{'status':status,'budget_s':budget,'reference_within_budget':None if budget is None else total<=budget,
             'slack_s':None if budget is None else budget-total,
             'range_within_budget':None if budget is None else high<=budget},
+        'device_location_used':bool(device),'device_location_accuracy_m':radius,
+        'device_accuracy_included_in_estimates':False,
         'schedule_status':'arithmetic_estimate_only','opening_hours_checked':False,
         'entrances_verified':False,'itinerary_feasible':None,'route_order_optimised':False,
         'live_llm':False,'complete_plan_created':True,'all_legs_accounted_for':True,

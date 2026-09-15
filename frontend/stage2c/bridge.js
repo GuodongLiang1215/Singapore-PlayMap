@@ -16,6 +16,10 @@
   },
   currentRevision:()=>trip.revision,
   currentSession:()=>trip.sessionId,
+  hasOrigin:()=>!!trip.data.origin,
+  // Resolves only after the user answers the device-location card; true means an
+  // origin was adopted. Never sets an origin on its own.
+  proposeDeviceOrigin:()=>proposeDeviceOrigin(),
   currentData:()=>clone(trip.data),
   apply(draft,expected){
    if(formInvalid)throw Error('左侧时间输入尚未完成，请先修正后再采用草案。');

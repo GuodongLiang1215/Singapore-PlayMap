@@ -74,6 +74,22 @@
   fitRoute(){if(!this.plan)return;let points=this.plan.legs.flatMap(l=>l.geometry?l.geometry.coordinates.map(p=>[p[1],p[0]]):[]);if(!points.length)points=[this.plan.origin,...this.plan.visits.map(v=>v.point)].map(p=>[p.latitude,p.longitude]);this.bounds(points);}
   fitDraft(){if(!this.draft)return;const points=[this.draft.origin,...this.draft.visits.map(v=>v.point),this.draft.finish_policy==='custom'?this.draft.finish:null].filter(Boolean);this.bounds(points.map(p=>[p.latitude,p.longitude]));}
   focusPoint(point){if(!this.map)return;this.map.stop();this.map.setView([point.latitude,point.longitude],16,{animate:false});if(this.focusLayer)this.map.removeLayer(this.focusLayer);this.focusLayer=L.circleMarker([point.latitude,point.longitude],{pane:'pmRoute',renderer:this.renderer,radius:12,weight:2,color:'#cc8e2f',fillOpacity:0,interactive:false}).addTo(this.map);}
+  /* A device reading is drawn with its reported error radius so the user can see
+     how coarse it is before deciding. Drawing it adopts nothing. */
+  showDevice(reading){
+   if(!this.map||!reading)return;
+   this.clearDevice();
+   const at=[reading.latitude,reading.longitude];
+   this.deviceLayer=L.layerGroup().addTo(this.map);
+   if(Number.isFinite(reading.accuracy_m)&&reading.accuracy_m>0)
+    L.circle(at,{pane:'pmPOI',radius:reading.accuracy_m,interactive:false,
+     color:'#175db5',weight:1,opacity:.7,fillColor:'#175db5',fillOpacity:.12}).addTo(this.deviceLayer);
+   L.circleMarker(at,{pane:'pmEndpoints',radius:7,weight:2,color:'#fff',
+    fillColor:'#175db5',fillOpacity:1,interactive:false}).addTo(this.deviceLayer);
+   this.map.stop();
+   this.map.setView(at,Number.isFinite(reading.accuracy_m)&&reading.accuracy_m>500?15:16,{animate:false});
+  }
+  clearDevice(){if(this.deviceLayer&&this.map)this.map.removeLayer(this.deviceLayer);this.deviceLayer=null;}
   focusLeg(index){const l=this.plan?.legs[index];if(!l)return;if(l.geometry)this.bounds(l.geometry.coordinates.map(p=>[p[1],p[0]]));else this.focusPoint(l.origin);}
  }
  root.PlayMapTripMap=TripMap;

@@ -98,8 +98,12 @@ def model_context(body,cat=None):
     def point(p):
         if not p:return None
         # Raw user-coordinate labels have no reason to leave the local backend.
-        return {'label':p.label if p.source in ('catalogue_representative','onemap_search') else '已在地图确认的位置',
-                'source':p.source,'has_confirmed_coordinates':True,'entrance_verified':False}
+        # A device origin is named as such so the model stops asking for a start
+        # point, yet is never presented as a place the user identified.
+        if p.source in ('catalogue_representative','onemap_search'):label=p.label
+        elif p.source=='device_location':label='用户设备定位的当前位置（未命名地点）'
+        else:label='已在地图确认的位置'
+        return {'label':label,'source':p.source,'has_confirmed_coordinates':True,'entrance_verified':False}
     def categories(v):
         e=cat.by_id.get(v.point.entity_id) if cat is not None and v.point.source=='catalogue_representative' else None
         return [c for c in e.get('categories',[]) if c in ('nature','food','heritage','monument','tourism')] if e else []
@@ -108,6 +112,24 @@ def model_context(body,cat=None):
                        'categories':categories(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
             'finish_policy':body.draft.finish_policy,'finish':point(body.draft.finish),
             'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json')}
+
+DISTANCE_BANDS=((1000,'<1km'),(3000,'1-3km'),(10000,'3-10km'))
+
+def distance_band(metres):
+    """Coarsen an anchor distance before it leaves the backend.
+
+    Candidates are catalogue entries whose coordinates are public, so an exact
+    geodesic distance from the anchor makes the anchor itself recoverable by
+    trilateration - the start point would be exported even though no coordinate
+    field is ever sent. Selection only needs relative proximity. Bands still
+    constrain the anchor to a region: this lowers precision, it does not make
+    the start point unknowable, and it is not a claim about road distance.
+    """
+    if isinstance(metres,bool) or not isinstance(metres,(int,float)):return None
+    for limit,label in DISTANCE_BANDS:
+        if metres<limit:return label
+    return '>10km'
+
 
 def validate_actions(body,parsed):
     quotes=[body.message]+([body.pending.user_message] if body.pending else [])
@@ -290,9 +312,12 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         if not slot['options']:warnings.append('尚未补齐：'+slot_label(slot)+'候选。可能是具体条件无匹配或目录覆盖不足；不是已确认现实中没有。未补齐前不省略此项采用。')
     generic=[s for s in slots if not s['explicit_location_confirmation'] and s['options']]
     if generic:
-        # No selected coordinates, raw source descriptions, or private route geometries leave the backend.
+        # No selected coordinates, raw source descriptions, or private route geometries leave
+        # the backend, and anchor distances are coarsened so the start point is not exported
+        # as an exact distance set. Exact metres stay local for ranking and for this browser.
         short=[{'slot_id':s['slot_id'],'categories':s['categories'],
-            'candidates':[{k:o[k] for k in ('candidate_key','identity','label','categories','distance_hint_m')} for o in s['options']]} for s in generic]
+            'candidates':[{**{k:o[k] for k in ('candidate_key','identity','label','categories')},
+                'distance_band':distance_band(o['distance_hint_m'])} for o in s['options']]} for s in generic]
         raw_selection=generate(SELECT,{'slots':short,'preferences':prefs.model_dump()},selection_schema())
         _trace['phase']='selection_validation'
         try:selected=Selection.model_validate(raw_selection)
@@ -319,7 +344,9 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         'prompt_version':PROMPT_VERSION,'wire_version':WIRE_VERSION,'command_contract':CONTRACT_NAME,
         'operation_adaptation':adaptation,'time_update':time_update.diagnostic,'model':client.settings.model if hasattr(client,'settings') else 'OFFLINE_TEST_DOUBLE',
         'privacy':{'selected_coordinates_sent_to_llm':False,'raw_chat_text_sent_to_llm':True,
-                   'named_search_queries_sent_to_onemap':True,'credentials_exposed':False},
+                   'named_search_queries_sent_to_onemap':True,'credentials_exposed':False,
+                   'exact_candidate_distances_sent_to_llm':False,
+                   'candidate_distance_bands_sent_to_llm':True},
         'notice':'草案未应用。建议候选不代表入口、营业或时间预算已经满足；采用后由现有程序计算。'}
 
 

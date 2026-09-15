@@ -1,3 +1,46 @@
 .chat-panel{border-top:4px solid #256e65}.chat-panel h2{margin:0 0 8px}.chat-model{font-size:.8rem;color:#44655f;margin:6px 0 10px}.chat-log{max-height:240px;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px}.chat-message{padding:10px 12px;border:1px solid #dce8e2;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f9f7}.chat-message.user{background:#eaf3f0}.chat-message p{margin:5px 0}.chat-message strong{font-size:.82rem}#chat-input{resize:vertical;min-height:100px;font:inherit;line-height:1.5;width:100%;box-sizing:border-box;padding:10px;border:1px solid #aac6bc;border-radius:8px;margin:10px 0}.chat-consent{font-size:.82rem;line-height:1.6;align-items:flex-start!important}.chat-consent input{margin-top:6px}#chat-status{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem;min-height:1.3em}#chat-proposal{padding:12px;background:#f5faf7;border:1px solid #bfd5cc;border-radius:10px}.chat-slot{border-bottom:1px solid #d4e0d9;margin:12px 0;padding-bottom:12px}.chat-slot select{margin:8px 0;max-width:100%}.chat-slot p{overflow-wrap:anywhere}#chat-preferences{font-size:.8rem;color:#41665c;white-space:pre-wrap}.chat-actions{display:flex;gap:8px;flex-wrap:wrap}.chat-caution{font-size:.8rem;color:#596761}#chat-apply{width:100%;margin-top:10px}#chat-proposal[hidden]{display:none}
 
 #chat-form{display:block;width:100%}#chat-form>label{display:block}#chat-form>.chat-consent{display:flex;gap:8px;align-items:flex-start}#chat-form .chat-actions{display:flex;flex-wrap:wrap;gap:8px}#chat-form .chat-consent input{flex:0 0 auto;width:auto}#chat-form .chat-consent span{min-width:0}#chat-input{display:block;width:100%;min-width:0}
+
+/* In-page conversation list. Memory only; see ConversationLog. */
+.chat-history-block{border-bottom:1px solid #d6e2da;padding-bottom:9px;margin-bottom:10px}.chat-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.chat-history{display:flex;flex-direction:column;gap:4px;max-height:168px;overflow-y:auto}.chat-thread{text-align:left;display:block;width:100%;padding:6px 8px;font-size:12px;line-height:1.35}.chat-thread small{display:block;color:#5d6b63;font-size:11px;margin-top:2px}.chat-thread.selected{background:#e2f0e7;border-color:#397960}#chat-history-banner{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* ===== 2C map-first layout =====================================================
+   Three columns: conversation rail, working panel, map as the hero surface.
+   Scoped to this stylesheet, so /map-2b keeps the validated two-column layout.
+   Every existing element id is preserved; only position and size change.      */
+main{grid-template-columns:186px minmax(0,390px) minmax(0,1fr);align-items:start;gap:12px}
+.history-rail{position:sticky;top:12px;max-height:calc(100vh - 150px);overflow-y:auto;
+ background:#fff;border:1px solid #d6e2da;border-radius:9px;padding:10px}
+.history-rail .chat-history-block{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.history-rail .chat-history{max-height:none}
+
+/* Working panel: search first, then the conversation, with the composer docked. */
+.left{display:flex;flex-direction:column;max-height:calc(100vh - 150px)}
+.left>section:nth-of-type(2){order:-2}        /* place picker: search box on top */
+.left>section.chat-panel{order:-1}
+.left>#chat-form{order:99;margin-top:auto;position:sticky;bottom:0;background:#fff;
+ border:1px solid #d6e2da;border-radius:9px;padding:10px;box-shadow:0 -6px 14px rgba(20,60,45,.07)}
+.left>#chat-form[hidden]{display:none}
+.left>#chat-form textarea{min-height:60px}
+.chat-log{max-height:clamp(160px,26vh,340px)}
+
+/* Map is the hero; it keeps its own scroll-free box. */
+.workspace{position:sticky;top:12px}
+#map{height:clamp(420px,calc(100vh - 290px),900px)}
+
+@media(max-width:1180px){
+ /* Rail folds into a horizontal strip above the panel. */
+ main{grid-template-columns:minmax(0,370px) minmax(0,1fr)}
+ .history-rail{grid-column:1/-1;position:static;max-height:none}
+ .history-rail .chat-history{flex-direction:row;overflow-x:auto;padding-bottom:3px}
+ .history-rail .chat-thread{width:auto;min-width:148px;flex:0 0 auto}
+}
+@media(max-width:680px){
+ main{display:flex;flex-direction:column}
+ .workspace{order:-2;position:static}
+ .left{max-height:none;display:block}
+ .left>#chat-form{position:static;box-shadow:none}
+ #map{height:clamp(300px,46vh,460px)}
+ .history-rail{order:-1}
+}

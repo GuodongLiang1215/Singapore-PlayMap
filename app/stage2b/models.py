@@ -9,7 +9,7 @@ SGT = timezone(timedelta(hours=8), 'Asia/Singapore')
 MAX_VISITS = 20  # Request protection, NOT a geographical or data coverage limit.
 
 class PlacePoint(Location):
-    source: Literal['onemap_search', 'user_map', 'user_coordinates', 'catalogue_representative']
+    source: Literal['onemap_search', 'user_map', 'user_coordinates', 'catalogue_representative', 'device_location']
     entity_id: str | None = Field(default=None, min_length=1, max_length=512)
     catalogue_build_id: str | None = Field(default=None, min_length=1, max_length=100)
 
@@ -31,8 +31,11 @@ class PlacePoint(Location):
         return self
 
     def route_location(self):
+        # A catalogue representative point is routed as a map point; a device
+        # reading keeps its own provenance and its reported radius.
         return Location(latitude=self.latitude, longitude=self.longitude, label=self.label,
             source='user_map' if self.source == 'catalogue_representative' else self.source,
+            accuracy_m=self.accuracy_m if self.source == 'device_location' else None,
             confirmed=True)
 
 class Visit(Contract):

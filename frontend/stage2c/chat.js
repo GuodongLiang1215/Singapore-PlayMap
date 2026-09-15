@@ -2,13 +2,33 @@
 (function(){'use strict';
  const el=id=>document.getElementById(id),bridge=PlayMapChatBridge,clone=x=>JSON.parse(JSON.stringify(x));
  const gate=new PlayMapChatState.Gate();
- let controller=null,proposal=null,pending=null,preferences={preferred:[],excluded:[],notes:[]},prefHistory=[],applying=false;
+ let controller=null,proposal=null,pending=null,preferences={preferred:[],excluded:[],notes:[]},prefHistory=[],applying=false,originAsked=false;
  const metrics={completed:0,failed:0,calls:0,applied:0,cancelled:0,tokens:{},model:null,error:null,lastFailure:null,failedAttempts:0,failedUnknown:0,lastAdaptation:null};
  const names={park:'公园',food:'吃饭',museum:'博物馆',shopping:'购物',heritage:'历史文化',architecture:'建筑',art:'艺术',nature:'自然',photography:'拍照'};
  function make(tag,text,cls){const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;}
  function button(text,fn){const b=make('button',text,'quiet');b.type='button';b.onclick=fn;return b;}
  function status(text,cls=''){el('chat-status').textContent=text;el('chat-status').className=cls;}
- function message(role,text){const p=make('div',undefined,'chat-message '+role);p.append(make('strong',role==='user'?'你':'PlayMap'),make('p',text));el('chat-log').append(p);while(el('chat-log').children.length>16)el('chat-log').firstElementChild.remove();el('chat-log').scrollTop=el('chat-log').scrollHeight;}
+ const log=new PlayMapChatState.ConversationLog();
+ function renderLog(){
+  const box=el('chat-log'),past=!log.isViewingActive();
+  box.replaceChildren(...log.viewing().messages.map(m=>{
+   const p=make('div',undefined,'chat-message '+m.role);
+   p.append(make('strong',m.role==='user'?'你':'PlayMap'),make('p',m.text));return p;}));
+  // A past thread is a transcript, not a restorable plan: hide the composer
+  // rather than let a send land in a conversation the user is only reading.
+  el('chat-history-banner').hidden=!past;el('chat-form').hidden=past;
+  if(!past)box.scrollTop=box.scrollHeight;
+ }
+ function renderHistory(){
+  const box=el('chat-history');box.replaceChildren();
+  for(const t of log.list()){
+   const b=make('button',t.title,'chat-thread'+(t.viewing?' selected':''));
+   b.type='button';b.append(make('small',t.count+' 条'+(t.active?' · 当前':'')));
+   b.onclick=()=>{if(t.active)log.resume();else log.view(t.id);renderLog();renderHistory();};
+   box.append(b);
+  }
+ }
+ function message(role,text){log.add(role,text);renderLog();renderHistory();}
  function showPrefs(){const p=preferences;el('chat-preferences').textContent='已采用需求：'+(p.preferred.length?'偏好 '+p.preferred.map(x=>names[x]||x).join('、')+'；':'')+(p.excluded.length?'排除 '+p.excluded.map(x=>names[x]||x).join('、')+'；':'')+(p.notes.length?'待核验 '+p.notes.join('；'):'')+(!p.preferred.length&&!p.excluded.length&&!p.notes.length?'尚无额外偏好':'');}
  async function request(path,body,signal){const r=await fetch('/api/stage2c/'+path,{method:'POST',headers:{'Content-Type':'application/json','X-PlayMap-Client':'stage2c'},body:JSON.stringify(body),signal,cache:'no-store'});let d;try{d=await r.json();}catch{throw Error('本地服务没有返回JSON，请确认新启动入口。');}if(!r.ok){const e=Error(d.detail?.message||'本次请求失败');e.code=d.detail?.code||'REQUEST_FAILED';e.safeDetail=PlayMapChatState.safeErrorDetail(d.detail);throw e;}return d;}
  function cancel(text='已取消等待。已发出的API请求可能仍会计入额度。'){
@@ -64,6 +84,16 @@
  async function send(event){event.preventDefault();
   const text=el('chat-input').value.trim();if(!text)return;
   if(!el('chat-consent').checked){status('请先阅读并勾选发送说明；测试时只使用公开地点与虚构需求。','warning');return;}
+  // Ask BEFORE the model call: candidates are ranked against the origin, so an
+  // origin adopted afterwards would not re-anchor this turn's retrieval. Asked at
+  // most once per conversation, and declining is a normal answer.
+  if(!bridge.hasOrigin()&&!originAsked){
+   originAsked=true;el('chat-send').disabled=true;
+   status('还没有出发点。请在地图上方回答是否使用当前位置；选「不用」则按全岛范围推荐。');
+   try{await bridge.proposeDeviceOrigin();}catch{}
+   el('chat-send').disabled=false;
+   if(controller)return;
+  }
   let snap;try{snap=bridge.snapshot();}catch(e){status(e.message,'error');return;}
   if(controller)return;
   const ticket=gate.begin(snap.revision),local=new AbortController();controller=local;proposal=null;
@@ -105,6 +135,9 @@
  async function refresh(){try{const r=await fetch('/api/stage2c/status',{cache:'no-store'}).then(x=>x.json());el('chat-model').textContent=r.configured?'Gemini · '+r.model+' · CHAT FIX 5 · 按发送调用':'模型尚未配置：'+(r.error?.message||'请检查.env');if(r.model)metrics.model=r.model;}catch{el('chat-model').textContent='无法读取模型状态，请确认使用stage2c_main入口。';}}
  function download(){const d=PlayMapChatState.diagnose(metrics,bridge.diagnostic(),proposal,selections()),url=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'})),a=make('a');a.href=url;a.download='stage2c1_chat_report.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);status('已导出无原话、地点名、坐标或Key的本地报告；失败请求可能已消耗额度，精确用量以Google控制台为准。');}
  el('chat-form').onsubmit=send;el('chat-apply').onclick=adopt;el('chat-cancel').onclick=()=>cancel();el('chat-export').onclick=download;
- el('chat-reset').onclick=async()=>{if(!window.confirm('清除本页对话、偏好和待采用草案？地图中的已采用行程保留；此操作不删除Google已收到的内容。'))return;cancel(null);preferences={preferred:[],excluded:[],notes:[]};prefHistory=[];pending=null;proposal=null;el('chat-proposal').hidden=true;el('chat-log').replaceChildren();showPrefs();try{await request('forget',{session_id:bridge.currentSession()});}catch{}status('本地对话与待采用草案已清理；已有行程保留。');};
- showPrefs();refresh();
+ // Starting a new thread only parks the transcript; the adopted itinerary stays.
+ el('chat-new').onclick=()=>{cancel(null);pending=null;log.start();renderLog();renderHistory();status('已开始新对话；地图上已采用的行程保留。');};
+ el('chat-resume').onclick=()=>{log.resume();renderLog();renderHistory();};
+ el('chat-reset').onclick=async()=>{if(!window.confirm('清除本页对话、偏好和待采用草案？地图中的已采用行程保留；此操作不删除Google已收到的内容。'))return;cancel(null);preferences={preferred:[],excluded:[],notes:[]};prefHistory=[];pending=null;proposal=null;originAsked=false;el('chat-proposal').hidden=true;log.clear();renderLog();renderHistory();showPrefs();try{await request('forget',{session_id:bridge.currentSession()});}catch{}status('本地对话与待采用草案已清理；已有行程保留。');};
+ showPrefs();renderHistory();refresh();
 })();

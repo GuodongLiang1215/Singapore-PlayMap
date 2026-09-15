@@ -142,6 +142,39 @@
   if(safe.itinerary)safe.itinerary={...safe.itinerary,llm:safe.confirmed_proposals>0};
   return safe;
  }
- const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,readinessText};root.PlayMapChatState=exports;
+ /* In-page conversation log. Memory only: never written to storage, never sent
+    anywhere, gone on reload, and not shared with teammates. Viewing an older
+    thread is READ-ONLY and never restores or alters the itinerary that produced
+    it, because the thread holds words, not a verified plan. */
+ class ConversationLog{
+  constructor(limit=20,messageLimit=200){
+   this.limit=Math.max(1,limit);this.messageLimit=Math.max(1,messageLimit);
+   this.threads=[];this.activeId=null;this.viewingId=null;this.seq=0;this.start();
+  }
+  start(){
+   this.threads=this.threads.filter(t=>t.messages.length);   // never keep blank threads
+   const thread={id:'c'+(++this.seq),title:null,messages:[]};
+   this.threads.unshift(thread);
+   while(this.threads.length>this.limit)this.threads.pop();
+   this.activeId=thread.id;this.viewingId=thread.id;return thread;
+  }
+  get(id){return this.threads.find(t=>t.id===id)||null;}
+  active(){return this.get(this.activeId)||this.start();}
+  viewing(){return this.get(this.viewingId)||this.active();}
+  isViewingActive(){return this.viewingId===this.activeId;}
+  add(role,text){
+   const t=this.active();
+   t.messages.push({role,text:String(text)});
+   while(t.messages.length>this.messageLimit)t.messages.shift();
+   if(t.title===null&&role==='user')t.title=String(text).replace(/\s+/g,' ').trim().slice(0,40);
+   return t;
+  }
+  view(id){const t=this.get(id);if(t)this.viewingId=id;return t;}
+  resume(){this.viewingId=this.activeId;return this.active();}
+  list(){return this.threads.map(t=>({id:t.id,title:t.title||'（尚未发送）',
+   count:t.messages.length,active:t.id===this.activeId,viewing:t.id===this.viewingId}));}
+  clear(){this.threads=[];this.seq=0;return this.start();}
+ }
+ const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,readinessText,ConversationLog};root.PlayMapChatState=exports;
  if(typeof module!=='undefined'&&module.exports)module.exports=exports;
 })(typeof window==='undefined'?globalThis:window);

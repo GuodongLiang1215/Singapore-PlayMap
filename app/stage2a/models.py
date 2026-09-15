@@ -14,14 +14,27 @@ class Location(Contract):
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
     label: str = Field(default='用户选点', min_length=1, max_length=200)
-    source: Literal['onemap_search', 'user_map', 'user_coordinates']
+    # 'device_location' is a browser geolocation reading the user then confirmed.
+    # It is a named provenance precisely so nothing downstream can mistake it for
+    # a point the user identified on the map.
+    source: Literal['onemap_search', 'user_map', 'user_coordinates', 'device_location']
     confirmed: bool
+    # Device-reported radius in metres. Recorded and shown, never used to correct
+    # a coordinate and never folded into any duration estimate.
+    accuracy_m: float | None = Field(default=None, ge=0, le=100000)
 
     @field_validator('latitude', 'longitude', mode='before')
     @classmethod
     def real_number(cls, v):
         if isinstance(v, bool) or not isinstance(v, (int, float)):
             raise ValueError('Coordinates must be numeric JSON values, not text or booleans.')
+        return v
+
+    @field_validator('accuracy_m', mode='before')
+    @classmethod
+    def real_accuracy(cls, v):
+        if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float))):
+            raise ValueError('Accuracy must be a number of metres or omitted.')
         return v
 
     @field_validator('confirmed', mode='before')
@@ -36,6 +49,8 @@ class Location(Contract):
         w, s, e, n = SG_REQUEST_ENVELOPE
         if not (w <= self.longitude <= e and s <= self.latitude <= n):
             raise ValueError('Point is outside the broad Singapore service envelope; check latitude/longitude order.')
+        if self.accuracy_m is not None and self.source != 'device_location':
+            raise ValueError('Only a device location carries a reported accuracy radius.')
         return self
 
 class SearchRequest(Contract):

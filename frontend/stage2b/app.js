@@ -2,6 +2,9 @@
 const $=id=>document.getElementById(id),T=PlayMapTrip,trip=new T.ItineraryState();
 const CATEGORY={nature:'自然与公园',tourism:'景点资料',heritage:'历史地点',monument:'古迹',food:'熟食中心'};
 const MODE={walk:'步行',cycle:'骑行',drive:'驾车'};
+// A device reading must never be described as a point the user identified.
+const SOURCE_LABEL={catalogue_representative:'来源代表点',device_location:'设备定位（含误差）',
+ onemap_search:'用户确认候选',user_map:'用户确认候选',user_coordinates:'用户确认候选'};
 const STAYS={nature:[30,60,120],tourism:[30,60,90],heritage:[10,20,40],monument:[15,30,60],food:[20,40,60],unknown:[15,30,60]};
 let all=[],profile=null,matched=[],listLimit=30,filterTimer=null,autoTimer=null,planController=null;
 let selected=null,replacement=null,searchSequence=0,searchController=null,nextSearch=null,searchText='',detailSequence=0,formInvalid=false;
@@ -25,7 +28,7 @@ function beginReplacement(target){replacement=target;const label=target==='origi
 function cancelReplacement(){replacement=null;$('replacement-notice').hidden=true;renderSelected();}
 function selectPlace(point,meta){selected={point,meta};renderSelected();reportError(null);}
 function renderSelected(){
- const box=$('selected-place');box.hidden=!selected;if(!selected)return;const {point:p,meta}=selected;box.replaceChildren(node('h3',p.label),node('p',meta.address||'没有详细地址','small'),node('p',`${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)} · ${p.source==='catalogue_representative'?'来源代表点':'用户确认候选'}，不是已核验入口。`,'place-source'));
+ const box=$('selected-place');box.hidden=!selected;if(!selected)return;const {point:p,meta}=selected;box.replaceChildren(node('h3',p.label),node('p',meta.address||'没有详细地址','small'),node('p',`${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)} · ${SOURCE_LABEL[p.source]||'用户确认候选'}，不是已核验入口。`,'place-source'));
  if(meta.hold)box.append(node('p','旧址或状态待核查。请先搜索当前位置，不直接按旧坐标加入。','warning'));
  const actions=node('div',undefined,'place-actions');
  const use=target=>{if(meta.hold)return;try{
@@ -68,7 +71,7 @@ function stayPreview(v){
  const f=all.find(x=>x.properties.entity_id===v.point.entity_id),category=f?.properties.category||'unknown';const base=STAYS[category]||STAYS.unknown,k={quick:.5,regular:1,extended:1.5}[v.stay_profile];return `初始假设 ${Math.floor(base[1]*k)} 分钟，范围 ${Math.floor(base[0]*k)}—${Math.floor(base[2]*k)}；非实测，可修改。`;
 }
 function renderTrip(){
- const d=trip.data;$('origin-summary').textContent=d.origin?d.origin.label+' · 已确认选点，非核验入口':'尚未选择';$('visit-count').textContent=`${d.visits.length} 个停留点 · 当前顺序不会被自动调整`;
+ const d=trip.data;$('origin-summary').textContent=d.origin?d.origin.label+' · '+(SOURCE_LABEL[d.origin.source]||'已确认选点')+'，非核验入口':'尚未选择';$('visit-count').textContent=`${d.visits.length} 个停留点 · 当前顺序不会被自动调整`;
  const box=$('visits');box.replaceChildren();d.visits.forEach((v,i)=>{
   const card=node('div',undefined,'visit-card');card.dataset.visitId=v.visit_id;const head=node('div',undefined,'visit-head');head.append(node('span',String(i+1),'badge'),node('strong',v.point.label));card.append(head);
   const actions=node('div',undefined,'visit-actions'),up=button('上移',()=>edit(()=>trip.moveVisit(v.visit_id,-1))),down=button('下移',()=>edit(()=>trip.moveVisit(v.visit_id,1)));up.disabled=i===0;down.disabled=i===d.visits.length-1;actions.append(up,down,button('替换',()=>beginReplacement(v.visit_id)),button('删除',()=>edit(()=>{trip.removeVisit(v.visit_id);if(replacement===v.visit_id)cancelReplacement();})),button('定位',()=>mapView.focusPoint(v.point)));card.append(actions);
@@ -120,7 +123,50 @@ function renderResult(r){
  $('plan-warnings').replaceChildren(...r.cautions.map(t=>node('p',t,'small')));
 }
 function exportReport(){if(!trip.lastSuccess||trip.lastSuccess.revision!==trip.revision||formInvalid)return reportError(Error('请先取得当前输入下的完整方案。'));const report=T.diagnostic(trip.lastSuccess,trip.revision);const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),link=node('a');link.href=url;link.download='stage2b_itinerary_report.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);$('export-status').textContent='已下载到本机；不含精确位置、地点名称、具体时刻或Token，未自动上传。';}
+/* Geolocation is OFFERED, never applied. The reading is drawn with its error
+   radius first; it becomes an origin only when the user presses the button.
+   confirmed:true is therefore still the user's act, not the device's. */
+let deviceReading=null,deviceResolve=null;
+function closeLocate(adopted){
+ $('locate-card').hidden=true;$('locate-card').replaceChildren();deviceReading=null;
+ const resolve=deviceResolve;deviceResolve=null;if(resolve)resolve(!!adopted);
+}
+function adoptDevice(){
+ const r=deviceReading;if(!r)return closeLocate(false);
+ try{
+  trip.setOrigin({latitude:r.latitude,longitude:r.longitude,label:'当前位置（设备定位）',
+   source:'device_location',accuracy_m:r.accuracy_m,confirmed:true});
+  reportError(null);renderTrip();invalidate();closeLocate(true);
+ }catch(e){reportError(e);closeLocate(false);}
+}
+function renderLocateCard(reading){
+ deviceReading=reading;
+ const card=$('locate-card');card.hidden=false;card.replaceChildren();
+ card.append(node('p','检测到你的位置。'+PlayMapLocate.describe(reading),'small'));
+ if(reading.coarse)card.append(node('p','误差偏大：地图上的蓝圈就是可能的范围。用作出发点会让时间估计同样不准，而这个误差不会计入任何估算。','small warning'));
+ const row=node('div',undefined,'place-actions');
+ row.append(button('用这里作为出发点',adoptDevice,'primary'),button('不用，我自己选',()=>closeLocate(false)));
+ card.append(row,node('p','设备定位不是已核验入口，也不证明你此刻确实位于该点。','small'));
+}
+async function locateDevice(){
+ $('locate-status').textContent='正在向浏览器请求定位…可能会弹出权限提示。';
+ try{
+  const reading=await PlayMapLocate.read();
+  $('locate-status').textContent='';
+  mapView.showDevice(reading);renderLocateCard(reading);
+ }catch(e){
+  // Five distinct causes, five honest messages; none of them change the itinerary.
+  $('locate-status').textContent=e.message;mapView.clearDevice();closeLocate(false);
+ }
+}
+/* Chat calls this before sending when no origin is set. It resolves only after
+   the user answers, and resolves false on every failure path. */
+function proposeDeviceOrigin(){
+ if(trip.data.origin)return Promise.resolve(false);
+ return new Promise(resolve=>{deviceResolve=resolve;locateDevice();});
+}
 function wire(){
+ $('locate-me').onclick=()=>locateDevice();
  for(const t of ['local','search','map'])$('tab-'+t).onclick=()=>tab(t);
  $('search-form').onsubmit=e=>{e.preventDefault();search(1);};$('search-query').oninput=resetSearch;$('search-more').onclick=()=>{if(nextSearch)search(nextSearch);};
  $('pick-map').onclick=()=>{if(!mapView.map)return reportError(Error('地图未就绪，可以使用搜索或输入坐标。'));mapView.setPick(true);$('map').scrollIntoView({block:'nearest'});};$('cancel-pick').onclick=()=>mapView.setPick(false);document.addEventListener('keydown',e=>{if(e.key==='Escape')mapView.setPick(false);});

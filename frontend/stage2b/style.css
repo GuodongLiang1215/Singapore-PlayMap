@@ -3,3 +3,6 @@ header .subtitle{margin:6px 0 0}.topline #map-version{margin-left:auto;font-size
 @media(max-width:1050px){.topline #map-version{margin-left:0}.timeline-row{grid-template-columns:112px 1fr}header nav{flex-wrap:wrap}.metrics div{min-width:115px}}@media(max-width:680px){.left{max-height:none}.timeline-row{grid-template-columns:94px 1fr}.time-label{font-size:11px}.workspace{order:-1}#map{height:340px}.visit-fields{grid-template-columns:1fr 1fr}header nav{margin-top:8px}#result-panel .metrics strong{font-size:18px}}
 
 .place-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.place-actions button{min-width:0}.place-actions .replace-action{grid-column:1/-1}
+
+/* Device-location proposal card: shown inside the map toolbar, full width. */
+.locate-card{flex-basis:100%;border:1px solid #9fbea9;background:#eff6f1;border-radius:7px;padding:10px 12px}.locate-card p{margin:4px 0}.locate-card .place-actions{margin:9px 0 2px}.locate-card .primary{margin-top:0}#locate-status{font-size:11px;color:var(--warn)}
