@@ -22,6 +22,7 @@ class Draft(Strict):
     finish: PlacePoint | None = None
     mode: Literal['walk','drive','cycle'] = 'walk'
     time: TimeSettings = Field(default_factory=TimeSettings)
+    max_walk_minutes: int | None = Field(default=None, gt=0)
 
     @model_validator(mode='after')
     def ids(self):
@@ -81,6 +82,7 @@ class ClearAction(ActionBase):
 Action = Union[LocationAction,RemoveAction,MoveAction,StayAction,FinishAction,ModeAction,TimeAction,ClearAction]
 class Interpretation(Strict):
     acknowledgement: str = Field(max_length=400)
+    max_walk_minutes: int | None = Field(default=None,gt=0)
     preferred_add: list[Topic] = Field(default_factory=list,max_length=10)
     preferred_remove: list[Topic] = Field(default_factory=list,max_length=10)
     excluded_add: list[Topic] = Field(default_factory=list,max_length=10)

@@ -1,6 +1,8 @@
 from app.stage2b.spatial_constraints import validate_max_walking_time
 from app.stage2b.models import PlanRequest, PlacePoint, Visit
 from app.stage2b.planning import assemble
+from app.stage2c.command_contract import compile_commands
+from app.stage2c.models import Interpretation
 
 def test_maximum_walking_time_violation():
     legs = [
@@ -137,3 +139,17 @@ def test_planning_assemble_reports_walking_violation():
         result["walking_constraint_check"]["violations"][0]["exceeded_by_minutes"]
         == 2
     )
+
+def test_stage2c_preserves_max_walk_minutes():
+    raw = {
+        "acknowledgement": "Walking limit noted.",
+        "max_walk_minutes": 10,
+        "commands": {}
+    }
+
+    cooked, command_count = compile_commands(raw)
+
+    interpretation = Interpretation.model_validate(cooked)
+
+    assert command_count == 0
+    assert interpretation.max_walk_minutes == 10

@@ -186,6 +186,8 @@ def excluded_visits(visits,excluded,cat):
 
 def assemble(record,choices,*,strict=False,cat=None):
     body,parsed=record['body'],record['parsed'];d=body.draft.model_copy(deep=True)
+    if parsed.max_walk_minutes is not None:
+        d.max_walk_minutes = parsed.max_walk_minutes
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     d.time=time_update.settings
     time_changes_added=False
