@@ -49,6 +49,13 @@ number of minutes instead of putting it in notes_add.
 Example: "Keep each walk under 10 minutes." => max_walk_minutes = 10.
 Generic 'not tired' or 'don't walk too much' stays a preference note;
 do not invent an exact distance/time cap.
+If the user only states a walking-time limit, update max_walk_minutes without
+inventing a place edit.
+
+If the user says an existing visit is too far and asks for another place within
+an explicit walking-time limit, set max_walk_minutes and also emit replace_visit
+for the referenced existing visit, preserving its known category when possible.
+Do not choose a replacement that has not been retrieved.
 Public transport requested => set_mode public_transport and explain not connected; NEVER substitute walking.
 Each command.quote must be a short EXACT substring of the current message or pending user message.
 All edits are DRAFTS awaiting confirmation. Never say 已添加/已修改/已安排 before adoption.

@@ -115,7 +115,30 @@ function renderResult(r){
  $('clock-note').textContent=(r.time.departure_at?'以下为新加坡时间 UTC+8。':'未指定出发时刻：以下 +HH:MM 表示从出发开始的相对时间。')+' 出发时刻仅排时间轴；未预测未来交通，也未核验开放时间。';
  $('plan-version').textContent='当前方案版本 '+r.revision;
  const flagged=r.legs.some(l=>l.endpoint_review_required||l.diagnostics.large_detour_flag||l.diagnostics.geometry_summary_mismatch);
- $('plan-status').className=flagged?'warning':'';$('plan-status').textContent=flagged?'完整分段计算已完成，但有端点偏移或绕行等提示。时间结果仍是条件性估计。':'已按你的顺序计算通行、停留与总时间。时间预算检查不代表营业或入口已核验。';
+ const walkingCheck=r.walking_constraint_check;
+ const walkingViolated=walkingCheck?.status==='violation';
+ $('plan-status').className=(flagged||walkingViolated)?'warning':'';
+
+if(walkingViolated){
+    const violations=walkingCheck.violations;
+
+    const detail=violations.map(v =>
+        `${v.leg_id}：${v.duration_minutes} 分钟，超出限制 ${v.exceeded_by_minutes} 分钟`
+    ).join('；');
+
+    $('plan-status').textContent=
+        `当前行程有 ${violations.length} 段超过你的单段步行时间限制。${detail}。`;
+
+}else if(flagged){
+
+    $('plan-status').textContent=
+        '完整分段计算已完成，但有端点偏移或绕行等提示。时间结果仍是条件性估计。';
+
+}else{
+
+    $('plan-status').textContent=
+        '已按你的顺序计算通行、停留与总时间。时间预算检查不代表营业或入口已核验。';
+}
  const panel=$('timeline');panel.replaceChildren();for(const row of r.timeline){
   const el=node('div',undefined,'timeline-row '+row.kind);el.tabIndex=0;el.setAttribute('role','button');
   const time=node('div',undefined,'time-label');time.append(node('span',T.axisLabel(row)),node('span','↓ '+T.axisLabel(row,true)));const content=node('div',undefined,'timeline-content');
