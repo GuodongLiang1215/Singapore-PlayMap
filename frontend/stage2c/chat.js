@@ -83,6 +83,9 @@
   const prefs=r.preview.preferences;
   el('chat-proposed-prefs').textContent='草案偏好：'+prefs.preferred.map(x=>names[x]||x).join('、')+'；排除：'+(prefs.excluded.map(x=>names[x]||x).join('、')||'无')+'。尚未证明所有偏好满足。';
   updateReadiness();
+  const walkingConstraintChanged =
+    r.interpretation.max_walk_minutes !== undefined &&
+    r.interpretation.max_walk_minutes !== null;
  if(!r.interpretation.actions.length &&JSON.stringify(prefs)===JSON.stringify(preferences) &&!walkingConstraintChanged){el('chat-apply').disabled=true;}
   const empty=metrics.lastProposal.empty_slot_count;
   status(empty?`草案尚未完整 · ${empty}项没有候选；模型请求已成功，原行程未修改。`:`草案已生成 · 本轮 ${r.usage.generation_requests} 次模型请求。先核对地点和修改，再采用。`,empty?'warning':'');
