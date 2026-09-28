@@ -97,6 +97,7 @@ class PlanRequest(Contract):
     finish: PlacePoint | None = None
     mode: Literal['walk', 'drive', 'cycle'] = 'walk'
     time: TimeSettings = Field(default_factory=TimeSettings)
+    max_walk_minutes: int | None = Field(default=None, gt=0)
     force_refresh: bool = False
 
     @model_validator(mode='after')

@@ -8,6 +8,7 @@ from fastapi.concurrency import run_in_threadpool
 from app.stage2a.models import RouteRequest, distance_m
 from app.stage2a.transport import ProviderError
 from app.stage2b.models import PlanRequest, PlacePoint
+from .spatial_constraints import validate_max_walking_time
 
 # Explicit, editable project assumptions. NOT empirical visitor-duration statistics.
 BASE_STAYS = {
@@ -166,6 +167,16 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
     elif total > budget: status='reference_exceeds'
     elif high > budget: status='reference_fits_upper_exceeds'
     else: status='all_estimates_fit'
+    if request.max_walk_minutes is not None and request.mode == "walk":
+        walking_check = validate_max_walking_time(
+            legs=legs,
+            max_minutes=request.max_walk_minutes
+        )
+    else:
+        walking_check = {
+            "status": "not_requested",
+            "violations": []
+        }
     start = request.time.departure_at
     def stamp(offset): return (start+timedelta(seconds=offset)).isoformat() if start else None
     cursor, timeline = 0.0, []
@@ -230,6 +241,7 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
         'budget_check':{'status':status,'budget_s':budget,'reference_within_budget':None if budget is None else total<=budget,
             'slack_s':None if budget is None else budget-total,
             'range_within_budget':None if budget is None else high<=budget},
+        'walking_constraint_check': walking_check,
         'device_location_used':bool(device),'device_location_accuracy_m':radius,
         'device_accuracy_included_in_estimates':False,
         'schedule_status':'arithmetic_estimate_only','opening_hours_checked':False,

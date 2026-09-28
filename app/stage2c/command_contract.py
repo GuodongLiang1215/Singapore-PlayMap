@@ -87,6 +87,7 @@ def scoped_schema():
         fields = {k: copy.deepcopy(v) for k, v in specs.items() if k in ARGUMENTS[op] | {'order', 'quote'}}
         commands[op] = array(_object(fields, [k for k in fields if k in REQUIRED[op]]))
     fields = {'acknowledgement': copy.deepcopy(text)}
+    fields['max_walk_minutes'] = {'type': ['integer', 'null']}
     for k in ('preferred_add', 'preferred_remove', 'excluded_add', 'excluded_remove'):
         fields[k] = array({'type': 'string', 'enum': list(get_args(Topic))})
     for k in ('notes_add', 'notes_remove', 'questions'):
