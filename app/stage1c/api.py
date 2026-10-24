@@ -53,15 +53,22 @@ def features(q: str = Query('', max_length=160), category: str = Query('', max_l
     for term in normal_name(q).split():
         where.append('instr(search_text,?)>0'); args.append(term)
     with ro_connect(path) as db:
-        # The nationwide candidate catalogue is small enough to filter its explicit
-        # category arrays without depending on SQLite JSON-extension availability.
-        rows = db.execute('SELECT data_json FROM entities WHERE '+ ' AND '.join(where) + ' ORDER BY title,entity_id', args).fetchall()
-    matched = [json.loads(r[0]) for r in rows]
-    if category: matched = [e for e in matched if category in e['categories']]
-    total = len(matched); selected = matched[offset:offset+limit]
+        sql = ' FROM entities WHERE ' + ' AND '.join(where)
+        if category:
+            # Category arrays are filtered in Python, without the SQLite JSON extension.
+            rows = db.execute('SELECT data_json' + sql + ' ORDER BY title,entity_id', args).fetchall()
+            matched = [e for e in (json.loads(r[0]) for r in rows) if category in e['categories']]
+            total = len(matched); selected = matched[offset:offset+limit]
+        else:
+            # Page in SQL so large catalogues (e.g. with Overture places) are not re-parsed per page.
+            total = db.execute('SELECT COUNT(*)' + sql, args).fetchone()[0]
+            rows = db.execute('SELECT data_json' + sql + ' ORDER BY title,entity_id LIMIT ? OFFSET ?',
+                              [*args, limit, offset]).fetchall()
+            selected = [json.loads(r[0]) for r in rows]
     items = []
     keys = ('entity_id','primary_uid','member_count','display_title','category','categories','search_tags','search_text',
-            'longitude','latitude','address','coordinate_kind','coordinate_is_entrance','visit_status','default_exploration_visible')
+            'longitude','latitude','address','coordinate_kind','coordinate_is_entrance','visit_status','default_exploration_visible',
+            'suggested_duration','opening_hours_display')
     for e in selected:
         props = {k:e.get(k) for k in keys}
         props['regular_hours_evidence_count'] = len(e['regular_hours_evidence'])
@@ -96,3 +103,71 @@ def resolve(uid: str = Query(..., min_length=1, max_length=512), build_id: str |
         row = db.execute('SELECT entity_id FROM members WHERE record_uid=?', (uid,)).fetchone()
     if row is None: raise HTTPException(404, 'Source record not found in candidate catalogue')
     return {'record_uid':uid,'entity_id':row[0],'build_id':report['build_id']}
+
+
+# ---------------------------------------------------------------------------
+# Nearby places (for spatial recommendation). Read-only; cached per snapshot.
+# ---------------------------------------------------------------------------
+import math
+import threading
+
+_NEARBY_CACHE = {'build_id': None, 'rows': []}
+_NEARBY_LOCK = threading.Lock()
+NEARBY_KEYS = ('entity_id', 'display_title', 'category', 'categories', 'address', 'longitude', 'latitude',
+               'coordinate_kind', 'suggested_duration', 'opening_hours_display', 'last_admission')
+
+
+def _metres(lat1, lon1, lat2, lon2):
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = p2 - p1, math.radians(lon2 - lon1)
+    h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 6371008.8 * 2 * math.asin(math.sqrt(min(1.0, max(0.0, h))))
+
+
+def _nearby_rows(path, build_id):
+    """Visible, drawable entities of this snapshot, loaded once and kept in memory."""
+    with _NEARBY_LOCK:
+        if _NEARBY_CACHE['build_id'] != build_id:
+            rows = []
+            with ro_connect(path) as db:
+                for (raw,) in db.execute('SELECT data_json FROM entities WHERE visible=1 AND map_eligible=1'):
+                    e = json.loads(raw)
+                    if isinstance(e.get('latitude'), (int, float)) and isinstance(e.get('longitude'), (int, float)):
+                        item = {k: e.get(k) for k in NEARBY_KEYS}
+                        item['entrance_count'] = len(e.get('entrance_points') or [])
+                        item['search_text'] = e.get('search_text') or ''
+                        rows.append(item)
+            _NEARBY_CACHE.update(build_id=build_id, rows=rows)
+        return _NEARBY_CACHE['rows']
+
+
+@router.get('/nearby')
+def nearby(lat: float = Query(..., ge=1.15, le=1.48), lon: float = Query(..., ge=103.55, le=104.1),
+           radius_m: float = Query(1000, gt=0, le=5000), category: str = Query('', max_length=40),
+           q: str = Query('', max_length=160), limit: int = Query(20, ge=1, le=100),
+           build_id: str | None = None):
+    """Places within radius_m of (lat, lon), nearest first. Straight-line distance, not walking distance."""
+    if category and category not in ('nature', 'tourism', 'monument', 'heritage', 'food'):
+        raise HTTPException(422, 'Unknown category')
+    path, report = snapshot(build_id)
+    terms = normal_name(q).split()
+    # Cheap box filter before the exact distance (1 degree latitude ~ 111 km).
+    dlat = radius_m / 111_000
+    dlon = radius_m / (111_000 * max(0.1, math.cos(math.radians(lat))))
+    found = []
+    for r in _nearby_rows(path, report['build_id']):
+        if abs(r['latitude'] - lat) > dlat or abs(r['longitude'] - lon) > dlon:
+            continue
+        if category and category not in (r['categories'] or [r['category']]):
+            continue
+        if terms and not all(t in r['search_text'] for t in terms):
+            continue
+        d = _metres(lat, lon, r['latitude'], r['longitude'])
+        if d <= radius_m:
+            found.append((d, r))
+    found.sort(key=lambda x: (x[0], x[1]['entity_id']))
+    items = [{**{k: v for k, v in r.items() if k != 'search_text'}, 'distance_m': round(d)} for d, r in found[:limit]]
+    return {'build_id': report['build_id'], 'center': {'latitude': lat, 'longitude': lon}, 'radius_m': radius_m,
+            'matched_total': len(found), 'returned_count': len(items), 'places': items,
+            'distance_kind': 'straight_line_not_walking_route',
+            'note': 'Visible catalogue places only; hidden old or duplicate records are excluded.'}

@@ -91,7 +91,7 @@
  }
  function readinessText(proposal,choices){
   const d=proposalDiagnostic(proposal,choices);if(!d)return '';
-  const labels={nature:'公园/自然',food:'餐饮',heritage:'历史地点',monument:'古迹',tourism:'景点'};
+  const labels={nature:'公园/自然',food:'餐饮',heritage:'历史地点',monument:'古迹',tourism:'景点/购物/娱乐'};
   const name=s=>'第'+s.slot_number+'项（'+(s.categories.map(c=>labels[c]).join('/')||'地点')+'）';
   const empty=d.slots.filter(s=>s.option_count===0);
   if(empty.length)return '暂不能采用：'+empty.map(name).join('、')+'没有可用候选。已找到的地点仍只是草案；不会删除未满足的项目来启用按钮。可继续说明具体地点，或明确调整该项要求。';

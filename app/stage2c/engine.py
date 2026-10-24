@@ -19,6 +19,10 @@ from .prompts import INTERPRET, SELECT, PROMPT_VERSION
 from .wire_schema import interpretation_schema, selection_schema, schema_stats, WIRE_VERSION
 from .operation_adapter import parse_interpretation, OperationFormatError, validation_from_exception, safe_validation
 
+# Words in the user's own request that mean "just buy something and go" (e.g. "grab a coffee to go").
+TAKEAWAY_WORDS = re.compile(r'(\bto go\b|take ?-?away|\bgrab (a|an|some)\b|\bpick up (a|an|some)\b|\bbuy (a|an|some)\b|'
+                            r'外带|外卖|打包|带走|买杯|买个|买瓶|买点|顺路买|顺便买)', re.I)
+
 class ChatError(Exception):
     def __init__(self,code,message,status=422):self.code,self.message,self.status=code,message,status;super().__init__(message)
     def public(self):
@@ -214,7 +218,9 @@ def assemble(record,choices,*,strict=False,cat=None):
                 if not s['explicit_location_confirmation'] and any((v.point.entity_id and v.point.entity_id==p.entity_id) or
                     (v.point.latitude==p.latitude and v.point.longitude==p.longitude) for v in d.visits):
                     raise ChatError('DUPLICATE_SUGGESTION','候选与已有停留重复，请在草案中选择另一处。')
-                d.visits.append(Visit(visit_id=record['new_ids'][i],point=p));changes.append('新增停留 → '+p.label+'（停留先用可改初值）')
+                takeaway=bool(TAKEAWAY_WORDS.search(a.quote or ''))
+                d.visits.append(Visit(visit_id=record['new_ids'][i],point=p,stay_profile='takeaway' if takeaway else 'regular'))
+                changes.append('新增停留 → '+p.label+('（外带／顺路购买，停留按短时间计）' if takeaway else '（停留先用可改初值）'))
         elif a.op=='remove_visit':d.visits=[v for v in d.visits if v.visit_id!=a.target_id];changes.append('删除指定停留点')
         elif a.op=='move_visit':
             v=find(a.target_id)

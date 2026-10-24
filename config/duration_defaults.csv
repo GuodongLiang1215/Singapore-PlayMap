@@ -1,0 +1,30 @@
+﻿规则,名称,匹配类别,外带（分钟）,短（分钟）,一般（分钟）,长（分钟）,说明
+theme_park,主题乐园 / 水上乐园,amusement_park;water_park;fairgrounds,,180,300,480,通常半天到一天
+zoo_aquarium,动物园 / 水族馆,zoo;aquarium;wildlife_sanctuary;petting_zoo,,90,150,240,
+museum,博物馆,*museum,,45,90,150,含美术馆、历史、科学、儿童博物馆
+gallery,画廊,art_gallery;street_art;glass_blowing_venue,,20,40,60,
+show,演出 / 电影 / 体育赛事,theatre_venue;performing_arts_venue;music_venue;movie_theater;drive_in_theater;comedy_club;jazz_and_blues_venue;auditorium;event_venue;festival_venue;band_orchestra_symphony;*stadium*;*arena;track_stadium,,90,120,180,按一场演出或比赛的时长
+indoor_fun,室内娱乐,arcade;escape_room;karaoke_venue;bowling_alley;pool_billiards;laser_tag;indoor_playcenter;ice_skating_rink;roller_skating_rink;skating_rink;go_kart*;paintball;miniature_golf_course,,60,90,120,
+casino,赌场,casino,,60,120,180,
+dessert,甜品 / 饮品,dessert_shop;ice_cream_shop;gelato_shop;frozen_yogurt_shop;bubble_tea_shop;smoothie_juice_bar;chocolatier;bakery;donut_shop;cupcake_shop,5,15,20,30,外带为主
+nightlife,酒吧 / 夜店,bar;*_bar;pub;gastropub;speakeasy;brewery;beer_garden;dance_club;salsa_club;lounge,,45,90,150,
+buffet,自助餐,buffet_restaurant,,60,90,120,
+quick_food,快餐 / 小贩 / 美食广场,fast_food_restaurant;food_truck_stand;food_court;food_and_drink;street_vendor;source:nea_hawker_centres,10,20,30,45,含熟食中心
+cafe,咖啡馆 / 茶室,cafe;coffee_shop;tea_room;hong_kong_style_cafe,10,30,45,60,
+restaurant,餐厅,*restaurant;bistro;diner,,45,60,90,各国菜系餐厅
+mall,商场 / 百货,shopping_mall;department_store;shopping;outlet_store;duty_free_store,,60,90,180,
+market,市集 / 夜市,night_market;flea_market;farmers_market,,45,60,90,
+shop,特色小店,*store;gift_shop;pop_up_store,5,15,30,45,书店、纪念品店、古董店等
+nature_reserve,自然保护区 / 大型自然公园,nature_reserve;national_park;botanical_garden;nparks:nature,,60,120,180,
+beach,海滩,beach,,60,120,180,
+trail,步道,hiking_trail;mountain_bike_trail,,60,90,150,
+small_park,游乐场 / 小型绿地,playground;dog_park;skate_park;nparks:small,,15,30,45,社区游乐场、健身角、空地
+park,公园,park;source:nparks_parks,,30,60,90,
+viewpoint,自然地标 / 观景点,lake;river;mountain;waterfall;canal;cave;forest;bridge;pier;marina;geographic_entities;observatory;lighthouse,,15,30,60,
+water_sport,水上 / 户外活动,*rental*;*kayak*;surfing*;kiteboarding;paddleboarding_center;scuba_diving*;fishing*;sky_diving;horse*;equestrian_facility,,60,120,180,
+culture,文化中心,cultural_center;arts_and_entertainment;social_club;fraternal_organization,,30,60,90,
+worship,宗教场所,*place_of_worship;religious_organization;historic_mission,,15,30,45,
+heritage_site,古迹 / 纪念碑,historic_site;monument;sculpture_statue;palace;cemetery;source:nhb_monuments,,10,20,40,
+heritage_marker,历史标记点,source:nhb_historic_sites,,5,10,20,NHB 历史地点多为路边标记牌
+sport,运动场馆 / 健身,gym;*_studio;*_club;*_class;*_center;*_court;*_field;*_pitch;*_range;*_course;swimming_pool;swimming_instructor;fitness_trainer;golf_instructor;boot_camp;sport*;*league;race_track;rock_climbing_spot;sports_and_recreation;boxing_gym;rock_climbing_gym,,60,90,120,多为会员制或需预约
+stb_other,其他 STB 景点,source:stb_attractions,,30,60,90,未单独核验的 STB 景点

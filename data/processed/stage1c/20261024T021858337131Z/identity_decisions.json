@@ -1,0 +1,694 @@
+{
+  "decisions": [
+    {
+      "decision_id": "pair-01",
+      "member_uids": [
+        "nea_hawker_centres:119383",
+        "nea_hawker_centres:119384"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "不同楼号与不同市场/熟食中心记录，保留为两个地点。不能因距离近或名称相似而合并。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 67.23,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nea_hawker_centres:119383",
+          "source_key": "nea_hawker_centres",
+          "name": "Telok Blangah Drive Blk 79 (Telok Blangah Food Centre)",
+          "address": "Blk 79, Telok Blangah Drive, Singapore 100079",
+          "longitude": 103.80761812956985,
+          "latitude": 1.2733559939051546
+        },
+        {
+          "record_uid": "nea_hawker_centres:119384",
+          "source_key": "nea_hawker_centres",
+          "name": "Telok Blangah Drive Blk 82 (Telok Blangah Market)",
+          "address": "Blk 82, Telok Blangah Drive, Singapore 100082",
+          "longitude": 103.80790033728778,
+          "latitude": 1.2738907675844822
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-02",
+      "member_uids": [
+        "nea_hawker_centres:119443",
+        "nea_hawker_centres:119444"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "502与503为不同楼号，源记录分别指市场及熟食中心；保留独立记录。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 70.26,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nea_hawker_centres:119443",
+          "source_key": "nea_hawker_centres",
+          "name": "West Coast Drive Blk 502 (Ayer Rajah Market)",
+          "address": "Blk 502, West Coast Drive, Singapore 120502",
+          "longitude": 103.7591280191558,
+          "latitude": 1.3119069571999333
+        },
+        {
+          "record_uid": "nea_hawker_centres:119444",
+          "source_key": "nea_hawker_centres",
+          "name": "West Coast Drive Blk 503 (Ayer Rajah Food Centre)",
+          "address": "Blk 503, West Coast Drive, Singapore 120503",
+          "longitude": 103.75975140548066,
+          "latitude": 1.3118030896284905
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-03",
+      "member_uids": [
+        "nhb_historic_sites:2338",
+        "nparks_parks:120117"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "同名但坐标相距约10.9公里。NHB记录地址为300 Tanglin Road，不能与NParks的同名公园合并。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_name_distant_check_identity",
+      "reported_straight_line_metres": 10923.16,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_historic_sites:2338",
+          "source_key": "nhb_historic_sites",
+          "name": "Phoenix Park",
+          "address": "300 Tanglin Road 247970",
+          "longitude": 103.81678600022666,
+          "latitude": 1.2977480000620045
+        },
+        {
+          "record_uid": "nparks_parks:120117",
+          "source_key": "nparks_parks",
+          "name": "PHOENIX PARK",
+          "address": null,
+          "longitude": 103.75723986270971,
+          "latitude": 1.3758898083445699
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-04",
+      "member_uids": [
+        "nhb_historic_sites:2241",
+        "nparks_parks:120241"
+      ],
+      "action": "related_not_same",
+      "reason_zh": "历史街区/历史标识与公园管理点的访问范围不相同；记录关联，不合并。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 56.32,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_historic_sites:2241",
+          "source_key": "nhb_historic_sites",
+          "name": "Raffles Place",
+          "address": "Raffles Place MRT Station, Exit A",
+          "longitude": 103.85140100023737,
+          "latitude": 1.2840910000564687
+        },
+        {
+          "record_uid": "nparks_parks:120241",
+          "source_key": "nparks_parks",
+          "name": "RAFFLES PLACE PK",
+          "address": null,
+          "longitude": 103.8514999268154,
+          "latitude": 1.2835942597617673
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-05",
+      "member_uids": [
+        "nhb_historic_sites:2289",
+        "nparks_parks:120362"
+      ],
+      "action": "related_not_same",
+      "reason_zh": "水库历史地点记录与公园管理点不是完全相同的访问对象；保留各自粒度。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 95.2,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_historic_sites:2289",
+          "source_key": "nhb_historic_sites",
+          "name": "Upper Seletar Reservoir",
+          "address": "Beside Lookout Tower, Upper Seletar Reservoir Park, Mandai Road Track 7",
+          "longitude": 103.8066569997877,
+          "latitude": 1.400914999719964
+        },
+        {
+          "record_uid": "nparks_parks:120362",
+          "source_key": "nparks_parks",
+          "name": "UPPER SELETAR RESERVOIR PARK",
+          "address": null,
+          "longitude": 103.80744001762055,
+          "latitude": 1.4012617805865533
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-06",
+      "member_uids": [
+        "nhb_historic_sites:2317",
+        "nparks_parks:120174"
+      ],
+      "action": "related_not_same",
+      "reason_zh": "历史地点记录描述公园历史并定位到露天剧场旁，不能仅凭同名自动等同于整个公园点位。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 43.4,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_historic_sites:2317",
+          "source_key": "nhb_historic_sites",
+          "name": "Katong Park",
+          "address": "Meyer Road Beside Amphitheatre at Katong Park",
+          "longitude": 103.88611910319297,
+          "latitude": 1.2968502631265257
+        },
+        {
+          "record_uid": "nparks_parks:120174",
+          "source_key": "nparks_parks",
+          "name": "KATONG PK",
+          "address": null,
+          "longitude": 103.88634784301114,
+          "latitude": 1.2971665046106944
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-07",
+      "member_uids": [
+        "nhb_monuments:1704",
+        "stb_attractions:1036"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称一致、同为4001 Beach Road，同一清真寺的古迹与旅游介绍资料。只建立地点组，保留两个来源及各自坐标。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 12.4,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_monuments:1704",
+          "source_key": "nhb_monuments",
+          "name": "Hajjah Fatimah Mosque",
+          "address": "4001 Beach Road 199584",
+          "longitude": 103.86286070489973,
+          "latitude": 1.3028889682096216
+        },
+        {
+          "record_uid": "stb_attractions:1036",
+          "source_key": "stb_attractions",
+          "name": "Hajjah Fatimah Mosque",
+          "address": "4001 Beach Road",
+          "longitude": 103.86285000001742,
+          "latitude": 1.3029999998983477
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "stb_attractions:1036",
+      "display_name": "Hajjah Fatimah Mosque",
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-08",
+      "member_uids": [
+        "nhb_monuments:1731",
+        "stb_attractions:1052"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称一致、同为93 Stamford Road，同一博物馆的古迹与旅游介绍。组级身份不证明当前参观条件。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 53.63,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_monuments:1731",
+          "source_key": "nhb_monuments",
+          "name": "National Museum of Singapore",
+          "address": "93 Stamford Road 178897",
+          "longitude": 103.84848599900096,
+          "latitude": 1.296661821524236
+        },
+        {
+          "record_uid": "stb_attractions:1052",
+          "source_key": "stb_attractions",
+          "name": "National Museum of Singapore",
+          "address": "93 Stamford Road",
+          "longitude": 103.84882999956713,
+          "latitude": 1.297000000312191
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "stb_attractions:1052",
+      "display_name": "National Museum of Singapore",
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-09",
+      "member_uids": [
+        "nhb_monuments:1746",
+        "stb_attractions:1069"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称一致、均指Waterloo Street的同一会堂；保留不同来源的地址表述、坐标与访问条件。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 38.35,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nhb_monuments:1746",
+          "source_key": "nhb_monuments",
+          "name": "Maghain Aboth Synagogue",
+          "address": "Waterloo Street 187968",
+          "longitude": 103.85059947479468,
+          "latitude": 1.298273205070678
+        },
+        {
+          "record_uid": "stb_attractions:1069",
+          "source_key": "stb_attractions",
+          "name": "Maghain Aboth Synagogue",
+          "address": "24/26 Waterloo Street",
+          "longitude": 103.85081000006583,
+          "latitude": 1.2980000004431316
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "stb_attractions:1069",
+      "display_name": "Maghain Aboth Synagogue",
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-10",
+      "member_uids": [
+        "nparks_parks:120189",
+        "stb_attractions:978"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称一致，STB地址与NParks官网沿Labrador Villa Road的自然保护区相符；距离差异与代表点并不冲突，不取坐标平均值。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_name_distant_check_identity",
+      "reported_straight_line_metres": 151.16,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120189",
+          "source_key": "nparks_parks",
+          "name": "LABRADOR NATURE RESERVE",
+          "address": null,
+          "longitude": 103.8020372193653,
+          "latitude": 1.2673562042777244
+        },
+        {
+          "record_uid": "stb_attractions:978",
+          "source_key": "stb_attractions",
+          "name": "Labrador Nature Reserve",
+          "address": "Labrador Villa Road",
+          "longitude": 103.80194400025553,
+          "latitude": 1.2660000003513552
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "nparks_parks:120189",
+      "display_name": "Labrador Nature Reserve",
+      "web_sources": [
+        "https://www.nparks.gov.sg/visit/parks/park-detail/labrador-nature-reserve"
+      ],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-11",
+      "member_uids": [
+        "nparks_parks:120195",
+        "nparks_parks:120331"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "源记录保留OS与PG不同对象/管理标签；现有证据不足以认定为同一地点，保守分开。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 60.59,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120195",
+          "source_key": "nparks_parks",
+          "name": "JLN LIMAU KASTURI OS",
+          "address": null,
+          "longitude": 103.94622771976445,
+          "latitude": 1.3244942567204065
+        },
+        {
+          "record_uid": "nparks_parks:120331",
+          "source_key": "nparks_parks",
+          "name": "JLN LIMAU KASTURI PG",
+          "address": null,
+          "longitude": 103.94638906084543,
+          "latitude": 1.3239737658864272
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-12",
+      "member_uids": [
+        "nparks_parks:120196",
+        "nparks_parks:120320"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "源记录保留OS与PG不同对象/管理标签；现有证据不足以认定为同一地点，保守分开。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 57.55,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120196",
+          "source_key": "nparks_parks",
+          "name": "JLN PELATOK OS",
+          "address": null,
+          "longitude": 103.96085682394701,
+          "latitude": 1.346174574160508
+        },
+        {
+          "record_uid": "nparks_parks:120320",
+          "source_key": "nparks_parks",
+          "name": "JLN PELATOK PG",
+          "address": null,
+          "longitude": 103.9603400330171,
+          "latitude": 1.346144327776515
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-13",
+      "member_uids": [
+        "nparks_parks:120268",
+        "nparks_parks:120269"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "源记录为PG与FC不同标签；不删除可能不同的设施/管理对象。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 38.6,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120268",
+          "source_key": "nparks_parks",
+          "name": "ST MICHAEL'S PG",
+          "address": null,
+          "longitude": 103.86488766637642,
+          "latitude": 1.3262280958131525
+        },
+        {
+          "record_uid": "nparks_parks:120269",
+          "source_key": "nparks_parks",
+          "name": "ST MICHAEL'S FC",
+          "address": null,
+          "longitude": 103.86510904569799,
+          "latitude": 1.3264955858864842
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-14",
+      "member_uids": [
+        "nparks_parks:120289",
+        "nparks_parks:120303"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "道路名Daud与Eunos不同；近邻与字符串相似不足以证明身份一致。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 94.0,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120289",
+          "source_key": "nparks_parks",
+          "name": "JLN DAUD INTERIM PK",
+          "address": null,
+          "longitude": 103.90653362722021,
+          "latitude": 1.3255910007370635
+        },
+        {
+          "record_uid": "nparks_parks:120303",
+          "source_key": "nparks_parks",
+          "name": "JLN EUNOS INTERIM PK",
+          "address": null,
+          "longitude": 103.90600138050888,
+          "latitude": 1.3249340929144309
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-15",
+      "member_uids": [
+        "nparks_parks:120290",
+        "nparks_parks:120291"
+      ],
+      "action": "keep_separate",
+      "reason_zh": "道路名Marican与Marzuki不同；保留各自公园身份。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "nearby_similar_name",
+      "reported_straight_line_metres": 46.42,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120290",
+          "source_key": "nparks_parks",
+          "name": "LORONG MARICAN PARK",
+          "address": null,
+          "longitude": 103.90793148364666,
+          "latitude": 1.323887417613441
+        },
+        {
+          "record_uid": "nparks_parks:120291",
+          "source_key": "nparks_parks",
+          "name": "LORONG MARZUKI PARK",
+          "address": null,
+          "longitude": 103.90833923340004,
+          "latitude": 1.3237972700028935
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": null,
+      "display_name": null,
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-16",
+      "member_uids": [
+        "nparks_parks:120345",
+        "stb_attractions:970"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称HortPark一致，STB地址33 Hyderabad Road与NParks当前官网一致。保留两种来源坐标，不把管理代表点当入口。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_name_distant_check_identity",
+      "reported_straight_line_metres": 185.94,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120345",
+          "source_key": "nparks_parks",
+          "name": "HORTPARK",
+          "address": null,
+          "longitude": 103.79805321601927,
+          "latitude": 1.279077971566117
+        },
+        {
+          "record_uid": "stb_attractions:970",
+          "source_key": "stb_attractions",
+          "name": "HortPark",
+          "address": "33 Hyderabad Road",
+          "longitude": 103.79972399991794,
+          "latitude": 1.2789999999040045
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "nparks_parks:120345",
+      "display_name": "HortPark",
+      "web_sources": [
+        "https://www.nparks.gov.sg/visit/parks/park-detail/hortpark"
+      ],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-17",
+      "member_uids": [
+        "nparks_parks:120073",
+        "stb_attractions:967"
+      ],
+      "action": "same_place",
+      "reason_zh": "名称Fort Canning Park一致，STB边界地址与NParks官网相符；同一公园两份来源。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 99.67,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "nparks_parks:120073",
+          "source_key": "nparks_parks",
+          "name": "FORT CANNING PARK",
+          "address": null,
+          "longitude": 103.846609328737,
+          "latitude": 1.295890735425007
+        },
+        {
+          "record_uid": "stb_attractions:967",
+          "source_key": "stb_attractions",
+          "name": "Fort Canning Park",
+          "address": "Bounded by Hill Street, Canning Rise, Clemenceau Avenue and River Valley Road",
+          "longitude": 103.84650899995276,
+          "latitude": 1.294999999918433
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "nparks_parks:120073",
+      "display_name": "Fort Canning Park",
+      "web_sources": [
+        "https://www.nparks.gov.sg/visit/parks/park-detail/fort-canning-park"
+      ],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-18",
+      "member_uids": [
+        "stb_attractions:1016",
+        "stb_attractions:997"
+      ],
+      "action": "same_place",
+      "reason_zh": "同名、同地址、同坐标，均为Gardens by the Bay官方网站的两份旅游介绍。不是两个独立游览目的地。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 0.0,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "stb_attractions:1016",
+          "source_key": "stb_attractions",
+          "name": "Gardens by the Bay",
+          "address": "18 Marina Gardens Drive",
+          "longitude": 103.8636129995887,
+          "latitude": 1.2819999996692497
+        },
+        {
+          "record_uid": "stb_attractions:997",
+          "source_key": "stb_attractions",
+          "name": "Gardens by the Bay",
+          "address": "18 Marina Gardens Drive",
+          "longitude": 103.8636129995887,
+          "latitude": 1.2819999996692497
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "stb_attractions:997",
+      "display_name": "Gardens by the Bay",
+      "web_sources": [],
+      "applied": true
+    },
+    {
+      "decision_id": "pair-19",
+      "member_uids": [
+        "stb_attractions:1019",
+        "stb_attractions:972"
+      ],
+      "action": "same_place",
+      "reason_zh": "同名、同为1 McNally Street、同坐标且简介一致，保留为同一地点的两个来源。",
+      "basis": "review_of_uploaded_source_names_addresses_coordinates_and_scope_not_field_verification",
+      "original_reason": "same_normalised_name_nearby",
+      "reported_straight_line_metres": 0.0,
+      "evidence_file": "stage1b_review_bundle.zip/duplicate_review.json",
+      "expected_records": [
+        {
+          "record_uid": "stb_attractions:1019",
+          "source_key": "stb_attractions",
+          "name": "Lasalle College of the Arts",
+          "address": "1 McNally Street",
+          "longitude": 103.85160000018641,
+          "latitude": 1.3029999996442767
+        },
+        {
+          "record_uid": "stb_attractions:972",
+          "source_key": "stb_attractions",
+          "name": "Lasalle College of the Arts",
+          "address": "1 McNally Street",
+          "longitude": 103.85160000018641,
+          "latitude": 1.3029999996442767
+        }
+      ],
+      "reviewed_on": "2026-09-14",
+      "primary_uid": "stb_attractions:972",
+      "display_name": "LASALLE College of the Arts (McNally)",
+      "web_sources": [],
+      "applied": true
+    }
+  ]
+}

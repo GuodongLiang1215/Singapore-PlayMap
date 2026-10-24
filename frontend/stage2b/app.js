@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id),T=PlayMapTrip,trip=new T.ItineraryState();
-const CATEGORY={nature:'自然与公园',tourism:'景点资料',heritage:'历史地点',monument:'古迹',food:'熟食中心'};
+const CATEGORY={nature:'自然与公园',tourism:'景点、购物与娱乐',heritage:'历史地点',monument:'古迹',food:'餐饮'};
 const MODE={walk:'步行',cycle:'骑行',drive:'驾车'};
 // A device reading must never be described as a point the user identified.
 const SOURCE_LABEL={catalogue_representative:'来源代表点',device_location:'设备定位（含误差）',
@@ -46,7 +46,7 @@ function renderSelected(){
  if(!meta.hold){if(replacement)actions.append(button('用这个位置替换指定项',()=>use(replacement),'replace-action'));actions.append(button('设为出发点',()=>use('origin')),button('加入停留点',()=>use('add')),button('设为结束位置',()=>use('finish')));}
  const lookup=button('搜索实际通行位置',()=>{tab('search');$('search-query').value=meta.searchQuery||p.label;search(1);});actions.append(lookup,button('在地图上查看',()=>mapView.focusPoint(p)));box.append(actions);
  if(meta.category)box.append(node('p','类别：'+(CATEGORY[meta.category]||meta.category),'small'));
- if(meta.detail){for(const review of meta.detail.legacy_reviews||[])box.append(node('p',review.note_zh,'small'));box.append(node('p',`已收录常规时段证据 ${meta.detail.regular_hours_evidence?.length||0} 条；本阶段不据此自动判定营业。`,'small'));}
+ if(meta.detail){if(meta.detail.opening_hours_display)box.append(node('p','开放时间：'+meta.detail.opening_hours_display+(meta.detail.last_admission?'（最后入场 '+meta.detail.last_admission+'）':''),'small'));for(const review of meta.detail.legacy_reviews||[])box.append(node('p',review.note_zh,'small'));box.append(node('p',`已收录常规时段证据 ${meta.detail.regular_hours_evidence?.length||0} 条；本阶段不据此自动判定营业。`,'small'));}
 }
 async function selectFeature(f){
  const p=f.properties,[lon,lat]=f.geometry.coordinates;
@@ -72,7 +72,7 @@ async function search(page=1){
 }
 function stayPreview(v){
  if(v.stay_minutes!==null)return `用户设定 ${v.stay_minutes} 分钟`;
- const f=all.find(x=>x.properties.entity_id===v.point.entity_id),category=f?.properties.category||'unknown';const base=STAYS[category]||STAYS.unknown,k={quick:.5,regular:1,extended:1.5}[v.stay_profile];return `初始假设 ${Math.floor(base[1]*k)} 分钟，范围 ${Math.floor(base[0]*k)}—${Math.floor(base[2]*k)}；非实测，可修改。`;
+ const f=all.find(x=>x.properties.entity_id===v.point.entity_id),category=f?.properties.category||'unknown';const sd=f?.properties.suggested_duration;if(sd){if(v.stay_profile==='takeaway'&&sd.takeaway)return `外带 ${sd.takeaway} 分钟；可修改。`;const m={takeaway:sd.short,quick:sd.short,regular:sd.regular,extended:sd.long}[v.stay_profile];return `建议 ${m} 分钟，范围 ${sd.short}—${sd.long}；可修改。`;}const base=STAYS[category]||STAYS.unknown,k={takeaway:.5,quick:.5,regular:1,extended:1.5}[v.stay_profile];return `初始假设 ${Math.floor(base[1]*k)} 分钟，范围 ${Math.floor(base[0]*k)}—${Math.floor(base[2]*k)}；非实测，可修改。`;
 }
 function renderTrip(){
  const d=trip.data;$('origin-summary').textContent=d.origin?d.origin.label+' · '+(SOURCE_LABEL[d.origin.source]||'已确认选点')+'，非核验入口':'尚未选择';$('visit-count').textContent=`${d.visits.length} 个停留点 · 当前顺序不会被自动调整`;
@@ -80,7 +80,7 @@ function renderTrip(){
   const card=node('div',undefined,'visit-card');card.dataset.visitId=v.visit_id;const head=node('div',undefined,'visit-head');head.append(node('span',String(i+1),'badge'),node('strong',v.point.label));card.append(head);
   const actions=node('div',undefined,'visit-actions'),up=button('上移',()=>edit(()=>trip.moveVisit(v.visit_id,-1))),down=button('下移',()=>edit(()=>trip.moveVisit(v.visit_id,1)));up.disabled=i===0;down.disabled=i===d.visits.length-1;actions.append(up,down,button('替换',()=>beginReplacement(v.visit_id)),button('删除',()=>edit(()=>{trip.removeVisit(v.visit_id);if(replacement===v.visit_id)cancelReplacement();})),button('定位',()=>mapView.focusPoint(v.point)));card.append(actions);
   const fields=node('div',undefined,'visit-fields'),left=node('div'),right=node('div'),label=node('label','停留分钟（空＝建议）'),input=node('input');input.type='number';input.min='0';input.max='1440';input.step='1';input.value=v.stay_minutes??'';input.placeholder='使用初始建议';input.setAttribute('aria-label','第'+(i+1)+'站停留分钟');label.append(input);left.append(label);
-  const sel=node('select');sel.setAttribute('aria-label','第'+(i+1)+'站建议档位');for(const [key,text] of [['quick','短停'],['regular','普通'],['extended','深入']]){const o=node('option',text);o.value=key;sel.append(o);}sel.value=v.stay_profile;const label2=node('label','建议档位（仅留空时）');label2.append(sel);right.append(label2);fields.append(left,right);card.append(fields,node('p',stayPreview(v),'visit-note'));
+  const sel=node('select');sel.setAttribute('aria-label','第'+(i+1)+'站建议档位');for(const [key,text] of [['takeaway','外带'],['quick','短停'],['regular','普通'],['extended','深入']]){const o=node('option',text);o.value=key;sel.append(o);}sel.value=v.stay_profile;const label2=node('label','建议档位（仅留空时）');label2.append(sel);right.append(label2);fields.append(left,right);card.append(fields,node('p',stayPreview(v),'visit-note'));
   const apply=()=>{try{const n=T.integer(input.value,'停留分钟',{min:0,max:1440,nullable:true});formInvalid=false;edit(()=>trip.setStay(v.visit_id,n,sel.value));}catch(e){formInvalid=true;trip.cancel();invalidate();reportError(e);input.classList.add('input-error-border');}};input.onchange=sel.onchange=apply;box.append(card);
  });
  $('finish-policy').value=d.finish_policy;$('finish-panel').hidden=d.finish_policy!=='custom';$('finish-summary').textContent=d.finish?d.finish.label:'尚未选择结束位置';$('mode').value=d.mode;$('undo').disabled=!trip.history.length;

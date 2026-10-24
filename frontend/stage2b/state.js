@@ -37,7 +37,7 @@
   replaceVisit(id,p){this.change(d=>{const v=d.visits.find(v=>v.visit_id===id);if(!v)throw Error('停留点已不存在。');v.point=validPoint(p);});}
   removeVisit(id){this.change(d=>{if(!d.visits.some(v=>v.visit_id===id))throw Error('停留点已不存在。');d.visits=d.visits.filter(v=>v.visit_id!==id);});}
   moveVisit(id,delta){this.change(d=>{const i=d.visits.findIndex(v=>v.visit_id===id),j=i+delta;if(i<0||j<0||j>=d.visits.length)throw Error('无法继续移动。');const [v]=d.visits.splice(i,1);d.visits.splice(j,0,v);});}
-  setStay(id,minutes,profile){this.change(d=>{const v=d.visits.find(v=>v.visit_id===id);if(!v)throw Error('停留点已不存在。');if(minutes!==null&&(!Number.isInteger(minutes)||minutes<0||minutes>1440))throw Error('停留时间需要0—1440的整数或留空。');if(!['quick','regular','extended'].includes(profile))throw Error('玩法无效。');v.stay_minutes=minutes;v.stay_profile=profile;});}
+  setStay(id,minutes,profile){this.change(d=>{const v=d.visits.find(v=>v.visit_id===id);if(!v)throw Error('停留点已不存在。');if(minutes!==null&&(!Number.isInteger(minutes)||minutes<0||minutes>1440))throw Error('停留时间需要0—1440的整数或留空。');if(!['takeaway','quick','regular','extended'].includes(profile))throw Error('玩法无效。');v.stay_minutes=minutes;v.stay_profile=profile;});}
   setMode(mode){if(!['walk','drive','cycle'].includes(mode))throw Error('未接入该交通方式。');this.change(d=>{d.mode=mode;});}
   setTime(t){this.change(d=>{d.time=copy(t);});}
   undo(){if(!this.history.length)return false;this.data=this.history.pop();this.revision++;this.sequence++;return true;}

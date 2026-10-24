@@ -1,7 +1,7 @@
 'use strict';
 // All source text is rendered with textContent. No source HTML is executed.
 const $ = id => document.getElementById(id);
-const LABEL={tourism:'景点',nature:'公园 / 自然',heritage:'历史地点',monument:'古迹',food:'熟食中心'};
+const LABEL={tourism:'景点 / 购物 / 娱乐',nature:'公园 / 自然',heritage:'历史地点',monument:'古迹',food:'餐饮'};
 const COLORS={tourism:'#af783b',nature:'#31846b',heritage:'#6474a1',monument:'#9b7297',food:'#ce7764'};
 const ACCESS_LABEL={name_supports_target:'名称支持目标 · 仍未核验',explicit_target_differs:'目标名称不同 · 不自动用作入口',broader_area_context:'只支持更大范围上下文',broad_target_label:'地名较宽 · 无法唯一确定',unspecified_or_unresolved:'名称未明确目标'};
 let profile=null,all=[],matched=[],map=null,markers=null,tiles=null,originMarker=null,listLimit=100,detailRevision=0;
@@ -65,7 +65,7 @@ async function detail(id){
   section(panel,'建议停留与入口','尚未建立游玩时长，未核验入口。官网常规时段不等于完成路线规划。');
   const sources=node('div',undefined,'detail-section');sources.append(node('strong','保留的来源详情'));
   for(const r of d.source_records){const card=node('details',undefined,'source-card');card.append(node('summary',r.source_key+' · '+r.record_uid));const dl=node('dl');kv(dl,'原始名称',r.name);kv(dl,'资料时期',r.provenance.source_period_label);kv(dl,'地址',r.address);kv(dl,'坐标',`${r.latitude}, ${r.longitude}`);card.append(dl);
-   section(card,'原来源简介',r.stage1b?.display_description||r.description);section(card,'原来源时段（未经当前核验）',r.stage1b?.opening_hours_display||r.opening_hours_raw);safeLink(card,'官方数据目录 ↗',r.provenance.catalogue_url);safeLink(card,'原详情链接（可能过时）↗',r.external_url);safeLink(card,'数据许可 ↗',r.provenance.licence_url);sources.append(card);}
+   section(card,'原来源简介',r.stage1b?.display_description||r.description);section(card,'原来源时段（未经当前核验）',r.stage1b?.opening_hours_display||r.opening_hours_raw);safeLink(card,r.source_key==='overture_places'?'Overture 数据说明 ↗':'官方数据目录 ↗',r.provenance.catalogue_url);safeLink(card,'原详情链接（可能过时）↗',r.external_url);safeLink(card,'数据许可 ↗',r.provenance.licence_url);sources.append(card);}
   panel.append(sources);
   if(e.related_records.length){const box=node('div',undefined,'detail-section');box.append(node('strong','保留分开的相关记录'));
    for(const rel of e.related_records){const f=all.find(x=>x.id===rel.entity_id);const b=node('button',f?.properties.display_title||rel.entity_id,'related-button');b.onclick=()=>focusEntity(rel.entity_id);box.append(b,node('p',rel.reason_zh,'small'));}panel.append(box);}

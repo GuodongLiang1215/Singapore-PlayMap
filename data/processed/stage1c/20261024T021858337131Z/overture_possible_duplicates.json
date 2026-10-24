@@ -1,0 +1,2328 @@
+{
+  "rule": "within 150 m of an official entity and name similarity >= 0.86",
+  "count": 258,
+  "pairs": [
+    {
+      "overture_uid": "overture_places:01a3fd97-36b6-4270-b811-3e7e70eb7e64",
+      "overture_name": "Toa Payoh",
+      "official_entity_id": "place:nea_hawker_centres:119386",
+      "official_name": "Toa Payoh Lorong 4 Blk 74 (Toa Payoh Vista Market)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 84.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:02a9179d-b691-47f5-af99-7e87250bb48e",
+      "overture_name": "Blk 4A Jalan Batu Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119434",
+      "official_name": "Jalan Batu Blk 4A (Blk 4A Jalan Batu Hawker Centre/Market)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 10.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:03afa136-91ee-4425-a6d1-d095597c2431",
+      "overture_name": "St Joseph's Church",
+      "official_entity_id": "place:nhb_monuments:1677",
+      "official_name": "St Joseph's Church",
+      "name_similarity": 1.0,
+      "straight_line_metres": 5.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:03f4e652-5a2c-4cad-93b4-a0a0f63b5652",
+      "overture_name": "Upper Boon Keng Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119442",
+      "official_name": "Upper Boon Keng Road Blk 17 (Blk 17 Upper Boon Keng Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 25.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:0646fb77-31de-4420-80ed-0847e72469c7",
+      "overture_name": "Tan Teck Guan Building",
+      "official_entity_id": "place:nhb_monuments:1691",
+      "official_name": "Tan Teck Guan Building",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:07e07de0-f219-4d42-8043-e6ee3e0c9102",
+      "overture_name": "Koon Seng Park",
+      "official_entity_id": "place:nparks_parks:120301",
+      "official_name": "KOON SENG PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 1.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:08dd0638-0208-4b9b-add3-e682e5c97027",
+      "overture_name": "Park Villas Terrace Playground",
+      "official_entity_id": "place:nparks_parks:120419",
+      "official_name": "PK VILLAS TERRACE PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:08f4c5c1-591b-4c96-b11c-68bb9bd8697e",
+      "overture_name": "Singapore Zoo",
+      "official_entity_id": "place:stb_attractions:989",
+      "official_name": "Singapore Zoo: Attractions & Things to Do",
+      "name_similarity": 0.9,
+      "straight_line_metres": 38.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:097da881-1e41-4c22-b50f-710ccf95d234",
+      "overture_name": "Tampines Round Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119381",
+      "official_name": "Tampines Street 11 Blk 137 (Tampines Round Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 44.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:0a6ee849-1a01-43c5-a12b-0d6e7354309c",
+      "overture_name": "Telok Ayer Green",
+      "official_entity_id": "place:nparks_parks:120137",
+      "official_name": "TELOK AYER GREEN",
+      "name_similarity": 1.0,
+      "straight_line_metres": 6.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:0c59e660-6386-4dd9-ac11-9a30f2ee359f",
+      "overture_name": "Sakya Muni Buddha Gaya Temple",
+      "official_entity_id": "place:nhb_historic_sites:2251",
+      "official_name": "Sakya Muni Buddha Gaya Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 10.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:0f6d75fc-7efd-4e89-ac9d-d2ff9353dc14",
+      "overture_name": "National Design Centre",
+      "official_entity_id": "place:stb_attractions:1047",
+      "official_name": "National Design Centre, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 42.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:11faedef-476e-47ac-b4c4-9efe61aa8850",
+      "overture_name": "Clementi Woods Park",
+      "official_entity_id": "place:nparks_parks:120424",
+      "official_name": "CLEMENTI WOODS PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 85.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:137de324-6f01-4177-a613-eb547b2bfb18",
+      "overture_name": "Phoenix Park",
+      "official_entity_id": "place:nparks_parks:120117",
+      "official_name": "PHOENIX PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 27.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1420e0ea-8c70-4a72-abea-3c3f7ab31675",
+      "overture_name": "Toa Payoh Town Park",
+      "official_entity_id": "place:nparks_parks:120244",
+      "official_name": "TOA PAYOH TOWN PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 37.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:14f87165-ab08-4bfd-8e1a-77c19b7e273d",
+      "overture_name": "Church of St Teresa",
+      "official_entity_id": "place:nhb_monuments:1725",
+      "official_name": "Church of St Teresa",
+      "name_similarity": 1.0,
+      "straight_line_metres": 58.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:18a22747-4763-419d-a677-9db781ef19f7",
+      "overture_name": "Raffles Hotel Museum",
+      "official_entity_id": "place:nhb_monuments:1742",
+      "official_name": "Raffles Hotel",
+      "name_similarity": 0.9,
+      "straight_line_metres": 85.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:19c6d6d9-5a8e-43f8-8b6f-04fe1907a814",
+      "overture_name": "Lakeside Grove",
+      "official_entity_id": "place:nparks_parks:120429",
+      "official_name": "LAKESIDE GROVE FITNESS CORNER",
+      "name_similarity": 0.9,
+      "straight_line_metres": 51.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1a2d4343-b168-4abf-a12a-db5c240eaaa4",
+      "overture_name": "Kampong Glam Park",
+      "official_entity_id": "place:nparks_parks:120018",
+      "official_name": "KAMPONG GLAM PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 12.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1c775189-f63c-4428-9fe0-a92eecf7fff9",
+      "overture_name": "Florissa Park",
+      "official_entity_id": "place:nparks_parks:120089",
+      "official_name": "FLORISSA PK PG",
+      "name_similarity": 0.9,
+      "straight_line_metres": 19.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1cb00dcb-e75b-4253-95a0-a9cd5e35a0ce",
+      "overture_name": "University Road Park",
+      "official_entity_id": "place:nparks_parks:120169",
+      "official_name": "UNIVERSITY RD PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 39.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1e0f4f96-111e-4585-9370-9679e7015005",
+      "overture_name": "Universal Studios Singapore",
+      "official_entity_id": "place:stb_attractions:961",
+      "official_name": "Universal Studios Singaporeâ„¢ Theme Park",
+      "name_similarity": 0.9,
+      "straight_line_metres": 21.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1e716cc0-e951-4714-bbff-97d99c0ce671",
+      "overture_name": "Admiralty",
+      "official_entity_id": "place:nea_hawker_centres:119365",
+      "official_name": "Kampung Admiralty Hawker Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 112.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1eda45d7-b602-40f0-b047-3e103ca3e912",
+      "overture_name": "Anchorvale Village Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119451",
+      "official_name": "Anchorvale Village Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 35.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1f426664-9443-46d8-b265-8b541d279352",
+      "overture_name": "Woodlands Town Park East",
+      "official_entity_id": "place:nparks_parks:120444",
+      "official_name": "WOODLANDS TOWN PK EAST",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:1f947c65-16a4-4a9c-ae98-6cb6d08a6ef0",
+      "overture_name": "Bukit Canberra Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119454",
+      "official_name": "Bukit Canberra Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 85.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2342a916-ce75-44ed-bb05-d158fb5398b5",
+      "overture_name": "Masjid Sultan Singapore",
+      "official_entity_id": "place:stb_attractions:1002",
+      "official_name": "Sultan Mosque (Masjid Sultan) Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 38.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2365dded-36f2-4d44-aada-ca0801fcd6b8",
+      "overture_name": "Sunbird Circle Playground",
+      "official_entity_id": "place:nparks_parks:120322",
+      "official_name": "SUNBIRD CIRCLE PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 11.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:243975b3-e11e-42e8-add4-64dcfc956b76",
+      "overture_name": "Taman Permata Park",
+      "official_entity_id": "place:nparks_parks:120256",
+      "official_name": "TAMAN PERMATA PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 18.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:24dced96-a099-4173-b85d-3fd9b50dac5e",
+      "overture_name": "Chestnut Close Park",
+      "official_entity_id": "place:nparks_parks:120068",
+      "official_name": "CHESTNUT CLOSE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 115.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:25bd543c-6c1a-4483-8a43-e98332c7771e",
+      "overture_name": "Pasir Panjang Machine-gun Pillbox",
+      "official_entity_id": "place:nhb_historic_sites:2323",
+      "official_name": "Pasir Panjang Machine-Gun Pillbox",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:26e841e8-5e5f-42c9-b8f6-30f8152b6048",
+      "overture_name": "Telok Ayer Chinese Methodist Church",
+      "official_entity_id": "place:nhb_monuments:1673",
+      "official_name": "Telok Ayer Chinese Methodist Church",
+      "name_similarity": 1.0,
+      "straight_line_metres": 5.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:27da6a03-314f-4268-a26d-0dfe11e7d065",
+      "overture_name": "Dalhousie Obelisk",
+      "official_entity_id": "place:stb_attractions:1054",
+      "official_name": "Dalhousie Obelisk, a Singapore Landmark",
+      "name_similarity": 0.9,
+      "straight_line_metres": 53.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:27dc6582-1df2-4968-850c-c778e5354c8b",
+      "overture_name": "Ang Mo Kio Avenue 10 Block 527 Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119396",
+      "official_name": "Ang Mo Kio Ave 10 Blk 527 (Cheng San Market and Cooked Food Centre)",
+      "name_similarity": 0.862,
+      "straight_line_metres": 20.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:28d8f048-e816-4a3e-933b-0fa6637842e5",
+      "overture_name": "Lucky Gardens Playground",
+      "official_entity_id": "place:nparks_parks:120329",
+      "official_name": "LUCKY GARDENS PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2a3fe5f8-f1d1-49ec-9989-bfc6ad8e91c0",
+      "overture_name": "Sun Yat Sen Nanyang Memorial Hall",
+      "official_entity_id": "place:nhb_monuments:1743",
+      "official_name": "Former Sun Yat Sen Villa (now Sun Yat Sen Nanyang Memorial Hall)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 24.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2abf50a9-e285-4c7f-a5cb-8faf0452c4f2",
+      "overture_name": "Holland Green Playground",
+      "official_entity_id": "place:nparks_parks:120113",
+      "official_name": "HOLLAND GREEN PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 26.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2c62aeef-87ca-4d7f-a6c8-51cc564c4d85",
+      "overture_name": "Tanjong Pagar Park",
+      "official_entity_id": "place:nparks_parks:120136",
+      "official_name": "TANJONG PAGAR PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 24.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2d834ed0-d63a-42a6-afe8-b10433594f26",
+      "overture_name": "Goldhill Avenue Playground",
+      "official_entity_id": "place:nparks_parks:120024",
+      "official_name": "GOLDHILL AVE PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 26.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:2eae14f1-d72a-4760-a35a-26fe5ea41a51",
+      "overture_name": "Katong Antique House",
+      "official_entity_id": "place:stb_attractions:964",
+      "official_name": "Katong Antique House Singapore: Peranakan Heritage",
+      "name_similarity": 0.9,
+      "straight_line_metres": 26.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3110776f-3289-4dcb-a58b-c91213099738",
+      "overture_name": "St James Power Station",
+      "official_entity_id": "place:nhb_monuments:1726",
+      "official_name": "Former St James Power Station",
+      "name_similarity": 0.9,
+      "straight_line_metres": 37.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:31750998-2f6b-4e7c-baf4-dfe7007d4448",
+      "overture_name": "Clifford",
+      "official_entity_id": "place:nhb_historic_sites:2269",
+      "official_name": "Clifford Pier",
+      "name_similarity": 0.9,
+      "straight_line_metres": 29.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:323d73e9-cddd-4e27-b3fa-6ee8af64b254",
+      "overture_name": "Coronation Park",
+      "official_entity_id": "place:nparks_parks:120177",
+      "official_name": "CORONATION PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 6.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:352c2a46-4b81-4fab-87b0-151e8c03e79e",
+      "overture_name": "Greenridge Crescent Playground",
+      "official_entity_id": "place:nparks_parks:120123",
+      "official_name": "GREENRIDGE CRESCENT PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3649a188-995a-4189-be02-dec80ae6fc7f",
+      "overture_name": "Commonwealth Crescent Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119477",
+      "official_name": "Commonwealth Crescent Market",
+      "name_similarity": 0.9,
+      "straight_line_metres": 15.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:36c4461a-15d9-4c4e-8239-dcb4bb852ff7",
+      "overture_name": "Chinese Heritage Centre",
+      "official_entity_id": "place:stb_attractions:1040",
+      "official_name": "Chinese Heritage Centre, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 32.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3893d57b-f4d8-4b17-a277-be063d6d0467",
+      "overture_name": "Labrador Nature Reserve",
+      "official_entity_id": "place:nparks_parks:120189",
+      "official_name": "Labrador Nature Reserve",
+      "name_similarity": 1.0,
+      "straight_line_metres": 94.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:39dc24f4-8a77-4839-8e69-48a77d013a3f",
+      "overture_name": "Marina Barrage",
+      "official_entity_id": "place:stb_attractions:1033",
+      "official_name": "Marina Barrage",
+      "name_similarity": 1.0,
+      "straight_line_metres": 53.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3a5f6d6a-ebce-430c-9e9d-c3750b6641bb",
+      "overture_name": "Kukoh 21 Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119438",
+      "official_name": "Jalan Kukoh Blk 1 (Kukoh 21 Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 10.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3b007bc3-3e72-4920-98a8-2062791491c1",
+      "overture_name": "Adam Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119484",
+      "official_name": "Adam Road Food Centre",
+      "name_similarity": 0.865,
+      "straight_line_metres": 8.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3c76e9ca-6686-434b-adf3-6979b7a674ee",
+      "overture_name": "Tras Link Park",
+      "official_entity_id": "place:nparks_parks:120249",
+      "official_name": "TRAS LINK PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 3.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3ca89f89-ad56-4af6-b180-02ac86f607e8",
+      "overture_name": "Namly Park",
+      "official_entity_id": "place:nparks_parks:120129",
+      "official_name": "NAMLY PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 12.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3e94a208-d0fb-4192-af48-689f63c2ff41",
+      "overture_name": "East Coast Terrace Park",
+      "official_entity_id": "place:nparks_parks:120144",
+      "official_name": "EAST COAST TERRACE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4035cc18-0d21-452a-9f23-4121ce4a473f",
+      "overture_name": "Havelock Road Cooked Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119430",
+      "official_name": "Havelock Road Blk 22A/B (Havelock Road Cooked Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 19.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:407f4a23-bdff-4bbc-91b3-4105e30e95b9",
+      "overture_name": "天福宫 Thian Hock Keng",
+      "official_entity_id": "place:nhb_monuments:1714",
+      "official_name": "Thian Hock Keng",
+      "name_similarity": 0.882,
+      "straight_line_metres": 23.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:40a3de53-4c19-49de-9854-662c2f7fe81b",
+      "overture_name": "Sri Krishnan Temple",
+      "official_entity_id": "place:nhb_historic_sites:2262",
+      "official_name": "Sri Krishnan Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 19.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:416678d3-65da-4a0c-a444-e811b17c2f91",
+      "overture_name": "Bukit Merah Central Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119411",
+      "official_name": "Bukit Merah Central Blk 163 (Bukit Merah Central Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 64.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:41dd440f-635b-49ff-aa48-1154938dffea",
+      "overture_name": "East Coast Lagoon Food Village",
+      "official_entity_id": "place:nea_hawker_centres:119471",
+      "official_name": "East Coast Lagoon Food Village",
+      "name_similarity": 1.0,
+      "straight_line_metres": 30.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4592ed4a-08e2-4312-97a8-ae275316ba33",
+      "overture_name": "Gelenggang Park",
+      "official_entity_id": "place:nparks_parks:120083",
+      "official_name": "GELENGGANG PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 22.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4716ea1d-f9c3-4fe8-9fe1-d490d60948ea",
+      "overture_name": "Church of the Nativity of the Blessed Virgin Mary",
+      "official_entity_id": "place:nhb_monuments:1696",
+      "official_name": "Church of the Nativity of the Blessed Virgin Mary",
+      "name_similarity": 1.0,
+      "straight_line_metres": 35.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:49c66b73-c8a1-43e6-9f68-404f83cfe0e4",
+      "overture_name": "Choa Chu Kang Park",
+      "official_entity_id": "place:nparks_parks:120462",
+      "official_name": "CHOA CHU KANG PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 61.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4b0f4a58-a1b1-49a6-a53c-4a805b466a9b",
+      "overture_name": "Johore Battery",
+      "official_entity_id": "place:nhb_historic_sites:2294",
+      "official_name": "Johore Battery",
+      "name_similarity": 1.0,
+      "straight_line_metres": 24.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4b104eed-99f7-49e4-954c-249f74144e1c",
+      "overture_name": "Limau Garden Playground",
+      "official_entity_id": "place:nparks_parks:120328",
+      "official_name": "LIMAU GARDEN PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4b5df543-70cd-4624-aa54-7188d1781095",
+      "overture_name": "Lim Bo Seng Memorial",
+      "official_entity_id": "place:stb_attractions:1062",
+      "official_name": "Lim Bo Seng Memorial",
+      "name_similarity": 1.0,
+      "straight_line_metres": 56.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4c77a70f-388b-46ae-8300-a3b3442a7238",
+      "overture_name": "The MacDonald House",
+      "official_entity_id": "place:nhb_monuments:1682",
+      "official_name": "MacDonald House",
+      "name_similarity": 0.9,
+      "straight_line_metres": 14.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4c8ea811-d6ae-4232-acd3-65111eb80a08",
+      "overture_name": "Esplanade Park",
+      "official_entity_id": "place:nparks_parks:120079",
+      "official_name": "ESPLANADE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 63.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4d07a2bc-c987-4f10-8e66-6572acaf2df8",
+      "overture_name": "JURONG WEST",
+      "official_entity_id": "place:nea_hawker_centres:119362",
+      "official_name": "Jurong West Street 52 Blk 505",
+      "name_similarity": 0.9,
+      "straight_line_metres": 100.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4d518f27-41aa-44dc-b99d-d74e0e6051e4",
+      "overture_name": "Yueh Hai Ching Temple",
+      "official_entity_id": "place:nhb_monuments:1678",
+      "official_name": "Yueh Hai Ching Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 33.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4d53e962-6fe6-4ba7-a20e-350521344bd7",
+      "overture_name": "Jalan Sendudok Park",
+      "official_entity_id": "place:nparks_parks:120243",
+      "official_name": "JLN SENDUDOK PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 11.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4d649d90-96a3-4d0d-bb6b-c01831744688",
+      "overture_name": "Armenian Apostolic Church of St. Gregory the Illuminator",
+      "official_entity_id": "place:nhb_monuments:1721",
+      "official_name": "Armenian Apostolic Church of Saint Gregory the Illuminator",
+      "name_similarity": 0.94,
+      "straight_line_metres": 40.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4de95202-ff37-4f01-ae95-da92f6cc18e6",
+      "overture_name": "Anchorvale Village",
+      "official_entity_id": "place:nea_hawker_centres:119451",
+      "official_name": "Anchorvale Village Hawker Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 5.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4ecac6cd-6efd-4a79-b455-5696452e1e5c",
+      "overture_name": "Ang Mo Kio Town Garden West",
+      "official_entity_id": "place:nparks_parks:120305",
+      "official_name": "ANG MO KIO TOWN GARDEN WEST",
+      "name_similarity": 1.0,
+      "straight_line_metres": 61.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4f3aa30a-9976-4e06-8b48-618c3775c34f",
+      "overture_name": "Sri Mariamman Temple",
+      "official_entity_id": "place:nhb_monuments:1713",
+      "official_name": "Sri Mariamman Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 26.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4f96d7e7-5828-4b15-bbc4-4f1ee2887ea7",
+      "overture_name": "Catholic Church of Our Lady of Lourdes",
+      "official_entity_id": "place:nhb_monuments:1732",
+      "official_name": "Church of Our Lady of Lourdes",
+      "name_similarity": 0.866,
+      "straight_line_metres": 7.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4f9dfd19-043e-4b3b-a362-030bc5265fac",
+      "overture_name": "Pasir Ris Central Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119373",
+      "official_name": "Pasir Ris Central Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 14.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:4fa175f1-47b2-462e-af43-f892cac9d0cc",
+      "overture_name": "Kampong Glam",
+      "official_entity_id": "place:stb_attractions:1041",
+      "official_name": "Kampong Glam & Malay Culture in Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 81.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:51f42253-8d90-41c8-b90a-4805de2dda8f",
+      "overture_name": "Queen Elizabeth Walk",
+      "official_entity_id": "place:nhb_historic_sites:2253",
+      "official_name": "Queen Elizabeth Walk",
+      "name_similarity": 1.0,
+      "straight_line_metres": 13.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:532bfd8e-2066-4745-a22b-66581f568bc8",
+      "overture_name": "Green Lane Park",
+      "official_entity_id": "place:nparks_parks:120297",
+      "official_name": "GREEN LANE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 29.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:544901a5-3f13-43b7-b4af-3054e3f401e5",
+      "overture_name": "Thomson Green Playground",
+      "official_entity_id": "place:nparks_parks:120359",
+      "official_name": "THOMSON GREEN PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 10.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:54625117-8c0a-4eaa-9b84-b33fcb72b98a",
+      "overture_name": "Hoover Park",
+      "official_entity_id": "place:nparks_parks:120126",
+      "official_name": "HOOVER PARK (LOR PISANG HIJAU PLAYGROUND)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 11.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:557e09a3-d2b0-4fa4-b465-9afbd71b095c",
+      "overture_name": "Faber Heights Park",
+      "official_entity_id": "place:nparks_parks:120072",
+      "official_name": "FABER HEIGHTS PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 11.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:55fa0376-ea15-494d-b440-f3d249dd0d3a",
+      "overture_name": "Harvey Crescent Playground",
+      "official_entity_id": "place:nparks_parks:120324",
+      "official_name": "HARVEY CRESCENT PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 17.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:58fee50b-3dfe-4427-8c05-8d5b87ad0f98",
+      "overture_name": "Hong San See Temple",
+      "official_entity_id": "place:nhb_monuments:1734",
+      "official_name": "Hong San See",
+      "name_similarity": 0.9,
+      "straight_line_metres": 6.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5acc8626-24d8-49a4-a4b3-cd688c072710",
+      "overture_name": "Hampstead Wetlands Park",
+      "official_entity_id": "place:nparks_parks:120394",
+      "official_name": "HAMPSTEAD WETLANDS PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 18.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5c55548d-38c9-4a7b-a25d-10f55a87583c",
+      "overture_name": "Kampung Admiralty Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119365",
+      "official_name": "Kampung Admiralty Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5da853f1-b551-4cb7-9e51-fc91da9028a6",
+      "overture_name": "Geylang Bahru Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119426",
+      "official_name": "Geylang Bahru Blk 69 (Blk 69 Geylang Bahru Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 19.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5ea3911e-5c8a-4120-86f6-7816a27a2c68",
+      "overture_name": "Changi Height Playgound",
+      "official_entity_id": "place:nparks_parks:120335",
+      "official_name": "CHANGI HEIGHTS PG",
+      "name_similarity": 0.958,
+      "straight_line_metres": 24.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5eb2c4be-c8e4-4c1e-a778-0162922f67c1",
+      "overture_name": "Realty Park",
+      "official_entity_id": "place:nparks_parks:120236",
+      "official_name": "REALTY PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 31.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5ee4fcf2-95c6-4180-bdef-2d627222431e",
+      "overture_name": "St George's Church",
+      "official_entity_id": "place:nhb_monuments:1676",
+      "official_name": "St. George's Church",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5f34e32e-3856-4f52-9172-5413113b883b",
+      "overture_name": "Jurong West Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119439",
+      "official_name": "Jurong West Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5f90d4bc-88d8-4636-a64b-32d6e18b9753",
+      "overture_name": "Zion Riverside Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119468",
+      "official_name": "Zion Riverside Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 30.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:5f976194-a8b7-4fea-b568-0e7689ec3bf4",
+      "overture_name": "Istana Park",
+      "official_entity_id": "place:nparks_parks:120037",
+      "official_name": "ISTANA PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 21.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:624e4906-5b08-4b36-85a5-73808d02af4c",
+      "overture_name": "St Andrew's Cathedral",
+      "official_entity_id": "place:nhb_monuments:1716",
+      "official_name": "St. Andrew's Cathedral",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:64e58e36-d4c6-4847-9e3e-b86992f3ee35",
+      "overture_name": "Luxus Hills Park",
+      "official_entity_id": "place:nparks_parks:120059",
+      "official_name": "LUXUS HILLS PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 39.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:658b16a9-bc98-449d-a02c-4efd36e349bd",
+      "overture_name": "West Coast Green Playground",
+      "official_entity_id": "place:nparks_parks:120226",
+      "official_name": "WEST COAST GREEN PLAYGROUND",
+      "name_similarity": 1.0,
+      "straight_line_metres": 8.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:66abd37b-acbb-4422-93e3-42edd4a3453e",
+      "overture_name": "Telok Blangah Hill Park",
+      "official_entity_id": "place:nparks_parks:120046",
+      "official_name": "TELOK BLANGAH HILL PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 48.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:67bee294-0a02-4e07-b34f-498b476f105d",
+      "overture_name": "College of Medicine Building",
+      "official_entity_id": "place:nhb_monuments:1680",
+      "official_name": "College of Medicine Building",
+      "name_similarity": 1.0,
+      "straight_line_metres": 71.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6b761bb5-e329-4044-98f7-fb960f8f5fbf",
+      "overture_name": "Changi Point Ferry Terminal",
+      "official_entity_id": "place:nparks_parks:120310",
+      "official_name": "CHANGI PT FERRY TERMINAL",
+      "name_similarity": 0.941,
+      "straight_line_metres": 48.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6bd30932-df9f-4ba8-b5bc-0af12dcbd2af",
+      "overture_name": "Youth Olympic Park",
+      "official_entity_id": "place:nparks_parks:120395",
+      "official_name": "YOUTH OLYMPIC PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 14.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6c6e03a2-1d4c-4357-9e5c-f11cf303f078",
+      "overture_name": "Ayer Rajah Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119444",
+      "official_name": "West Coast Drive Blk 503 (Ayer Rajah Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 26.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6d071f69-5fad-4f56-a1fd-582d091e0b65",
+      "overture_name": "Jurong Town Hall",
+      "official_entity_id": "place:nhb_monuments:1709",
+      "official_name": "Jurong Town Hall",
+      "name_similarity": 1.0,
+      "straight_line_metres": 95.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6dd0aacf-7cfe-4df1-8a21-efd23f63edb3",
+      "overture_name": "Bedok North",
+      "official_entity_id": "place:nea_hawker_centres:119402",
+      "official_name": "Bedok North Street 3 Blk 511 (Kaki Bukit 511 Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 146.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6de92386-83e7-4431-a9fb-396ded26fcff",
+      "overture_name": "Bedok Reservoir",
+      "official_entity_id": "place:nea_hawker_centres:119405",
+      "official_name": "Bedok Reservoir Road Blk 630",
+      "name_similarity": 0.9,
+      "straight_line_metres": 80.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6e334cde-c051-4a49-86d9-551315382c66",
+      "overture_name": "Newton Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119483",
+      "official_name": "Newton Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6f2d8e8f-e4b7-4aa6-936b-b6482887b47c",
+      "overture_name": "Berseh Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119476",
+      "official_name": "Berseh Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:6fdba508-4df4-4309-9e82-7b5ac63aab55",
+      "overture_name": "Elite Terrace Park",
+      "official_entity_id": "place:nparks_parks:120146",
+      "official_name": "ELITE TERRACE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:706a2167-72b5-4709-920e-bc7726599df9",
+      "overture_name": "Henderson Waves",
+      "official_entity_id": "place:stb_attractions:1034",
+      "official_name": "Henderson Waves Bridge",
+      "name_similarity": 0.9,
+      "straight_line_metres": 46.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:70efa032-4f6a-41a3-9774-158344592460",
+      "overture_name": "Former Ford Factory",
+      "official_entity_id": "place:nhb_monuments:1736",
+      "official_name": "Former Ford Factory (now Memories at Old Ford Factory)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 50.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:717567e0-7f73-43f6-8d4c-1f0d64379c30",
+      "overture_name": "Kranji Reservoir Park",
+      "official_entity_id": "place:nparks_parks:120340",
+      "official_name": "KRANJI RESERVOIR PARK B",
+      "name_similarity": 0.9,
+      "straight_line_metres": 136.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:745aa0a5-b454-4842-99ae-a8dfe493d0d5",
+      "overture_name": "Chinese Garden, Singapore",
+      "official_entity_id": "place:stb_attractions:965",
+      "official_name": "Chinese Garden Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 40.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:7510eb65-925f-491c-9185-84d6e746fe05",
+      "overture_name": "Mar Thoma Road Park",
+      "official_entity_id": "place:nparks_parks:120298",
+      "official_name": "MAR THOMA ROAD PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 6.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:75db70a3-8e77-4ca4-a02d-46cb7ce51cbe",
+      "overture_name": "Sri Thendayuthapani Temple",
+      "official_entity_id": "place:nhb_monuments:1715",
+      "official_name": "Sri Thendayuthapani Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:770b6d82-cf34-4358-9f72-4ffdff39f6af",
+      "overture_name": "Lilac Drive Playground",
+      "official_entity_id": "place:nparks_parks:120238",
+      "official_name": "LILAC DR PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 32.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:77965d81-7932-4f06-aed1-dac84c9cbefe",
+      "overture_name": "Marsiling Park",
+      "official_entity_id": "place:nparks_parks:120430",
+      "official_name": "MARSILING PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 39.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:77ecbc4a-48df-44fd-aa02-13f9a32bec25",
+      "overture_name": "Tamarind Road Playground",
+      "official_entity_id": "place:nparks_parks:120103",
+      "official_name": "TAMARIND RD PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:786c9bde-9dc1-4c3b-88ef-18748a32c462",
+      "overture_name": "Sixth Avenue Playground",
+      "official_entity_id": "place:nparks_parks:120130",
+      "official_name": "SIXTH AVE PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 2.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:7c2a2057-03a5-4e82-99e9-64393f28c6cb",
+      "overture_name": "Old Airport Road Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119372",
+      "official_name": "Old Airport Road Blk 51 (51 Old Airport Road Food Centre and Shopping Mall)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 11.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:7d371a61-5c49-4cb3-b4ed-2f2656d9bf65",
+      "overture_name": "Carmichael Road Playground",
+      "official_entity_id": "place:nparks_parks:120255",
+      "official_name": "CARMICHAEL RD PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:7df1058a-5bf6-4355-bfc4-a91cd5631fae",
+      "overture_name": "Pasir Panjang Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119466",
+      "official_name": "Pasir Panjang Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 19.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:803d9020-3c4a-4281-8693-1559c2f44aae",
+      "overture_name": "Dhoby Ghaut Green",
+      "official_entity_id": "place:nparks_parks:120253",
+      "official_name": "DHOBY GHAUT GREEN",
+      "name_similarity": 1.0,
+      "straight_line_metres": 65.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8161208d-c809-4038-852f-dba6607ecbb2",
+      "overture_name": "Sengkang Riverside Park",
+      "official_entity_id": "place:nparks_parks:120389",
+      "official_name": "SENGKANG RIVERSIDE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 78.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:81ace547-e643-4bdb-b9bc-3deca882ed43",
+      "overture_name": "Tavistock Avenue Park",
+      "official_entity_id": "place:nparks_parks:120204",
+      "official_name": "TAVISTOCK AVE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:81d83c5b-a19c-41a6-a84a-f4468e006ab7",
+      "overture_name": "Pasir Ris Town Park",
+      "official_entity_id": "place:nparks_parks:120115",
+      "official_name": "PASIR RIS TOWN PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 50.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8404c978-670a-45a3-99d1-7843fe89252c",
+      "overture_name": "Empress Road Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119424",
+      "official_name": "Empress Road Blk 7 (Empress Road Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 13.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:84313df1-c2bc-435a-a2b9-2be24f7ce6ba",
+      "overture_name": "Kranji Reservoir Park A",
+      "official_entity_id": "place:nparks_parks:120453",
+      "official_name": "KRANJI RESERVOIR PARK A",
+      "name_similarity": 1.0,
+      "straight_line_metres": 30.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:847901f1-5efd-4c27-b770-822e4434f09e",
+      "overture_name": "Faber Hill Playground",
+      "official_entity_id": "place:nparks_parks:120011",
+      "official_name": "FABER HILLS PLAYGROUND",
+      "name_similarity": 0.977,
+      "straight_line_metres": 18.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8554ef51-60f4-499f-a68f-b0e38657382c",
+      "overture_name": "Sembawang Hills Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119473",
+      "official_name": "Sembawang Hills Food Centre (Jalan Leban Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 15.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:86ff4f79-1f30-4b8d-a312-a506489ee976",
+      "overture_name": "Punggol Waterway Park",
+      "official_entity_id": "place:nparks_parks:120057",
+      "official_name": "PUNGGOL WATERWAY PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 38.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:88c40b6e-e56d-42a8-9b07-3fea995c247a",
+      "overture_name": "Greenwood Crescent Playground",
+      "official_entity_id": "place:nparks_parks:120170",
+      "official_name": "GREENWOOD CRESCENT PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 12.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8990bafa-5123-419d-b5eb-62890728f082",
+      "overture_name": "Aljunied Park",
+      "official_entity_id": "place:nparks_parks:120259",
+      "official_name": "ALJUNIED PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 47.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:89de5531-7b68-42e2-b020-90b242432e69",
+      "overture_name": "Thomson Nature Park",
+      "official_entity_id": "place:nparks_parks:120364",
+      "official_name": "THOMSON NATURE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 97.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8a889738-83bf-45a6-83b6-b474e5c2bc3e",
+      "overture_name": "Marsiling Mall",
+      "official_entity_id": "place:nea_hawker_centres:119368",
+      "official_name": "Marsiling Mall Hawker Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 28.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8cf62014-9044-4823-aace-282803672122",
+      "overture_name": "Jurong Central Park",
+      "official_entity_id": "place:nparks_parks:120404",
+      "official_name": "JURONG CENTRAL PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 14.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:8f0b7def-a4c8-45d2-a02e-9d5a56adce98",
+      "overture_name": "Night Safari",
+      "official_entity_id": "place:stb_attractions:992",
+      "official_name": "Night Safari, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 34.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:92b97b8d-765e-40c4-92c0-0183d54b38de",
+      "overture_name": "Tan Si Chong Su Temple",
+      "official_entity_id": "place:nhb_monuments:1717",
+      "official_name": "Tan Si Chong Su",
+      "name_similarity": 0.9,
+      "straight_line_metres": 38.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:9419f696-abe7-4aca-9a57-1c184853e0a0",
+      "overture_name": "Kebun Baru Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119400",
+      "official_name": "Ang Mo Kio Street 22 Blk 226H (Kebun Baru Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 1.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:94364360-e5ab-4df1-8c13-64043f86160c",
+      "overture_name": "Civilian War Memorial",
+      "official_entity_id": "place:nhb_monuments:1728",
+      "official_name": "Civilian War Memorial",
+      "name_similarity": 1.0,
+      "straight_line_metres": 30.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:94dc1391-65a3-41dd-8475-6239c6a89310",
+      "overture_name": "Maghain Aboth Synagogue",
+      "official_entity_id": "place:stb_attractions:1069",
+      "official_name": "Maghain Aboth Synagogue",
+      "name_similarity": 1.0,
+      "straight_line_metres": 26.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:94ee600a-35b7-4657-bc57-e11e509ed92e",
+      "overture_name": "Kheam Hock Park",
+      "official_entity_id": "place:nparks_parks:120377",
+      "official_name": "KHEAM HOCK PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 18.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:96ec991a-88de-449d-9173-9b23c05f8829",
+      "overture_name": "City Hall",
+      "official_entity_id": "place:nhb_monuments:1703",
+      "official_name": "Former City Hall",
+      "name_similarity": 0.9,
+      "straight_line_metres": 37.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:97028da9-b6dd-4c0d-aa67-60cc33cddac8",
+      "overture_name": "Katong Park",
+      "official_entity_id": "place:nhb_historic_sites:2317",
+      "official_name": "Katong Park",
+      "name_similarity": 1.0,
+      "straight_line_metres": 14.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:977d6142-6427-489b-b6f1-86be09f8dee6",
+      "overture_name": "Woodleigh Village Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119459",
+      "official_name": "Woodleigh Village Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 33.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:97dc35cd-2854-4c4a-8284-e9a83a3ae9c3",
+      "overture_name": "Hong Lim Park",
+      "official_entity_id": "place:nparks_parks:120199",
+      "official_name": "HONG LIM PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 51.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:99e2443a-a973-4664-970a-3cf6c887ced6",
+      "overture_name": "Geylang East Park",
+      "official_entity_id": "place:nparks_parks:120029",
+      "official_name": "GEYLANG EAST PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:9ce3cfa8-eb7f-456d-8eb3-b0aea8fa6d61",
+      "overture_name": "Singapore Coins And Notes Museum",
+      "official_entity_id": "place:stb_attractions:1058",
+      "official_name": "Singapore Coins and Notes Museum & Museum Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 42.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:9e067837-e35d-4cdc-88a5-59f0d5819a4d",
+      "overture_name": "MINT Museum of Toys",
+      "official_entity_id": "place:stb_attractions:1061",
+      "official_name": "MINT Museum of Toys Singapore & Toy Museum",
+      "name_similarity": 0.9,
+      "straight_line_metres": 36.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:9f7dad8c-d1bd-468e-a945-461f8263fd5f",
+      "overture_name": "Chesed-El Synagogue",
+      "official_entity_id": "place:nhb_monuments:1702",
+      "official_name": "Chesed-El Synagogue",
+      "name_similarity": 1.0,
+      "straight_line_metres": 25.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a1c19a91-7d7d-403b-b0c0-001ea3a02904",
+      "overture_name": "Reflections at Bukit Chandu",
+      "official_entity_id": "place:stb_attractions:1065",
+      "official_name": "Reflections at Bukit Chandu: Singapore War Memorial",
+      "name_similarity": 0.9,
+      "straight_line_metres": 31.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a24f4624-4a88-4f7b-bcb0-42ef1a9e43a1",
+      "overture_name": "Sri Senpaga Vinayagar Temple",
+      "official_entity_id": "place:nhb_historic_sites:2281",
+      "official_name": "Sri Senpaga Vinayagar Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a3ea84e3-48a5-4192-8f6e-1034c0c1473b",
+      "overture_name": "Church of Saints Peter and Paul",
+      "official_entity_id": "place:nhb_monuments:1699",
+      "official_name": "Church of Saints Peter and Paul",
+      "name_similarity": 1.0,
+      "straight_line_metres": 25.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a4397f75-beba-4b6f-a348-3bf1a7dfa7a7",
+      "overture_name": "Duchess Park",
+      "official_entity_id": "place:nparks_parks:120295",
+      "official_name": "DUCHESS PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 29.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a462890b-fd31-42a0-a2fa-a2907363c0be",
+      "overture_name": "NUS Baba House",
+      "official_entity_id": "place:stb_attractions:1038",
+      "official_name": "NUS Baba House - Singapore Peranakan Architecture",
+      "name_similarity": 0.9,
+      "straight_line_metres": 24.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a64a35a5-43b6-4f1b-86c1-a02cc4907aa9",
+      "overture_name": "Peranakan Museum Singapore",
+      "official_entity_id": "place:stb_attractions:1024",
+      "official_name": "Peranakan Museum Singapore: History & Culture",
+      "name_similarity": 0.9,
+      "straight_line_metres": 40.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a6a13196-38f6-41c8-a88d-3f6d39e4b224",
+      "overture_name": "East Coast Terrace Park",
+      "official_entity_id": "place:nparks_parks:120144",
+      "official_name": "EAST COAST TERRACE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a6f10b46-18c5-475b-b22e-b4a37512b5b2",
+      "overture_name": "Telok Ayer Park",
+      "official_entity_id": "place:nparks_parks:120052",
+      "official_name": "TELOK AYER PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 17.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a75c8559-9370-4460-8746-7edf7302c2c1",
+      "overture_name": "Bukit Panjang",
+      "official_entity_id": "place:nea_hawker_centres:119415",
+      "official_name": "Bukit Panjang Hawker Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 62.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a81bc6bd-47bf-4915-91a3-feb284663de9",
+      "overture_name": "Carpmael Park",
+      "official_entity_id": "place:nparks_parks:120034",
+      "official_name": "CARPMAEL PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 3.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a912093c-227d-454a-881f-50b5330f141c",
+      "overture_name": "Former Beach Road Police Station",
+      "official_entity_id": "place:nhb_historic_sites:2318",
+      "official_name": "Beach Road Police Station",
+      "name_similarity": 0.877,
+      "straight_line_metres": 24.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a98b20c2-b433-4ce0-bed8-5ba2fb8b7fd5",
+      "overture_name": "Prinsep Street Presbyterian Church",
+      "official_entity_id": "place:nhb_monuments:1672",
+      "official_name": "Prinsep Street Presbyterian Church",
+      "name_similarity": 1.0,
+      "straight_line_metres": 2.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:a9ed2ae2-39b4-441a-a731-33ff257c3c27",
+      "overture_name": "Sembawang Park",
+      "official_entity_id": "place:nparks_parks:120156",
+      "official_name": "SEMBAWANG PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 18.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:aa35117b-3688-4bab-ac2f-6f2dc68a6a20",
+      "overture_name": "Red Dot Design Museum",
+      "official_entity_id": "place:stb_attractions:1044",
+      "official_name": "Red Dot Design Museum, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 25.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:aae7759c-77bb-4f94-ab1e-e45f8e3b1de3",
+      "overture_name": "Alexandra Village Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119413",
+      "official_name": "Bukit Merah Lane 1 Blk 120 (Alexandra Village Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 16.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:abee9f06-a182-47f5-becf-8543585e5d7a",
+      "overture_name": "Kallang Riverside Park",
+      "official_entity_id": "place:nparks_parks:120371",
+      "official_name": "KALLANG RIVERSIDE PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 97.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ad01207f-cb21-4c6e-8da1-0b845b93b4e3",
+      "overture_name": "Jamae Mosque",
+      "official_entity_id": "place:nhb_monuments:1681",
+      "official_name": "Jamae Mosque",
+      "name_similarity": 1.0,
+      "straight_line_metres": 15.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ad051268-0d53-46db-95e8-1b9c7e4d021c",
+      "overture_name": "Marine Parade Central Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119364",
+      "official_name": "Marine Parade Central Blk 84 (84 Marine Parade Central Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 12.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ad6888c2-0226-4d5b-98f8-107fe7d24b67",
+      "overture_name": "River Safari",
+      "official_entity_id": "place:stb_attractions:990",
+      "official_name": "River Safari Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 138.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ada2d465-cdad-458c-8ef1-1de1d79dfae3",
+      "overture_name": "Clover Crescent Playground",
+      "official_entity_id": "place:nparks_parks:120346",
+      "official_name": "CLOVER CRESCENT PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 27.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ae38dd6c-3e82-474b-8dc9-828944aec01a",
+      "overture_name": "Bedok Terrace Playground",
+      "official_entity_id": "place:nparks_parks:120326",
+      "official_name": "BEDOK TERRACE PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 54.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:aeb2ab22-0f17-4490-8f0c-e1dd7269b62a",
+      "overture_name": "National Museum of Singapore",
+      "official_entity_id": "place:stb_attractions:1052",
+      "official_name": "National Museum of Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 33.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:afdf025e-e114-4cc7-a743-26b5c369b049",
+      "overture_name": "Yunnan Park",
+      "official_entity_id": "place:nparks_parks:120425",
+      "official_name": "YUNNAN PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 13.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:afe985db-a521-4556-adbf-7b8c00b37dda",
+      "overture_name": "Hindhede Nature Park",
+      "official_entity_id": "place:nparks_parks:120383",
+      "official_name": "HINDHEDE NATURE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 145.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b19ec3a3-dea2-4061-8cba-df4b08f0bba4",
+      "overture_name": "Tanjong Pagar Plaza",
+      "official_entity_id": "place:nea_hawker_centres:119389",
+      "official_name": "Tanjong Pagar Plaza Blk 6 (Blk 6 Tanjong Pagar Plaza Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 114.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b2b64d5f-d3c8-4246-8cb4-56eb5f056b2d",
+      "overture_name": "Surin Avenue Neighbourhood Park",
+      "official_entity_id": "place:nparks_parks:120260",
+      "official_name": "SURIN AVE NEIGHBOURHOOD PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 9.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b529bdcd-036a-42f6-a005-3935be71b308",
+      "overture_name": "Yuhua Market and Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119440",
+      "official_name": "Jurong East Ave 1 Blk 347 (Yuhua Market and Hawker Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 70.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b5b8dcbe-669d-42b7-a4a3-5c4f759333df",
+      "overture_name": "Jalan Senang Playground",
+      "official_entity_id": "place:nparks_parks:120032",
+      "official_name": "JLN SENANG PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 28.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b6beb88c-2a2d-4166-87a0-c02bcd96cf55",
+      "overture_name": "ArtScience Museum",
+      "official_entity_id": "place:stb_attractions:1027",
+      "official_name": "ArtScience Museum Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 16.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b7264439-97aa-475e-acaa-52ad1b6c58f1",
+      "overture_name": "Ci Yuan Hawker Centre",
+      "official_entity_id": "place:nea_hawker_centres:119419",
+      "official_name": "Ci Yuan Hawker Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 27.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b7e731e9-1363-4abc-ac93-038111dd7e17",
+      "overture_name": "Bedok Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119467",
+      "official_name": "Bedok Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 23.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b94ac8ef-6f8d-4e8a-845a-55e8c9ed8984",
+      "overture_name": "Farquhar Garden",
+      "official_entity_id": "place:nparks_parks:120077",
+      "official_name": "FARQUHAR GARDEN (FCP)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 24.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b95d63b3-5e34-4387-9e0f-c0582bc1dd44",
+      "overture_name": "Punggol Beach",
+      "official_entity_id": "place:nhb_historic_sites:2326",
+      "official_name": "Punggol Beach Massacre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 78.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b9866ecf-2824-4b50-a776-37f31d37b871",
+      "overture_name": "Esplanade - Theatres on the Bay",
+      "official_entity_id": "place:stb_attractions:1046",
+      "official_name": "Esplanade Theatres on the Bay",
+      "name_similarity": 1.0,
+      "straight_line_metres": 63.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ba856d54-819b-4a89-807f-5f3f751176df",
+      "overture_name": "Telok Ayer Market",
+      "official_entity_id": "place:nhb_monuments:1711",
+      "official_name": "Former Telok Ayer Market (now known as Lau Pa Sat)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 12.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:baa148bc-c2a9-4757-bb45-f013f5123137",
+      "overture_name": "Cathedral of the Good Shepherd",
+      "official_entity_id": "place:nhb_monuments:1707",
+      "official_name": "Cathedral of the Good Shepherd",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bbcc276e-d00a-4529-8458-83746f81abb4",
+      "overture_name": "Malcolm Park",
+      "official_entity_id": "place:nparks_parks:120133",
+      "official_name": "MALCOLM PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 40.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bd3f52ef-82f9-4d2d-a085-493282baf647",
+      "overture_name": "Loyang View",
+      "official_entity_id": "place:nparks_parks:120313",
+      "official_name": "LOYANG VIEW PG",
+      "name_similarity": 0.9,
+      "straight_line_metres": 107.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bd9be8b1-12c1-4539-bc0c-ffe8a4c49532",
+      "overture_name": "Waringin Park Playground",
+      "official_entity_id": "place:nparks_parks:120075",
+      "official_name": "WARINGIN PK PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 13.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bdf72513-748d-4a17-8d2e-666e37f210b0",
+      "overture_name": "Taman Jurong",
+      "official_entity_id": "place:nea_hawker_centres:119380",
+      "official_name": "Taman Jurong Market and Food Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 59.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:be0b7ea5-cd2c-4451-820f-6a2ea78ce79b",
+      "overture_name": "Nagore Dargah",
+      "official_entity_id": "place:nhb_monuments:1671",
+      "official_name": "Former Nagore Dargah",
+      "name_similarity": 0.9,
+      "straight_line_metres": 13.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:be1cb19b-3920-4a5f-8d98-7715a797a3df",
+      "overture_name": "Beo Crescent Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119482",
+      "official_name": "Beo Crescent Market",
+      "name_similarity": 0.9,
+      "straight_line_metres": 23.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bee1622e-5202-4fa4-9501-ae319e70e6b2",
+      "overture_name": "ANG MO KIO",
+      "official_entity_id": "place:nea_hawker_centres:119399",
+      "official_name": "Ang Mo Kio Ave 6 Blk 724 (Blk 724 Ang Mo Kio Market)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 149.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c0861aaf-4d67-4ed6-86e2-20887147d0cf",
+      "overture_name": "Opera Estate Football Field",
+      "official_entity_id": "place:nparks_parks:120033",
+      "official_name": "OPERA ESTATE FOOTBALL FIELD",
+      "name_similarity": 1.0,
+      "straight_line_metres": 17.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c21c3956-37dd-41ac-acfe-24d805f1c566",
+      "overture_name": "Venus Green",
+      "official_entity_id": "place:nparks_parks:120250",
+      "official_name": "VENUS GREEN",
+      "name_similarity": 1.0,
+      "straight_line_metres": 8.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c259894f-8f6e-4aa4-bd97-55f6e4a8815c",
+      "overture_name": "Jln Leban",
+      "official_entity_id": "place:nea_hawker_centres:119473",
+      "official_name": "Sembawang Hills Food Centre (Jalan Leban Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 148.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c2ea0205-8c81-419c-8810-4c5fea9600f5",
+      "overture_name": "Jalan Selaseh",
+      "official_entity_id": "place:nparks_parks:120099",
+      "official_name": "JLN SELASEH PG",
+      "name_similarity": 0.9,
+      "straight_line_metres": 28.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c33ce477-f427-433b-b3e2-2604394f6405",
+      "overture_name": "JALAN MAS PUTEH",
+      "official_entity_id": "place:nparks_parks:120216",
+      "official_name": "JALAN MAS PUTEH PLAYGROUND",
+      "name_similarity": 0.9,
+      "straight_line_metres": 65.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c4fc0f7c-a88c-485c-83d8-81d86dc12254",
+      "overture_name": "Kent Ridge Park",
+      "official_entity_id": "place:nparks_parks:120200",
+      "official_name": "KENT RIDGE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 123.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c502591a-7f57-429c-9862-c1f695a51d73",
+      "overture_name": "Mei Hwan Drive Playground",
+      "official_entity_id": "place:nparks_parks:120415",
+      "official_name": "MEI HWAN DR PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 33.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c53ac48e-d91b-400b-9320-87c416618da5",
+      "overture_name": "Chartwell Drive Park",
+      "official_entity_id": "place:nparks_parks:120212",
+      "official_name": "CHARTWELL DR PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c5714d7e-de7a-47ae-9b99-32151f7457c0",
+      "overture_name": "Church of Our Lady of Lourdes",
+      "official_entity_id": "place:nhb_monuments:1732",
+      "official_name": "Church of Our Lady of Lourdes",
+      "name_similarity": 1.0,
+      "straight_line_metres": 12.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c6882b98-eb63-43c7-8df9-a5b3be312d73",
+      "overture_name": "Ellington Square Playground",
+      "official_entity_id": "place:nparks_parks:120009",
+      "official_name": "ELLINGTON SQUARE PLAYGROUND",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c6e5fd8a-6903-4b43-b90b-c3b157a5f7ac",
+      "overture_name": "Yishun Neighbourhood Park",
+      "official_entity_id": "place:nparks_parks:120282",
+      "official_name": "YISHUN NEIGHBOURHOOD PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 36.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c770eace-b6d1-4409-8c49-0da603e8bfc5",
+      "overture_name": "Kim Pong Park",
+      "official_entity_id": "place:nparks_parks:120048",
+      "official_name": "KIM PONG PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 13.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c7ad15c6-e4f8-4856-93f4-b3dd00660036",
+      "overture_name": "Woodlands Waterfront Park",
+      "official_entity_id": "place:nparks_parks:120220",
+      "official_name": "WOODLANDS WATERFRONT PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 112.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c8f71e82-464f-4231-84bd-ef0261403ab0",
+      "overture_name": "Greenfield Drive Playground",
+      "official_entity_id": "place:nparks_parks:120372",
+      "official_name": "GREENFIELD DR PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 11.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c95c8578-7435-4db5-9d01-353aff00f333",
+      "overture_name": "Clementi Crescent Playground",
+      "official_entity_id": "place:nparks_parks:120190",
+      "official_name": "CLEMENTI CRESCENT PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 16.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:c96e823a-0b61-475f-a47d-20de25a06aa5",
+      "overture_name": "Yuhua Village Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119361",
+      "official_name": "Jurong East Street 24 Blk 254 (Yuhua Village Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 32.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:cb1beffc-d219-4a0a-a7f6-9267138fbf0f",
+      "overture_name": "Chomp Chomp Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119489",
+      "official_name": "Chomp Chomp Food Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 21.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:cb2b9718-0f8d-409c-b7ce-1aad23e5b22f",
+      "overture_name": "Leban Park",
+      "official_entity_id": "place:nparks_parks:120084",
+      "official_name": "LEBAN PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 27.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:cc5731f7-2958-40cc-bd5c-9fab3929ca06",
+      "overture_name": "Bishan Ang Mo Kio Park",
+      "official_entity_id": "place:nparks_parks:120306",
+      "official_name": "BISHAN-ANG MO KIO PARK (POND GARDENS)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 59.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ccbae1a3-4dba-499f-946a-2a9dc396ec1e",
+      "overture_name": "Labrador Battery",
+      "official_entity_id": "place:nhb_historic_sites:2275",
+      "official_name": "Labrador Battery",
+      "name_similarity": 1.0,
+      "straight_line_metres": 18.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:cea646ab-17d0-4e5a-a2cb-84ed97c81179",
+      "overture_name": "Siong Lim Temple",
+      "official_entity_id": "place:nhb_monuments:1683",
+      "official_name": "Former Siong Lim Temple (now Lian Shan Shuang Lin Monastery)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 16.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:cf18742b-611c-4d8f-92fe-a4a0788d4437",
+      "overture_name": "Tampines Eco Green",
+      "official_entity_id": "place:nparks_parks:120184",
+      "official_name": "TAMPINES ECO GREEN PK",
+      "name_similarity": 0.9,
+      "straight_line_metres": 25.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d16f9120-e907-4ac5-827f-54cfcc1b934a",
+      "overture_name": "Chinese Garden",
+      "official_entity_id": "place:nparks_parks:120458",
+      "official_name": "CHINESE GARDENS",
+      "name_similarity": 0.9,
+      "straight_line_metres": 57.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d2f41993-0e53-4e74-ba3a-6176d752828e",
+      "overture_name": "Kranji Beach Battle Historic Marker",
+      "official_entity_id": "place:nhb_historic_sites:2256",
+      "official_name": "Kranji Beach Battle",
+      "name_similarity": 0.9,
+      "straight_line_metres": 77.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d30c2fcf-45b9-4cc3-9a8c-4cdd0dfb41fa",
+      "overture_name": "Singapore National Theatre",
+      "official_entity_id": "place:nhb_historic_sites:2292",
+      "official_name": "National Theatre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 88.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d4100200-1d05-4ed3-9cfb-e3dae734af35",
+      "overture_name": "Mayfair Park",
+      "official_entity_id": "place:nparks_parks:120251",
+      "official_name": "MAYFAIR PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 21.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d580f5bf-00ab-476b-b432-a351004f32ad",
+      "overture_name": "Taman Jurong Market & Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119380",
+      "official_name": "Taman Jurong Market and Food Centre",
+      "name_similarity": 0.939,
+      "straight_line_metres": 20.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:d8a8a0a0-663f-40c7-8c70-bbc84e45d9d5",
+      "overture_name": "Fernvale Hawker Centre & Market",
+      "official_entity_id": "place:nea_hawker_centres:119452",
+      "official_name": "Fernvale Hawker Centre & Market",
+      "name_similarity": 1.0,
+      "straight_line_metres": 28.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:daec7cc9-e74d-43e1-973d-f0d9986d4fe5",
+      "overture_name": "Lower Pierce Reservoir",
+      "official_entity_id": "place:nhb_historic_sites:2265",
+      "official_name": "Lower Peirce Reservoir",
+      "name_similarity": 0.955,
+      "straight_line_metres": 58.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:db1ddc19-82e0-497f-a4ac-477ec56b2377",
+      "overture_name": "Redhill Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119376",
+      "official_name": "Redhill Lane Blk 85 (Redhill Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 25.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:dc22f971-0de3-4e9d-b5b3-cfa4e9d0c8af",
+      "overture_name": "Singapore Flyer",
+      "official_entity_id": "place:stb_attractions:1031",
+      "official_name": "Singapore Flyer",
+      "name_similarity": 1.0,
+      "straight_line_metres": 44.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:dc9b1975-5eeb-44bb-a4a8-617e51be0516",
+      "overture_name": "Changi Beach",
+      "official_entity_id": "place:nparks_parks:120163",
+      "official_name": "CHANGI BEACH PK",
+      "name_similarity": 0.9,
+      "straight_line_metres": 21.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e00515c1-931b-486d-bd4e-6f67b0ebdbf6",
+      "overture_name": "Sook Ching Inspection Centre Historic Marker",
+      "official_entity_id": "place:nhb_historic_sites:2258",
+      "official_name": "Sook Ching Inspection Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 4.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e0a01fe8-a37f-438e-8a92-668b0761caea",
+      "overture_name": "Old Kallang Airport",
+      "official_entity_id": "place:nhb_historic_sites:2268",
+      "official_name": "Kallang Airport",
+      "name_similarity": 0.882,
+      "straight_line_metres": 104.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e126464f-40e7-49ff-a123-2f22dc79c9d6",
+      "overture_name": "Tiong Bahru Park",
+      "official_entity_id": "place:nparks_parks:120245",
+      "official_name": "TIONG BAHRU PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 106.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e1d6dbf2-66dd-423b-b64b-b879e750b9a2",
+      "overture_name": "Kim Keat Palm Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119391",
+      "official_name": "Toa Payoh Lorong 7 Blk 22 (Kim Keat Palm Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 11.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e2047d53-886f-4d89-8061-3f809c1fb8a1",
+      "overture_name": "Singapore City Gallery",
+      "official_entity_id": "place:stb_attractions:1059",
+      "official_name": "Singapore City Gallery",
+      "name_similarity": 1.0,
+      "straight_line_metres": 53.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e2929f5c-9804-45a1-b13b-5989629c9284",
+      "overture_name": "Jalan Kayu Park",
+      "official_entity_id": "place:nparks_parks:120294",
+      "official_name": "JLN KAYU PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 21.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e4d8729c-303e-47e6-ac8c-22e7297b7541",
+      "overture_name": "Bukit Panjang Hawker Centre and Market",
+      "official_entity_id": "place:nea_hawker_centres:119415",
+      "official_name": "Bukit Panjang Hawker Centre",
+      "name_similarity": 0.9,
+      "straight_line_metres": 17.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e50bb58b-49fe-4d9e-8486-5fcacd58c89c",
+      "overture_name": "Telok Blangah Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119383",
+      "official_name": "Telok Blangah Drive Blk 79 (Telok Blangah Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 4.7,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e531f83c-1389-4915-92ee-be3c2403781e",
+      "overture_name": "Raffles' Landing Site",
+      "official_entity_id": "place:stb_attractions:1055",
+      "official_name": "Raffles Statue – Sir Stamford Raffles Landing Site",
+      "name_similarity": 0.9,
+      "straight_line_metres": 32.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e6699039-c4df-41e4-aa3b-eee6d3d617ec",
+      "overture_name": "Circuit Road Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119417",
+      "official_name": "Circuit Road Blk 80 (80 Circuit Road Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 13.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e6cf9d1c-bed0-4e62-82db-acfaa835d5f0",
+      "overture_name": "Singapore Botanic Gardens",
+      "official_entity_id": "place:stb_attractions:988",
+      "official_name": "Singapore Botanic Gardens",
+      "name_similarity": 1.0,
+      "straight_line_metres": 26.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e6f0e4be-946f-4cde-8824-e99037ace312",
+      "overture_name": "Upper Seletar Reservoir Park",
+      "official_entity_id": "place:nparks_parks:120362",
+      "official_name": "UPPER SELETAR RESERVOIR PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 111.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:e8a0c564-23b5-4696-81d8-ee99d7236705",
+      "overture_name": "Begonia Rd Playground",
+      "official_entity_id": "place:nparks_parks:120105",
+      "official_name": "BEGONIA RD PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 45.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ea4a5d65-c7fe-49f0-8843-674cd14c577c",
+      "overture_name": "Bukit Gombak Park",
+      "official_entity_id": "place:nparks_parks:120049",
+      "official_name": "BUKIT GOMBAK PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 45.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:eb70673d-7d64-4937-aaaf-52502432edf7",
+      "overture_name": "Punggol Park",
+      "official_entity_id": "place:nparks_parks:120257",
+      "official_name": "PUNGGOL PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 134.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ebf3cdab-c3fb-4af3-a625-6ebe8121382d",
+      "overture_name": "The Foothills",
+      "official_entity_id": "place:nparks_parks:120076",
+      "official_name": "THE FOOTHILLS FORT CANNING PK",
+      "name_similarity": 0.9,
+      "straight_line_metres": 38.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ec3c143d-04fd-4ed1-b8b8-df953caae7a2",
+      "overture_name": "Convent of the Holy Infant Jesus",
+      "official_entity_id": "place:nhb_monuments:1697",
+      "official_name": "Former Convent of the Holy Infant Jesus Chapel and Caldwell House (now CHIJMES)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 26.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ed694ed2-a033-4080-89f8-3f472d1980ee",
+      "overture_name": "Middle Road Church",
+      "official_entity_id": "place:nhb_historic_sites:2304",
+      "official_name": "Middle Road Church",
+      "name_similarity": 1.0,
+      "straight_line_metres": 4.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:efaa9102-5e83-4ff3-bd78-c6fb1f2b5d4c",
+      "overture_name": "Ann Siang Hill Park",
+      "official_entity_id": "place:nparks_parks:120138",
+      "official_name": "ANN SIANG HILL PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 43.0,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:efddc74d-9d16-46b2-a6fd-e0b5804dd07b",
+      "overture_name": "Malay Heritage Centre",
+      "official_entity_id": "place:stb_attractions:1023",
+      "official_name": "Malay Heritage Centre, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 22.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:eff5b83f-9e43-447b-a448-841070891603",
+      "overture_name": "Sunset Way Playground",
+      "official_entity_id": "place:nparks_parks:120070",
+      "official_name": "SUNSET WAY PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 28.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:eff8cba3-ef8a-45d3-9ff8-9efa354ccbfd",
+      "overture_name": "Greenleaf View Playground",
+      "official_entity_id": "place:nparks_parks:120192",
+      "official_name": "GREENLEAF VIEW PK PG",
+      "name_similarity": 0.909,
+      "straight_line_metres": 30.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f0da6a61-08ec-4a6a-b656-e15f10831c78",
+      "overture_name": "Boon Lay Place Market",
+      "official_entity_id": "place:nea_hawker_centres:119409",
+      "official_name": "Boon Lay Place Blk 221A/B (Boon Lay Place Market and Food Village)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 9.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f0dea354-366e-4ded-a3e1-2646eb15cbc8",
+      "overture_name": "Toa Payoh Lorong 8 Block 213",
+      "official_entity_id": "place:nea_hawker_centres:119441",
+      "official_name": "Toa Payoh Lorong 8 Blk 210",
+      "name_similarity": 0.964,
+      "straight_line_metres": 115.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f2dcc600-2a4a-4135-b931-6bb91ea1552d",
+      "overture_name": "Jalan Besar Stadium",
+      "official_entity_id": "place:nhb_historic_sites:2272",
+      "official_name": "Jalan Besar Stadium",
+      "name_similarity": 1.0,
+      "straight_line_metres": 89.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f33c42a6-f498-4223-83f4-a7a47eb38cad",
+      "overture_name": "Sri Veeramakaliamman Temple",
+      "official_entity_id": "place:stb_attractions:1068",
+      "official_name": "Sri Veeramakaliamman Temple: Hindu Temple in Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 28.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f52426b4-86ea-47b6-93d7-9f813a8be84c",
+      "overture_name": "Kim Seng Park",
+      "official_entity_id": "place:nparks_parks:120417",
+      "official_name": "KIM SENG PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 83.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f705f283-71cf-4739-aaeb-6e9748e99dc9",
+      "overture_name": "Fuk Tak Chi Museum",
+      "official_entity_id": "place:nhb_historic_sites:2287",
+      "official_name": "Fuk Tak Chi",
+      "name_similarity": 0.9,
+      "straight_line_metres": 15.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f95dde90-0667-4324-946b-fb435df70872",
+      "overture_name": "Sun Plaza Park",
+      "official_entity_id": "place:nparks_parks:120342",
+      "official_name": "SUN PLAZA PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 72.6,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:fbc2091b-09f5-4740-afbd-8fa4bc15828d",
+      "overture_name": "Bendemeer Market and Food Centre",
+      "official_entity_id": "place:nea_hawker_centres:119407",
+      "official_name": "Bendemeer Road Blk 29 (Bendemeer Market and Food Centre)",
+      "name_similarity": 0.9,
+      "straight_line_metres": 29.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:fc04d56f-fc15-472d-96ba-198fdf08877f",
+      "overture_name": "National Gallery Singapore",
+      "official_entity_id": "place:stb_attractions:1001",
+      "official_name": "National Gallery Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 80.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:feb07dba-8b03-4175-97a4-d7828dc916cc",
+      "overture_name": "Tiong Bahru Market",
+      "official_entity_id": "place:nea_hawker_centres:119478",
+      "official_name": "Tiong Bahru Market",
+      "name_similarity": 1.0,
+      "straight_line_metres": 76.2,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ff06c3c1-48ed-4a5b-b8b1-73823b09f4a7",
+      "overture_name": "Chempaka Kuning Playground",
+      "official_entity_id": "place:nparks_parks:120317",
+      "official_name": "JLN CHEMPAKA KUNING PG",
+      "name_similarity": 0.9,
+      "straight_line_metres": 20.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ff0acf8b-3571-4289-9e38-603d9e74babe",
+      "overture_name": "Jalan Chempaka Kuning Playground",
+      "official_entity_id": "place:nparks_parks:120317",
+      "official_name": "JLN CHEMPAKA KUNING PG",
+      "name_similarity": 1.0,
+      "straight_line_metres": 20.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ff24cbd5-f7fb-4b46-a6ef-a41ebaabb19b",
+      "overture_name": "Pearl's Hill City Park",
+      "official_entity_id": "place:nparks_parks:120081",
+      "official_name": "PEARL'S HILL CITY PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 143.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:ffb3b972-1df7-4b87-b3ab-7e7031b8fe4e",
+      "overture_name": "Kwan Im Thong Hood Cho Temple",
+      "official_entity_id": "place:nhb_historic_sites:2264",
+      "official_name": "Kwan Im Thong Hood Cho Temple",
+      "name_similarity": 1.0,
+      "straight_line_metres": 13.6,
+      "decision": "not_added_needs_review"
+    }
+  ]
+}

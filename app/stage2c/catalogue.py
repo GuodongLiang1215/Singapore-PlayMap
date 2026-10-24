@@ -9,7 +9,7 @@ from .retrieval_rules import canonical_spec
 
 TOPICS={'park':['park','公园','garden'],'nature':['park','garden','nature','自然','公园'],
  'food':['hawker','food','market','熟食','餐饮'], 'museum':['museum','博物馆'],
- 'shopping':['shopping','mall','购物','商场'],'heritage':['historic','heritage','历史'],
+ 'shopping':['shopping','mall','购物','商场','百货'],'heritage':['historic','heritage','历史'],
  'architecture':['architecture','building','建筑'],'art':['museum','gallery','art','艺术'],
  'photography':['摄影','拍照']}
 TOPIC_CATEGORIES={'park':['nature'],'nature':['nature'],'food':['food'],'heritage':['heritage','monument'],
@@ -71,7 +71,9 @@ class LocalCatalogue:
         diagnostic.update(normalization or {})
         if explicit:
             held=[r for r in self.rows if not r.get('default_exploration_visible') and norm(r['display_title'])==query]
-            if held:
+            # A hidden duplicate or old record only blocks the search when no visible place has this name.
+            live=any(r.get('default_exploration_visible') and query in {norm(x) for x in [r['display_title'],*r.get('aliases',[])]} for r in self.rows) if held else False
+            if held and not live:
                 diagnostic['held_name_match']=True
                 return [],['此名称匹配旧址或状态待核查记录。请确认当前场所，不按旧址自动规划。'],True,diagnostic
         rows=[]
@@ -103,7 +105,7 @@ class LocalCatalogue:
         for _,e,d,exact in rows[:limit]:
             result.append({'identity':'catalogue:'+e['entity_id'],'label':e['display_title'],
                 'categories':e.get('categories',[e.get('category')]),'address':e.get('address') or '',
-                'basis':'官方来源目录，坐标为来源代表点，入口和营业未核验',
+                'basis':('Overture第三方合并数据（非官方），坐标为来源点，入口和营业未核验' if e.get('data_source')=='overture' else '官方来源目录，坐标为来源代表点，入口和营业未核验'),
                 'distance_hint_m':round(d) if d is not None else None,'exact_name_match':exact,
                 'point':{'latitude':e['latitude'],'longitude':e['longitude'],'label':e['display_title'][:200],
                     'source':'catalogue_representative','confirmed':True,'entity_id':e['entity_id'],
@@ -115,7 +117,7 @@ class LocalCatalogue:
         if not result and spec.keywords and diagnostic['name_matches']:
             notices.append('对应类别有目录记录，但本次具体关键词没有匹配。没有删除这些关键词来凑齐候选；可明确修改要求或手动选定地点。')
         if 'food' in spec.categories:
-            notices.append('当前餐饮候选主要来自熟食中心目录，不覆盖所有餐厅、咖啡馆；营业、菜品及饮食限制仍未核验。')
+            notices.append('餐饮候选来自熟食中心官方目录及Overture第三方数据（餐厅、咖啡馆、酒吧等），不保证覆盖全部；营业、菜品及饮食限制仍未核验。')
         return result,notices,False,diagnostic
 
 def retrieve_slot(index,action,cat,prefs,anchor,existing,geo):

@@ -99,3 +99,33 @@ Render 免费实例在长时间无人访问后会休眠。下一次访问时，R
 - 当前只部署 Stage1C 核心地点目录；旧的 Stage1A/1B 调试数据不会默认放入 GitHub。
 - 当前入口与营业时间仍未全面核验；部署不会改变这些研究边界。
 - 不要让组员输入私人住址或敏感信息到免费 Gemini 测试实例。
+
+## 7. 数据更新（Person A，2026-10）
+
+地点目录已从 869 个官方地点扩展到 **18,681 个**（默认显示 18,595 个），新增 Overture Maps 地点、47 个核心景点的核验信息、所有地点的建议游玩时长、部分地点的营业时间，以及"附近地点"查询接口。
+
+**完整说明见 [`docs/DATA_PERSON_A.md`](docs/DATA_PERSON_A.md)**，包括数据来源与许可、处理流程、新增字段、接口说明和限制。
+
+### 请对应成员检查（改动了其他成员负责的代码）
+
+| 成员 | 文件 | 改动 |
+|---|---|---|
+| B（LLM & 对话） | `app/stage2c/prompts.py` | 类别说明加入餐厅、咖啡馆、酒吧、商场、娱乐 |
+| B | `app/stage2c/catalogue.py` | Overture 地点标注"非官方"；同名隐藏记录不再挡住可显示地点的搜索 |
+| B | `app/stage2c/engine.py` | 原话含 "to go / takeaway / 外带 / 打包 / 买杯" 等词时，新加入的一站设为"外带" |
+| C（GIS & 规划） | `app/stage2b/models.py`、`planning.py` | 新增"外带"档位；规划优先使用地点自己的时长（核验值或细分类别默认值） |
+| C | `app/stage1c/api.py` | 新增 `/api/stage1c/nearby`（只做半径内查询，推荐逻辑仍归 C） |
+| D（集成 & UI） | `frontend/stage1c`、`stage2a`、`stage2b`、`stage2c` | "熟食中心"改为"餐饮"；地图改用 canvas；时长预览、开放时间显示、"外带"选项 |
+
+### 重建地点目录
+
+```powershell
+.\.venv\Scripts\python.exe scripts\import_core_review.py        # 核验表改动后
+.\.venv\Scripts\python.exe scripts\add_overture_to_catalogue.py # 生成新目录并切换
+```
+
+Overture 和 OSM 的原始下载在 `data/raw/`，不提交到 GitHub；重新下载的方法见文档第 4 节。
+
+### 数据出处（显示数据时需注明）
+
+Overture Maps Foundation；© OpenStreetMap contributors（ODbL）；data.gov.sg（Singapore Open Data Licence）；OneMap。`/api/stage1c/status` 的 `attribution` 字段已列出，界面如何显示由 D 决定。
