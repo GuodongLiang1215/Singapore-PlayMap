@@ -1,0 +1,1627 @@
+{
+ "schema_version": 1,
+ "exported_on": "2026-10-22",
+ "source_workbook": "review/core_attractions_review.xlsx",
+ "note": "资料核对（Claude）= 按官网或公开资料整理，未实地核验；时长 basis=estimate 为估计值。",
+ "places": {
+  "place:stb_attractions:997": {
+   "name": "Gardens by the Bay",
+   "priority": "★",
+   "opening_hours": "户外花园 每日 5:00–次日 2:00；花穹/云雾林 9:00–21:00",
+   "last_admission": "花穹 20:30；云雾林 20:00",
+   "closed": "户外花园无；室内馆每月闭馆维护一天（日期见官网）",
+   "price": "户外免费，室内馆收费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 150,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": "户外约 1 小时，加两馆约 2.5 小时",
+   "entrances": [
+    {
+     "name": "Bayfront 地铁站方向入口",
+     "latitude": 1.281941,
+     "longitude": 103.8611703,
+     "type": null,
+     "source": "OneMap：BAYFRONT MRT STATION EXIT｜BAYFRONT MRT STATION EXIT",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 272 m；名称匹配度 100%"
+    },
+    {
+     "name": "Gardens by the Bay 地铁站（TEL）入口",
+     "latitude": 1.2784873,
+     "longitude": 103.8674547,
+     "type": null,
+     "source": "OneMap：GARDENS BY THE BAY MRT STATION (TE22)｜11 MARINA MALL GARDENS BY THE BAY MRT STATION (TE22) SINGAPORE 019396",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 579 m；名称匹配度 100%"
+    },
+    {
+     "name": "Satay by the Bay / 东侧入口",
+     "latitude": 1.282343,
+     "longitude": 103.8686368,
+     "type": null,
+     "source": "OneMap：SATAY BY THE BAY｜18 MARINA GARDENS DRIVE SATAY BY THE BAY SINGAPORE 018953",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 560 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.gardensbythebay.com.sg/en/plan-your-visit/opening-hours.html",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:983": {
+   "name": "Marina Bay Sands SkyPark",
+   "priority": "★",
+   "opening_hours": "非高峰 9:30–16:30；高峰 17:00–22:00",
+   "last_admission": "16:00 / 21:30",
+   "closed": "官网未列",
+   "price": "收费（非高峰 S$35，高峰 S$39 成人）",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 45,
+    "long": 60,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [],
+   "source": "https://www.marinabaysands.com/attractions/sands-skypark.html",
+   "note": "16:30–17:00 之间不开放",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:982": {
+   "name": "Merlion Park",
+   "priority": "★",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 10,
+    "regular": 20,
+    "long": 30,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Merlion Park",
+     "latitude": 1.2868108,
+     "longitude": 103.8545349,
+     "type": "主入口",
+     "source": "OneMap：MERLION PARK (ONE FULLERTON)｜21 ESPLANADE DRIVE MERLION PARK (ONE FULLERTON)",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 21 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；鱼尾狮公园，Fullerton 酒店前",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1027": {
+   "name": "ArtScience Museum",
+   "priority": "★",
+   "opening_hours": "每日 9:00–18:00",
+   "last_admission": "17:00",
+   "closed": "无（官网写每日开放）",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 90,
+    "long": 120,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "ArtScience Museum 建筑位置（非精确门口）",
+     "latitude": 1.286224,
+     "longitude": 103.8592711,
+     "type": "主入口",
+     "source": "OneMap：MARINA BAY SANDS (ARTSCIENCE MUSEUM)｜6 BAYFRONT AVENUE MARINA BAY SANDS (ARTSCIENCE MUSEUM) SINGAPORE 018974",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 25 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.marinabaysands.com/museum/visitor-information.html",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1031": {
+   "name": "Singapore Flyer",
+   "priority": "★",
+   "opening_hours": "每日 10:00–22:00（含公共假期）",
+   "last_admission": "21:30",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 45,
+    "long": 60,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Singapore Flyer 建筑位置（非精确门口）",
+     "latitude": 1.2890727,
+     "longitude": 103.8629223,
+     "type": "主入口",
+     "source": "OneMap：SINGAPORE FLYER｜30 RAFFLES AVENUE SINGAPORE FLYER SINGAPORE 039803",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 25 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.singaporeflyer.com/en/plan-your-visit",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1046": {
+   "name": "Esplanade Theatres on the Bay",
+   "priority": "可选",
+   "opening_hours": "建筑 每日 8:00–23:30",
+   "last_admission": null,
+   "closed": "无",
+   "price": "公共区域免费，演出另购票",
+   "suggested_duration": {
+    "short": 20,
+    "regular": 45,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Esplanade 建筑位置（非精确门口）",
+     "latitude": 1.290205,
+     "longitude": 103.8555667,
+     "type": "主入口",
+     "source": "OneMap：ESPLANADE - THEATRES ON THE BAY｜1 ESPLANADE DRIVE ESPLANADE - THEATRES ON THE BAY SINGAPORE 038981",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 39 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    },
+    {
+     "name": "Esplanade 地铁站",
+     "latitude": 1.2913149,
+     "longitude": 103.8551926,
+     "type": "地铁/公交方向",
+     "source": "OneMap：CITY HALL/ESPLANADE MRT STATION EXIT C｜CITY HALL/ESPLANADE MRT STATION EXIT C",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 147 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.esplanade.com/visit",
+   "note": "屋顶和户外剧场为公共空间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1033": {
+   "name": "Marina Barrage",
+   "priority": "可选",
+   "opening_hours": "全天开放（信息柜台 9:00–21:00）",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Marina Barrage 建筑位置（非精确门口）",
+     "latitude": 1.2799057,
+     "longitude": 103.8704696,
+     "type": "主入口",
+     "source": "OneMap：MARINA BARRAGE｜8 MARINA GARDENS DRIVE MARINA BARRAGE SINGAPORE 018951",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 174 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": null,
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1022": {
+   "name": "Lau Pa Sat",
+   "priority": "可选",
+   "opening_hours": "24 小时",
+   "last_admission": null,
+   "closed": "无（各摊位营业时间不同）",
+   "price": "免费入场",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 45,
+    "long": 75,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "18 Raffles Quay",
+     "latitude": 1.2806539,
+     "longitude": 103.8504127,
+     "type": null,
+     "source": "OneMap：FORMER TELOK AYER MARKET (LAU PA SAT)｜18 RAFFLES QUAY FORMER TELOK AYER MARKET (LAU PA SAT)",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 39 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.laupasat.sg/",
+   "note": "沙爹街晚间营业，官网未列具体时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1001": {
+   "name": "National Gallery Singapore",
+   "priority": "★",
+   "opening_hours": "每日 10:00–19:00",
+   "last_admission": "18:30",
+   "closed": "无",
+   "price": "收费（展览不同票价不同）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "National Gallery 建筑位置（非精确门口）",
+     "latitude": 1.2906553,
+     "longitude": 103.851708,
+     "type": "主入口",
+     "source": "OneMap：NATIONAL GALLERY SINGAPORE｜1 SAINT ANDREW'S ROAD NATIONAL GALLERY SINGAPORE SINGAPORE 178957",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 83 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.nationalgallery.sg/",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1052": {
+   "name": "National Museum of Singapore",
+   "priority": "★",
+   "opening_hours": "每日 10:00–18:00（新加坡历史馆）",
+   "last_admission": null,
+   "closed": null,
+   "price": "收费（公民/PR 优惠）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "National Museum 建筑位置（非精确门口）",
+     "latitude": 1.2966955,
+     "longitude": 103.8485484,
+     "type": "主入口",
+     "source": "OneMap：NATIONAL MUSEUM OF SINGAPORE BOARD｜93 STAMFORD ROAD NATIONAL MUSEUM OF SINGAPORE BOARD",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 46 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": null,
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效；STB 旧资料写最后入场 17:30",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1051": {
+   "name": "Asian Civilisations Museum",
+   "priority": "★",
+   "opening_hours": "每日 10:00–19:00；周五至 21:00",
+   "last_admission": "闭馆前 30 分钟",
+   "closed": "官网未列",
+   "price": "收费（新加坡公民/PR 常设展免费）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Front Entrance",
+     "latitude": 1.287441,
+     "longitude": 103.8513751,
+     "type": null,
+     "source": "OneMap：ASIAN CIVILISATIONS MUSEUM｜1 EMPRESS PLACE ASIAN CIVILISATIONS MUSEUM SINGAPORE 179555",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 62 m；名称匹配度 100%"
+    },
+    {
+     "name": "River Entrance（两处都有坡道）",
+     "latitude": 1.287441,
+     "longitude": 103.8513751,
+     "type": null,
+     "source": "OneMap：ASIAN CIVILISATIONS MUSEUM｜1 EMPRESS PLACE ASIAN CIVILISATIONS MUSEUM SINGAPORE 179555",
+     "status": "OneMap 自动匹配",
+     "note": "OneMap 只有整栋建筑坐标，与 Front Entrance 相同；河边入口精确位置需在地图上取"
+    }
+   ],
+   "source": "https://www.nhb.gov.sg/acm/visit/plan-your-visit",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120073": {
+   "name": "Fort Canning Park",
+   "priority": "★",
+   "opening_hours": "24 小时（一般园区）",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 90,
+    "long": 150,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Fort Canning Park",
+     "latitude": 1.2949216,
+     "longitude": 103.8463818,
+     "type": "主入口",
+     "source": "OneMap：FORT CANNING PARK｜COX TERRACE FORT CANNING PARK",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 111 m；名称匹配度 100%"
+    },
+    {
+     "name": "Fort Canning 地铁站",
+     "latitude": 1.2928056,
+     "longitude": 103.8444151,
+     "type": "地铁/公交方向",
+     "source": "OneMap：FORT CANNING MRT STATION EXIT B｜FORT CANNING MRT STATION EXIT B",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 421 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks/park-detail/fort-canning-park",
+   "note": "开放时间已于 2026-09-14 核验，不适用于园内展馆",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1024": {
+   "name": "Peranakan Museum",
+   "priority": "可选",
+   "opening_hours": "每日 10:00–19:00；周五至 21:00",
+   "last_admission": "闭馆前 30 分钟",
+   "closed": "官网未列",
+   "price": "游客成人 S$18；公民/PR 常设展免费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 75,
+    "long": 120,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Peranakan Museum 建筑位置（非精确门口）",
+     "latitude": 1.2942875,
+     "longitude": 103.8490414,
+     "type": "主入口",
+     "source": "OneMap：PERANAKAN MUSEUM｜39 ARMENIAN STREET PERANAKAN MUSEUM SINGAPORE 179941",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 37 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.nhb.gov.sg/peranakanmuseum/visit/plan-your-visit",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1005": {
+   "name": "CHIJMES",
+   "priority": "可选",
+   "opening_hours": "全天开放（商户营业时间各异）",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费入场（餐厅消费另计）",
+   "suggested_duration": {
+    "short": 20,
+    "regular": 45,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "30 Victoria Street",
+     "latitude": 1.2947967,
+     "longitude": 103.8525734,
+     "type": null,
+     "source": "OneMap：CHIJMES｜30 VICTORIA STREET CHIJMES SINGAPORE 187996",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 102 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.chijmes.com.sg/",
+   "note": "STB 旧资料写 24 小时；餐饮建筑群，公共区域开放；官网未列统一开放时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1025": {
+   "name": "Raffles Singapore",
+   "priority": "可选",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 10,
+    "regular": 15,
+    "long": 30,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Raffles Hotel（外观）",
+     "latitude": 1.295764,
+     "longitude": 103.8540278,
+     "type": "主入口",
+     "source": "OneMap：RAFFLES HOTEL｜328 NORTH BRIDGE ROAD RAFFLES HOTEL",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 26 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；只看外观；酒店内部仅住客及餐厅客人",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:973": {
+   "name": "Singapore River（克拉码头一带）",
+   "priority": "可选",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 60,
+    "long": 120,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Clarke Quay",
+     "latitude": 1.288386,
+     "longitude": 103.8465552,
+     "type": "主入口",
+     "source": "OneMap：CLARKE QUAY MRT STATION (NE5)｜10 EU TONG SEN STREET CLARKE QUAY MRT STATION (NE5) SINGAPORE 059815",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 49 m；名称匹配度 100%"
+    },
+    {
+     "name": "Boat Quay",
+     "latitude": 1.2872358,
+     "longitude": 103.8484294,
+     "type": "次入口",
+     "source": "OneMap：BOAT QUAY CONSERVATION AREA｜51 SOUTH BRIDGE ROAD BOAT QUAY CONSERVATION AREA SINGAPORE 058683",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 204 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；沿河步道及克拉码头一带；商户各自营业",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:976": {
+   "name": "Chinatown（牛车水）",
+   "priority": "★",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Chinatown 地铁站",
+     "latitude": 1.2837351,
+     "longitude": 103.8437534,
+     "type": "地铁/公交方向",
+     "source": "OneMap：CHINATOWN MRT STATION EXIT A｜CHINATOWN MRT STATION EXIT A",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 193 m；名称匹配度 100%"
+    },
+    {
+     "name": "Chinatown Complex",
+     "latitude": 1.282275,
+     "longitude": 103.8432385,
+     "type": "次入口",
+     "source": "OneMap：CHINATOWN COMPLEX｜335 SMITH STREET CHINATOWN COMPLEX SINGAPORE 050335",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 67 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；街区，商铺和寺庙各有营业时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:977": {
+   "name": "Buddha Tooth Relic Temple",
+   "priority": "★",
+   "opening_hours": "每日 7:00–19:00",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 45,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "288 South Bridge Road 正门",
+     "latitude": 1.281499,
+     "longitude": 103.8442503,
+     "type": null,
+     "source": "OneMap：BUDDHA TOOTH RELIC TEMPLE AND MUSEUM｜288 SOUTH BRIDGE ROAD BUDDHA TOOTH RELIC TEMPLE AND MUSEUM",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 58 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.buddhatoothrelictemple.org.sg/",
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效；官网首页未列开放时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1003": {
+   "name": "Sri Mariamman Temple",
+   "priority": "★",
+   "opening_hours": "每日 6:00–12:00、18:00–21:00（周五晚至 21:15）",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 15,
+    "regular": 30,
+    "long": 45,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Sri Mariamman Temple 建筑位置（非精确门口）",
+     "latitude": 1.2826758,
+     "longitude": 103.8451555,
+     "type": "主入口",
+     "source": "OneMap：SRI MARIAMMAN TEMPLE｜244 SOUTH BRIDGE ROAD SRI MARIAMMAN TEMPLE SINGAPORE 058793",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 79 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://smt.org.sg/",
+   "note": "宗教场所，注意礼仪；中午至傍晚不开放",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:994": {
+   "name": "Little India（小印度）",
+   "priority": "★",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 90,
+    "long": 150,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Little India 地铁站",
+     "latitude": 1.3072438,
+     "longitude": 103.8498416,
+     "type": "地铁/公交方向",
+     "source": "OneMap：LITTLE INDIA MRT STATION｜60 BUKIT TIMAH ROAD LITTLE INDIA MRT STATION",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 27 m；名称匹配度 100%"
+    },
+    {
+     "name": "Tekka Centre",
+     "latitude": 1.306711,
+     "longitude": 103.8501344,
+     "type": "次入口",
+     "source": "OneMap：ZHUJIAO CENTRE (TEKKA MARKET)｜661 BUFFALO ROAD ZHUJIAO CENTRE (TEKKA MARKET) SINGAPORE 210661",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 47 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；街区，商铺各有营业时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1002": {
+   "name": "Sultan Mosque（甘榜格南）",
+   "priority": "★",
+   "opening_hours": "游客参观 周六至周四 10:00–12:00、14:00–16:00",
+   "last_admission": null,
+   "closed": "周五",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 15,
+    "regular": 30,
+    "long": 45,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Masjid Sultan 建筑位置（非精确门口）",
+     "latitude": 1.3022375,
+     "longitude": 103.8590043,
+     "type": "主入口",
+     "source": "OneMap：MASJID SULTAN｜3 MUSCAT STREET MASJID SULTAN SINGAPORE 198833",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 32 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.sultanmosque.sg/visitors-info/",
+   "note": "须穿长袖、长裤/长裙，现场可借长袍；入场人数有限",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1011": {
+   "name": "Thian Hock Keng Temple",
+   "priority": "可选",
+   "opening_hours": "每日 7:30–17:30",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 15,
+    "regular": 30,
+    "long": 45,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Thian Hock Keng 建筑位置（非精确门口）",
+     "latitude": 1.2810839,
+     "longitude": 103.8475075,
+     "type": "主入口",
+     "source": "OneMap：THIAN HOCK KENG｜158 TELOK AYER STREET THIAN HOCK KENG SINGAPORE 068613",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 17 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": null,
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1068": {
+   "name": "Sri Veeramakaliamman Temple",
+   "priority": "可选",
+   "opening_hours": "每日 5:30–21:30",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 15,
+    "regular": 30,
+    "long": 45,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Sri Veeramakaliamman Temple 建筑位置（非精确门口）",
+     "latitude": 1.3079119,
+     "longitude": 103.8524305,
+     "type": "主入口",
+     "source": "OneMap：SRI VEERAMA KALIAMMAN TEMPLE｜141 SERANGOON ROAD SRI VEERAMA KALIAMMAN TEMPLE SINGAPORE 218042",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 19 m；名称匹配度 67%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": null,
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1023": {
+   "name": "Malay Heritage Centre",
+   "priority": "可选",
+   "opening_hours": "周二至周日 10:00–18:00（园区 8:00–21:00）",
+   "last_admission": "17:30",
+   "closed": "周一",
+   "price": "公民/PR 免费；游客成人 S$8",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Malay Heritage Centre 建筑位置（非精确门口）",
+     "latitude": 1.3028812,
+     "longitude": 103.8598685,
+     "type": "主入口",
+     "source": "OneMap：MALAY HERITAGE CENTRE｜85 SULTAN GATE MALAY HERITAGE CENTRE SINGAPORE 198501",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 13 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.malayheritage.gov.sg/en/visit",
+   "note": "官网页面最后更新于 2020 年，信息可能过时",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:974": {
+   "name": "Joo Chiat / Katong",
+   "priority": "可选",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 90,
+    "long": 150,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Koon Seng Road（彩色店屋）",
+     "latitude": 1.3109021,
+     "longitude": 103.9033842,
+     "type": "主入口",
+     "source": "OneMap：KOON SENG ROAD｜KOON SENG ROAD",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 559 m；名称匹配度 100%"
+    },
+    {
+     "name": "Joo Chiat Complex",
+     "latitude": 1.315877,
+     "longitude": 103.898378,
+     "type": "次入口",
+     "source": "OneMap：JOO CHIAT COMPLEX｜1 JOO CHIAT ROAD",
+     "status": "OneMap 自动匹配",
+     "note": "Claude 从候选中改选建筑本身（原为楼内商铺）"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；街区，商铺各有营业时间",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:961": {
+   "name": "Universal Studios Singapore",
+   "priority": "★",
+   "opening_hours": "每日 10:00 开园，关门时间按日期变化",
+   "last_admission": null,
+   "closed": "按官网日历",
+   "price": "收费（S$83 起）",
+   "suggested_duration": {
+    "short": 300,
+    "regular": 420,
+    "long": 540,
+    "basis": "estimate"
+   },
+   "duration_note": "通常玩一整天",
+   "entrances": [
+    {
+     "name": "8 Sentosa Gateway（Resorts World Sentosa）",
+     "latitude": 1.2561209,
+     "longitude": 103.8225373,
+     "type": null,
+     "source": "OneMap：UNIVERSAL STUDIOS SINGAPORE｜30 SENTOSA GATEWAY UNIVERSAL STUDIOS SINGAPORE SINGAPORE 098140",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 275 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.rwsentosa.com/en/attractions/universal-studios-singapore",
+   "note": "开园时间来自 STB 旧资料；每天关门时间见官网日历",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:987": {
+   "name": "S.E.A. Aquarium → Singapore Oceanarium",
+   "priority": "★",
+   "opening_hours": null,
+   "last_admission": null,
+   "closed": null,
+   "price": "收费",
+   "suggested_duration": {
+    "short": 90,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "24 Sentosa Gateway（Resorts World Sentosa）",
+     "latitude": 1.2583602,
+     "longitude": 103.8205073,
+     "type": null,
+     "source": "OneMap：SINGAPORE OCEANARIUM｜24 SENTOSA GATEWAY SINGAPORE OCEANARIUM SINGAPORE 098137",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 189 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.singaporeoceanarium.com/en/visit/operating-hours.html",
+   "note": "S.E.A. Aquarium 于 2025-04-30 停业，2025-07-24 以 Singapore Oceanarium 重新开放；开放时间按日期公布，请看官网日程",
+   "status": "待补充",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）",
+   "display_title": "Singapore Oceanarium"
+  },
+  "place:stb_attractions:991": {
+   "name": "Cable Car & Mount Faber",
+   "priority": "★",
+   "opening_hours": null,
+   "last_admission": null,
+   "closed": null,
+   "price": "收费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Mount Faber 站",
+     "latitude": 1.2710912,
+     "longitude": 103.8197684,
+     "type": null,
+     "source": "OneMap：MOUNT FABER PEAK｜109 MOUNT FABER ROAD MOUNT FABER PEAK SINGAPORE 099203",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 63 m；名称匹配度 100%"
+    },
+    {
+     "name": "HarbourFront 站",
+     "latitude": 1.2644861,
+     "longitude": 103.8186869,
+     "type": null,
+     "source": "OneMap：HARBOURFRONT TOWER TWO｜3 HARBOURFRONT PLACE HARBOURFRONT TOWER TWO SINGAPORE 099254",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 727 m；名称匹配度 100%"
+    },
+    {
+     "name": "Sentosa 站",
+     "latitude": 1.2558342,
+     "longitude": 103.8165302,
+     "type": null,
+     "source": "OneMap：IMBIAH TRAIL (IMBIAH LOOKOUT)",
+     "status": "OneMap 自动匹配",
+     "note": "Claude 改选：缆车 Sentosa 站位于 Imbiah Lookout；坐标为该区域点，非站台精确位置"
+    }
+   ],
+   "source": "https://www.onefabergroup.com/",
+   "note": "官网禁止程序读取，需手动查开放时间",
+   "status": "待补充",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:1034": {
+   "name": "Henderson Waves Bridge",
+   "priority": "★",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 20,
+    "regular": 40,
+    "long": 60,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Henderson Waves",
+     "latitude": 1.2761108,
+     "longitude": 103.8153571,
+     "type": "主入口",
+     "source": "OneMap：HENDERSON WAVES BRIDGE｜HENDERSON ROAD HENDERSON WAVES BRIDGE",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 17 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；南部山脊步道的一段；STB 旧资料写 24 小时",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nhb_monuments:1684": {
+   "name": "Fort Siloso",
+   "priority": "可选",
+   "opening_hours": "每日 10:00–18:00",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Fort Siloso",
+     "latitude": 1.2595902,
+     "longitude": 103.8080592,
+     "type": "主入口",
+     "source": "OneMap：SENTOSA - FORT SILOSO｜103 SILOSO ROAD SENTOSA - FORT SILOSO SINGAPORE 098978",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 3469 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.sentosa.com.sg/en/things-to-do/attractions/fort-siloso/",
+   "note": "数据问题：NHB 数据中 Fort Siloso 坐标 (1.2907, 103.8065) 在本岛，离圣淘沙实际位置约 3.5 km，应以入口表的 OneMap 坐标为准。；资料来自官网页面摘要",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）",
+   "correction": {
+    "coordinate_from_entrance": "Fort Siloso",
+    "reason": "NHB 坐标在本岛，离圣淘沙实际位置约 3.5 km；改用 OneMap 位置"
+   }
+  },
+  "place:stb_attractions:1037": {
+   "name": "Haw Par Villa",
+   "priority": "可选",
+   "opening_hours": "Hell's Museum 10:00–18:00",
+   "last_admission": "17:00",
+   "closed": "周一；10–11 月多日全天闭馆（日期见官网）",
+   "price": "公园免费；Hell's Museum 收费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 90,
+    "long": 120,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Haw Par Villa（地铁站旁）",
+     "latitude": 1.2837242,
+     "longitude": 103.7824037,
+     "type": "主入口",
+     "source": "OneMap：HAW PAR VILLA｜262 PASIR PANJANG ROAD HAW PAR VILLA",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 266 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.hawparvilla.sg/",
+   "note": "2025-12-08 起公园部分区域关闭维护，至另行通知",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:995": {
+   "name": "Orchard Road",
+   "priority": "可选",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Orchard 地铁站",
+     "latitude": 1.3039801,
+     "longitude": 103.8322452,
+     "type": "地铁/公交方向",
+     "source": "OneMap：ORCHARD MRT STATION (NS22)｜437 ORCHARD ROAD ORCHARD MRT STATION (NS22) SINGAPORE 238878",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 27 m；名称匹配度 100%"
+    },
+    {
+     "name": "Somerset 地铁站",
+     "latitude": 1.3007847,
+     "longitude": 103.8384548,
+     "type": "地铁/公交方向",
+     "source": "OneMap：SOMERSET MRT STATION EXIT B｜SOMERSET MRT STATION EXIT B",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 753 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；购物街，商场一般约 10:00–22:00",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:989": {
+   "name": "Singapore Zoo",
+   "priority": "★",
+   "opening_hours": "每日 8:30–18:00",
+   "last_admission": "17:00",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 120,
+    "regular": 150,
+    "long": 240,
+    "basis": "official"
+   },
+   "duration_note": "官方建议 2.5 小时",
+   "entrances": [
+    {
+     "name": "Singapore Zoo 主入口（Mandai 入口广场）",
+     "latitude": 1.4055944,
+     "longitude": 103.7895983,
+     "type": null,
+     "source": "OneMap：SINGAPORE ZOO｜80 MANDAI LAKE ROAD SINGAPORE ZOO SINGAPORE 729826",
+     "status": "OneMap 自动匹配",
+     "note": "Claude 从 OneMap 候选中改选（原自动匹配为饲养设施）"
+    }
+   ],
+   "source": "https://www.mandai.com/en/plan-your-visit/itinerary/epic-day-out-a-full-day-of-wildlife-wonders.html",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:992": {
+   "name": "Night Safari",
+   "priority": "★",
+   "opening_hours": "每日 18:00–24:00",
+   "last_admission": "23:15",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 150,
+    "regular": 210,
+    "long": 240,
+    "basis": "official"
+   },
+   "duration_note": "官方建议 3.5 小时",
+   "entrances": [
+    {
+     "name": "Night Safari 入口（Mandai 入口广场）",
+     "latitude": 1.4016327,
+     "longitude": 103.7843353,
+     "type": null,
+     "source": "OneMap：NIGHT SAFARI｜80 MANDAI LAKE ROAD NIGHT SAFARI SINGAPORE 729826",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 416 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://mandai.com/night-safari",
+   "note": "需预选入园时段；步道和游园车 19:00 开始。官网另一页写 18:30 开门，以园区页 18:00 为准，请复核",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:overture_places:eb4ed8cd-3059-4abe-8e2f-6704c7b2c6c4": {
+   "name": "River Wonders",
+   "priority": "★",
+   "opening_hours": "每日 9:00–18:00",
+   "last_admission": "17:00",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 90,
+    "regular": 120,
+    "long": 180,
+    "basis": "official"
+   },
+   "duration_note": "官方建议 2 小时",
+   "entrances": [
+    {
+     "name": "River Wonders 入口（Mandai 入口广场）",
+     "latitude": 1.4036617,
+     "longitude": 103.7924612,
+     "type": null,
+     "source": "OneMap：RIVER WONDERS｜80 MANDAI LAKE ROAD RIVER WONDERS SINGAPORE 729826",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 199 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.mandai.com/en/plan-your-visit/itinerary/epic-day-out-a-full-day-of-wildlife-wonders.html",
+   "note": "原 River Safari；STB 旧记录 River Safari Singapore 应关联或隐藏",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:overture_places:29a9a8c1-2900-4b6e-88d3-ca06de7d7317": {
+   "name": "Bird Paradise",
+   "priority": "★",
+   "opening_hours": "每日 9:00–18:00",
+   "last_admission": "17:00",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 90,
+    "regular": 120,
+    "long": 180,
+    "basis": "official"
+   },
+   "duration_note": "官方建议 2 小时",
+   "entrances": [
+    {
+     "name": "Bird Paradise 入口（20 Mandai Lake Rd）",
+     "latitude": 1.4047122,
+     "longitude": 103.7798111,
+     "type": null,
+     "source": "OneMap：BIRD PARADISE｜30 MANDAI LAKE ROAD BIRD PARADISE SINGAPORE 729829",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 316 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.mandai.com/en/plan-your-visit/itinerary/epic-day-out-a-full-day-of-wildlife-wonders.html",
+   "note": "Jurong Bird Park 搬迁后的新址",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:988": {
+   "name": "Singapore Botanic Gardens",
+   "priority": "★",
+   "opening_hours": "每日 5:00–24:00",
+   "last_admission": null,
+   "closed": "无",
+   "price": "花园免费；国家胡姬花园收费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": "官方步道 40–90 分钟",
+   "entrances": [
+    {
+     "name": "Tanglin Gate",
+     "latitude": 1.3071266,
+     "longitude": 103.8185185,
+     "type": null,
+     "source": "OneMap：TANGLIN GATE｜TANGLIN GATE",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 817 m；名称匹配度 100%"
+    },
+    {
+     "name": "Bukit Timah Gate（近 Botanic Gardens 地铁站）",
+     "latitude": 1.3221137,
+     "longitude": 103.8149845,
+     "type": null,
+     "source": "OneMap：BOTANIC GARDENS MRT STATION (CC19)｜100 CLUNY PARK ROAD BOTANIC GARDENS MRT STATION (CC19) SINGAPORE 257494",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 908 m；名称匹配度 100%"
+    },
+    {
+     "name": "Gallop Gate",
+     "latitude": 1.3119095,
+     "longitude": 103.8123221,
+     "type": null,
+     "source": "OneMap：GALLOP GATE｜GALLOP GATE",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 462 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/sbg",
+   "note": "国家胡姬花园开放时间另计，官网首页未列",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120207": {
+   "name": "MacRitchie Reservoir Park",
+   "priority": "★",
+   "opening_hours": null,
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 150,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": "到树顶吊桥来回约 3–4 小时（需核实）",
+   "entrances": [
+    {
+     "name": "MacRitchie Reservoir Park 主入口",
+     "latitude": 1.341523,
+     "longitude": 103.8335904,
+     "type": "主入口",
+     "source": "OneMap：MACRITCHIE RESERVOIR PARK｜MACRITCHIE RESERVOIR PARK",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 368 m；名称匹配度 100%"
+    },
+    {
+     "name": "TreeTop Walk",
+     "latitude": 1.3574896,
+     "longitude": 103.8089259,
+     "type": "次入口",
+     "source": "OneMap：HSBC TREETOP WALK｜ISLAND CLUB ROAD HSBC TREETOP WALK",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 3418 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks",
+   "note": "未找到可读取的官方页面；树顶吊桥另有开放时间和休息日，需查官网",
+   "status": "待补充",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120361": {
+   "name": "Bukit Timah Nature Reserve",
+   "priority": "★",
+   "opening_hours": "每日 7:00–19:00",
+   "last_admission": null,
+   "closed": "无（山顶 2026-07 至 2028-03 有拆除工程）",
+   "price": "免费（停车收费）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Bukit Timah Nature Reserve Visitor Centre（Hindhede Drive 尽头）",
+     "latitude": 1.3483245,
+     "longitude": 103.7766495,
+     "type": null,
+     "source": "Overture：Bukit Timah Nature Reserve Visitor Centre",
+     "status": "资料核对（Claude）",
+     "note": "坐标来自 Overture，建议在地图上看一眼"
+    },
+    {
+     "name": "Hindhede Entrance",
+     "latitude": 1.3465243,
+     "longitude": 103.7760086,
+     "type": null,
+     "source": "Overture：Hindhede Entrance",
+     "status": "资料核对（Claude）",
+     "note": "坐标来自 Overture，建议在地图上看一眼"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks/park-detail/bukit-timah-nature-reserve",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:966": {
+   "name": "East Coast Park",
+   "priority": "★",
+   "opening_hours": "24 小时",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费（停车收费）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "East Coast Lagoon Food Village",
+     "latitude": 1.3072611,
+     "longitude": 103.9347997,
+     "type": "次入口",
+     "source": "OneMap：EAST COAST LAGOON FOOD VILLAGE｜1220 EAST COAST PARKWAY EAST COAST LAGOON FOOD VILLAGE SINGAPORE 468960",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 2608 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks/park-detail/east-coast-park",
+   "note": "公园很长（A–G 区），最近地铁站 Bedok；C1、C4 停车场步道施工",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120437": {
+   "name": "Sungei Buloh Wetland Reserve",
+   "priority": "★",
+   "opening_hours": "每日 7:00–19:00",
+   "last_admission": "18:30",
+   "closed": "无（部分区域因潮汐/天气临时关闭）",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 180,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Visitor Centre（60 Kranji Way）",
+     "latitude": 1.4402962,
+     "longitude": 103.7351379,
+     "type": null,
+     "source": "Overture：Sungei Buloh Wetland Reserve Visitor Centre",
+     "status": "资料核对（Claude）",
+     "note": "坐标来自 Overture，建议在地图上看一眼"
+    },
+    {
+     "name": "Wetland Centre",
+     "latitude": 1.4461167,
+     "longitude": 103.728932,
+     "type": null,
+     "source": "OneMap：SUNGEI BULOH WETLAND RESERVE (RESEARCH AND EDUCATION CENTRE)｜301 NEO TIEW CRESCENT SUNGEI BULOH WETLAND RESERVE (RESEARCH AND EDUCATION CENTRE) SINGAPORE 718925",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 514 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks/park-detail/sungei-buloh-wetland-reserve",
+   "note": "Platform 1 升级至 2026-10-23；两处均有免费停车",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:993": {
+   "name": "Pulau Ubin / Chek Jawa",
+   "priority": "★",
+   "opening_hours": null,
+   "last_admission": null,
+   "closed": null,
+   "price": "岛上免费（渡轮另付）",
+   "suggested_duration": {
+    "short": 180,
+    "regular": 240,
+    "long": 360,
+    "basis": "estimate"
+   },
+   "duration_note": "一般半天",
+   "entrances": [
+    {
+     "name": "Changi Point Ferry Terminal（乘小船上岛）",
+     "latitude": 1.390865,
+     "longitude": 103.987584,
+     "type": null,
+     "source": "OneMap：CHANGI POINT FERRY TERMINAL｜51 LORONG BEKUKONG",
+     "status": "OneMap 自动匹配",
+     "note": "码头在本岛，乘小船上乌敏岛"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks",
+   "note": "Chek Jawa 栈道另有开放时间，需查官网",
+   "status": "待补充",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120210": {
+   "name": "Jurong Lake Gardens (Lakeside Garden)",
+   "priority": "★",
+   "opening_hours": "全天开放",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 90,
+    "long": 150,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Jurong Lake Gardens",
+     "latitude": 1.333671,
+     "longitude": 103.726779,
+     "type": "主入口",
+     "source": "OneMap：JLG: LAKESIDE GARDEN",
+     "status": "OneMap 自动匹配",
+     "note": "Claude 改选；原匹配 Passion Wave（园内水上活动中心）"
+    },
+    {
+     "name": "Lakeside 地铁站",
+     "latitude": 1.3443026,
+     "longitude": 103.7217171,
+     "type": "地铁/公交方向",
+     "source": "OneMap：LAKESIDE MRT STATION EXIT C｜LAKESIDE MRT STATION EXIT C",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 1318 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "无门票的公共区域，按一般情况填写为全天开放，未见官方页面；裕廊湖花园",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:965": {
+   "name": "Chinese Garden",
+   "priority": "可选",
+   "opening_hours": "每日 6:00–23:00",
+   "last_admission": null,
+   "closed": null,
+   "price": "免费",
+   "suggested_duration": {
+    "short": 45,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Chinese Garden 地铁站",
+     "latitude": 1.3422343,
+     "longitude": 103.7324148,
+     "type": "地铁/公交方向",
+     "source": "OneMap：CHINESE GARDEN MRT STATION EXIT B｜CHINESE GARDEN MRT STATION EXIT B",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 449 m；名称匹配度 100%"
+    }
+   ],
+   "source": null,
+   "note": "沿用 STB 旧资料（约 2018 年），官网无法自动读取，未能确认是否仍有效；裕廊湖花园官网显示园内部分设施维护中，请注意",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:nparks_parks:120345": {
+   "name": "HortPark",
+   "priority": "可选",
+   "opening_hours": "每日 6:00–23:00（一般园区）",
+   "last_admission": null,
+   "closed": "无",
+   "price": "免费",
+   "suggested_duration": {
+    "short": 30,
+    "regular": 60,
+    "long": 90,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "HortPark",
+     "latitude": 1.2792629,
+     "longitude": 103.797934,
+     "type": "主入口",
+     "source": "OneMap：HORTPARK｜HORTPARK",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 24 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.nparks.gov.sg/visit/parks/park-detail/hortpark",
+   "note": "开放时间已于 2026-09-14 核验开放时间已在 9 月核验过（6:00–23:00），只需补入口和时长",
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:stb_attractions:962": {
+   "name": "Singapore Science Centre",
+   "priority": "可选",
+   "opening_hours": "每日 10:00–17:00",
+   "last_admission": "16:15",
+   "closed": "无",
+   "price": "收费",
+   "suggested_duration": {
+    "short": 90,
+    "regular": 150,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "Science Centre Singapore 建筑位置（非精确门口）",
+     "latitude": 1.3328387,
+     "longitude": 103.7358206,
+     "type": "主入口",
+     "source": "OneMap：SCIENCE CENTRE SINGAPORE｜15 SCIENCE CENTRE ROAD SCIENCE CENTRE SINGAPORE SINGAPORE 609081",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 19 m；名称匹配度 100%；OneMap 给的是建筑位置，不是精确门口"
+    }
+   ],
+   "source": "https://www.science.edu.sg/visit-us/plan-your-visit",
+   "note": null,
+   "status": "资料核对（Claude）",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  },
+  "place:overture_places:5e1391f8-411f-4544-af2a-9094302fdfad": {
+   "name": "Jewel Changi Airport",
+   "priority": "可选",
+   "opening_hours": null,
+   "last_admission": null,
+   "closed": null,
+   "price": "免费入场（部分景点收费）",
+   "suggested_duration": {
+    "short": 60,
+    "regular": 120,
+    "long": 240,
+    "basis": "estimate"
+   },
+   "duration_note": null,
+   "entrances": [
+    {
+     "name": "78 Airport Boulevard",
+     "latitude": 1.360341,
+     "longitude": 103.9890776,
+     "type": null,
+     "source": "OneMap：JEWEL CHANGI AIRPORT｜78 AIRPORT BOULEVARD JEWEL CHANGI AIRPORT SINGAPORE 819666",
+     "status": "OneMap 自动匹配",
+     "note": "距景点代表点 82 m；名称匹配度 100%"
+    }
+   ],
+   "source": "https://www.jewelchangiairport.com/",
+   "note": "可选；商场和雨漩涡开放时间不同，未查",
+   "status": "待补充",
+   "checked_on": "2026-10-22",
+   "checked_by": "Claude（资料整理）"
+  }
+ },
+ "hide": {
+  "place:overture_places:d50564ad-bee0-4ea7-acaa-38b9770c2a21": "Jurong Bird Park 已搬迁到万礼，改名 Bird Paradise",
+  "place:stb_attractions:990": "River Safari 已改名 River Wonders，使用新记录",
+  "place:overture_places:7c6d11c8-244a-4526-aade-b2afe9dc1231": "与环球影城同名但坐标在市中心，疑为售票点或坐标错误"
+ }
+}

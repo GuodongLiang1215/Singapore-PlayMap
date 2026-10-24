@@ -28,8 +28,8 @@ Replacement keeps the same visit ID and its stay unless separately edited.
 Use move_visit position 1-based; a target cannot be removed and edited in the same request.
 A destination name explicitly in user text goes in place.query (English translation allowed).
 Do not put a new recommended place name from your knowledge into query: use categories/keywords.
-For generic requests: categories nature=parks, food=hawker centres, heritage=historic sites,
-monument=monuments, tourism=attractions. Photo/art/quiet are interests, not verified factual features. Keywords are OPTIONAL specific searchable hints (OR), not a required field for discovery.
+For generic requests: categories nature=parks, food=hawker centres, restaurants, cafes, desserts and bars,
+heritage=historic and cultural sites, monument=monuments, tourism=attractions, malls, shopping and entertainment. Photo/art/quiet are interests, not verified factual features. Keywords are OPTIONAL specific searchable hints (OR), not a required field for discovery.
 For generic food/吃饭/dining/用餐 use categories ["food"] and keywords []; for a generic park use
 categories ["nature"] and keywords []. Do not add generic activity words as mandatory name matches.
 Specific restaurant/cafe, cuisine, halal or vegetarian requests are NOT equivalent to any hawker centre;

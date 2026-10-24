@@ -34,7 +34,7 @@
    if(this.poiLayer&&this.poiSignature===signature){if(show&&!this.map.hasLayer(this.poiLayer))this.poiLayer.addTo(this.map);else if(!show&&this.map.hasLayer(this.poiLayer))this.map.removeLayer(this.poiLayer);return;}
    if(this.poiLayer)this.map.removeLayer(this.poiLayer);this.poiLayer=null;this.poiSignature=signature;
    if(!show)return;
-   this.poiLayer=L.geoJSON({type:'FeatureCollection',features},{pointToLayer:(f,ll)=>L.circleMarker(ll,{pane:'pmPOI',radius:6,color:'#fff',weight:1.5,fillColor:f.properties.default_exploration_visible?'#468771':'#999',fillOpacity:.8,bubblingMouseEvents:false}),onEachFeature:(f,l)=>{l.on('click',e=>{if(e.originalEvent)L.DomEvent.stopPropagation(e.originalEvent);this.setPick(false);this.callbacks.onFeature(f);this.popupFeature(f,l.getLatLng());});}}).addTo(this.map);
+   this.poiLayer=L.geoJSON({type:'FeatureCollection',features},{pointToLayer:(f,ll)=>L.circleMarker(ll,{pane:'pmPOI',renderer:this.poiRenderer||(this.poiRenderer=L.canvas({pane:'pmPOI',padding:.2})),radius:6,color:'#fff',weight:1.5,fillColor:f.properties.default_exploration_visible?'#468771':'#999',fillOpacity:.8,bubblingMouseEvents:false}),onEachFeature:(f,l)=>{l.on('click',e=>{if(e.originalEvent)L.DomEvent.stopPropagation(e.originalEvent);this.setPick(false);this.callbacks.onFeature(f);this.popupFeature(f,l.getLatLng());});}}).addTo(this.map);
   }
   popupFeature(feature,ll){
    if(!this.map)return;const p=feature.properties,content=node('div',undefined,'pm-place-popup');content.append(node('strong',p.display_title),node('p','来源代表点，不是已核验入口。','small'));

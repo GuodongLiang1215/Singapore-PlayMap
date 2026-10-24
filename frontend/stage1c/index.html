@@ -7,7 +7,7 @@
 <section class="metrics"><div><span>候选来源记录 · 全部保留</span><strong id="records">—</strong></div><div><span>地点展示组 · 非完整去重数</span><strong id="entities">—</strong></div><div><span>本轮归为同一地点</span><strong id="groups">—</strong></div><div><span>归档或源状态待复核</span><strong id="holds">—</strong></div></section>
 <div class="notice">地点身份、来源坐标和实际入口是不同信息。本版按明确证据归组，补充部分官网时段并隔离过时地点记录；不是实时营业地图，尚未接入导航或LLM。</div>
 <main><aside class="left"><h2>探索全岛地点</h2><label for="search">名称、地址或类别词</label><input id="search" maxlength="160" placeholder="例如 Gardens、Phoenix、自然、美食">
-<label for="category">类别</label><select id="category"><option value="">全部类别</option><option value="tourism">景点资料</option><option value="nature">公园与自然</option><option value="heritage">历史地点</option><option value="monument">古迹</option><option value="food">熟食中心</option></select>
+<label for="category">类别</label><select id="category"><option value="">全部类别</option><option value="tourism">景点、购物与娱乐</option><option value="nature">公园与自然</option><option value="heritage">历史地点</option><option value="monument">古迹</option><option value="food">餐饮</option></select>
 <label class="check"><input type="checkbox" id="include-holds">包括旧址归档与状态待复核记录</label><p id="hold-note" class="small">正在读取真实本地数据…</p>
 <p class="small">分组保留每个来源。未出现不代表现实中不存在；检索旧址时可开启上方选项查看修正说明。</p>
 <label class="check"><input type="checkbox" id="tiles" checked>在线背景地图</label><button id="fit">查看全岛候选范围</button>

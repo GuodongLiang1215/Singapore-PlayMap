@@ -43,7 +43,8 @@ class Visit(Contract):
     point: PlacePoint
     # None means a visible project assumption, not a missing value converted to zero.
     stay_minutes: int | None = Field(default=None, ge=0, le=1440, strict=True)
-    stay_profile: Literal['quick', 'regular', 'extended'] = 'regular'
+    # 'takeaway' = just buying something (a coffee to go); uses the place's takeaway minutes when it has one.
+    stay_profile: Literal['takeaway', 'quick', 'regular', 'extended'] = 'regular'
 
 class TimeSettings(Contract):
     mode: Literal['estimate', 'budget', 'window'] = 'estimate'

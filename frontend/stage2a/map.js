@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id),state=new PlayMapRouteState();
-const LABELS={nature:'公园与自然',tourism:'景点资料',heritage:'历史地点',monument:'古迹',food:'熟食中心'};
+const LABELS={nature:'公园与自然',tourism:'景点、购物与娱乐',heritage:'历史地点',monument:'古迹',food:'餐饮'};
 let map=null,tiles=null,poiLayer=null,routeLayer=null,snappedLayer=null,endpointLayer=null,focusLayer=null,basemapControl=null,routeRenderer=null;
 const endpointMarkers={origin:null,destination:null};
 let poiSignature=null,viewRevision=0,catalogueTimer=null,resizeFrame=null,basemapFrame=null;

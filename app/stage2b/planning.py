@@ -16,7 +16,7 @@ BASE_STAYS = {
     'heritage': (10, 20, 40), 'monument': (15, 30, 60),
     'food': (20, 40, 60), 'unknown': (15, 30, 60),
 }
-PROFILE_FACTORS = {'quick':0.5, 'regular':1.0, 'extended':1.5}
+PROFILE_FACTORS = {'takeaway':0.5, 'quick':0.5, 'regular':1.0, 'extended':1.5}
 
 class PlanningError(Exception):
     def __init__(self, code, message, status=422, **extra):
@@ -43,6 +43,7 @@ def resolve_point(point: PlacePoint, resolver: Callable | None):
     normalized = point.model_copy(update={'latitude':entity['latitude'], 'longitude':entity['longitude'],
                                           'label':entity['display_title'][:200]})
     return {'point':normalized, 'category':entity.get('category') or 'unknown',
+            'suggested_duration':entity.get('suggested_duration'),
             'regular_hours_evidence':entity.get('regular_hours_evidence', []),
             'source_checked':True, 'entrance_verified':False}
 
@@ -53,7 +54,18 @@ def prepare(request, resolver=None):
     visits = []
     for v in request.visits:
         place = resolve_point(v.point, resolver)
-        if v.stay_minutes is None:
+        reviewed = place.get('suggested_duration')
+        if v.stay_minutes is None and v.stay_profile == 'takeaway' and reviewed and reviewed.get('takeaway'):
+            # Just buying something: short fixed time, no range.
+            lo = ref = hi = reviewed['takeaway']
+            basis = 'place_takeaway'
+        elif v.stay_minutes is None and reviewed:
+            # Place-specific short / regular / long: reviewed core attraction, or detailed-category default.
+            lo, hi = reviewed['short'], reviewed['long']
+            # takeaway without a takeaway time (e.g. a museum) falls back to the short value
+            ref = {'takeaway': lo, 'quick': lo, 'regular': reviewed['regular'], 'extended': hi}[v.stay_profile]
+            basis = 'place_' + reviewed.get('basis', 'estimate')
+        elif v.stay_minutes is None:
             base = BASE_STAYS.get(place['category'], BASE_STAYS['unknown'])
             factor = PROFILE_FACTORS[v.stay_profile]
             lo, ref, hi = [int(x * factor) for x in base]
@@ -64,7 +76,7 @@ def prepare(request, resolver=None):
         visits.append({'visit_id':v.visit_id, 'point':place['point'].model_dump(),
             'category':place['category'], 'stay_minutes':ref, 'stay_range_minutes':[lo,hi],
             'stay_basis':basis, 'stay_profile':v.stay_profile,
-            'stay_note':'用户设定时长，未独立验证是否足够。' if basis == 'user_specified' else '类别／通用初始假设，可修改；不是实测游览时长或置信区间。',
+            'stay_note':'用户设定时长，未独立验证是否足够。' if basis == 'user_specified' else ('外带／顺路购买，按短时间计算，可修改。' if basis == 'place_takeaway' else '按细分类别的初始假设，可修改；不是实测游览时长。' if basis == 'place_category_default' else ('景点建议时长，可修改。' if basis.startswith('place_') else '类别／通用初始假设，可修改；不是实测游览时长或置信区间。')),
             'entrance_verified':False, 'opening_status':'not_checked',
             'regular_hours_evidence_count':len(place['regular_hours_evidence']),
             'regular_hours_evidence':place['regular_hours_evidence']})
