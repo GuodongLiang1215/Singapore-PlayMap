@@ -16,8 +16,21 @@ cache = SegmentCache()
 _lock = threading.Lock()
 _counts = {'plans_completed':0,'plans_failed':0,'plans_cancelled':0}
 
+
 class ClearRequest(Contract):
-    session_id: str = Field(pattern=r'^[a-f0-9]{32}
+    session_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+
+
+class AlternativeRequest(Contract):
+    plan_request: PlanRequest
+    current_plan: dict
+    leg_id: str = Field(pattern=r'^leg-[1-9][0-9]*$')
+    radius_m: float = Field(default=1000, gt=0, le=5000)
+    category: str = Field(default='', max_length=40)
+    limit: int = Field(default=20, ge=1, le=100)
+    max_suggestions: int = Field(default=5, ge=1, le=20)
+
+
 @router.get('/status')
 def status():
     base = geo.status()
@@ -31,6 +44,7 @@ def status():
         'cache_scope':'per-browser-session, RAM only','private_queries_saved_to_disk':False,
         'runtime_counters_since_server_start':counts,
         'notice':'多地点通行与停留汇总不等于入口、开放和实时交通已核验。'}
+
 
 @router.post('/plan')
 async def plan(body: PlanRequest, request: Request):
@@ -98,87 +112,6 @@ async def alternatives(body: AlternativeRequest, request: Request):
             'itinerary_modified':False,
         }) from exc
 
-@router.post('/clear-memory')
-def clear_memory(body: ClearRequest):
-    cache.clear_session(body.session_id)
-    return {'cleared':True,'scope':'this browser session only','disk_files_modified':False}
-)
-
-class AlternativeRequest(Contract):
-    plan_request: PlanRequest
-    current_plan: dict
-    leg_id: str = Field(pattern=r'^leg-[1-9][0-9]*
-@router.get('/status')
-def status():
-    base = geo.status()
-    with _lock: counts = dict(_counts)
-    return {'stage':'2B','scope':'Singapore nationwide','geographic_filter':None,
-        'catalogue':base['catalogue'],'credentials':base['credentials'],
-        'manual_itinerary_implemented':True,'automatic_selection_implemented':False,
-        'order_optimisation_implemented':False,'live_llm':False,
-        'implemented_modes':['walk','drive','cycle'],'public_transport_implemented':False,
-        'max_visits_per_request':MAX_VISITS,'cache_ttl_seconds':cache.ttl_seconds,
-        'cache_scope':'per-browser-session, RAM only','private_queries_saved_to_disk':False,
-        'runtime_counters_since_server_start':counts,
-        'notice':'多地点通行与停留汇总不等于入口、开放和实时交通已核验。'}
-
-@router.post('/plan')
-async def plan(body: PlanRequest, request: Request):
-    try:
-        result = await calculate(body,geo.client,cache,
-            resolver=lambda uid,build:catalogue.entity(uid,build),
-            disconnected=request.is_disconnected)
-    except PlanningError as exc:
-        with _lock: _counts['plans_cancelled' if exc.code=='CLIENT_CANCELLED' else 'plans_failed'] += 1
-        raise HTTPException(exc.status,detail=exc.public()) from None
-    except HTTPException:
-        with _lock: _counts['plans_failed'] += 1
-        raise HTTPException(409,detail={'code':'CATALOGUE_CHANGED_OR_UNAVAILABLE',
-            'message':'核查目录版本改变或不可读。请刷新页面；原始资料没有被改动。',
-            'complete_plan_created':False}) from None
-    with _lock: _counts['plans_completed'] += 1
-    return result
-
-@router.post('/clear-memory')
-def clear_memory(body: ClearRequest):
-    cache.clear_session(body.session_id)
-    return {'cleared':True,'scope':'this browser session only','disk_files_modified':False}
-)
-    radius_m: float = Field(default=1000, gt=0, le=5000)
-    category: str = Field(default='', max_length=40)
-    limit: int = Field(default=20, ge=1, le=100)
-    max_suggestions: int = Field(default=5, ge=1, le=20)
-
-@router.get('/status')
-def status():
-    base = geo.status()
-    with _lock: counts = dict(_counts)
-    return {'stage':'2B','scope':'Singapore nationwide','geographic_filter':None,
-        'catalogue':base['catalogue'],'credentials':base['credentials'],
-        'manual_itinerary_implemented':True,'automatic_selection_implemented':False,
-        'order_optimisation_implemented':False,'live_llm':False,
-        'implemented_modes':['walk','drive','cycle'],'public_transport_implemented':False,
-        'max_visits_per_request':MAX_VISITS,'cache_ttl_seconds':cache.ttl_seconds,
-        'cache_scope':'per-browser-session, RAM only','private_queries_saved_to_disk':False,
-        'runtime_counters_since_server_start':counts,
-        'notice':'多地点通行与停留汇总不等于入口、开放和实时交通已核验。'}
-
-@router.post('/plan')
-async def plan(body: PlanRequest, request: Request):
-    try:
-        result = await calculate(body,geo.client,cache,
-            resolver=lambda uid,build:catalogue.entity(uid,build),
-            disconnected=request.is_disconnected)
-    except PlanningError as exc:
-        with _lock: _counts['plans_cancelled' if exc.code=='CLIENT_CANCELLED' else 'plans_failed'] += 1
-        raise HTTPException(exc.status,detail=exc.public()) from None
-    except HTTPException:
-        with _lock: _counts['plans_failed'] += 1
-        raise HTTPException(409,detail={'code':'CATALOGUE_CHANGED_OR_UNAVAILABLE',
-            'message':'核查目录版本改变或不可读。请刷新页面；原始资料没有被改动。',
-            'complete_plan_created':False}) from None
-    with _lock: _counts['plans_completed'] += 1
-    return result
 
 @router.post('/clear-memory')
 def clear_memory(body: ClearRequest):
