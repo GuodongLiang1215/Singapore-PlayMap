@@ -52,7 +52,7 @@ def test_alternatives_endpoint_returns_suggestions(monkeypatch):
         }
 
     monkeypatch.setattr(stage2b_api, "suggest_alternatives", fake_suggest)
-    client = TestClient(app)
+    client = TestClient(app, headers={"X-PlayMap-Client": "stage2b"})
     response = client.post("/api/stage2b/alternatives", json={
         "plan_request": plan_request().model_dump(mode="json"),
         "current_plan": current_plan(),
@@ -68,7 +68,7 @@ def test_alternatives_endpoint_returns_suggestions(monkeypatch):
 def test_alternatives_endpoint_rejects_nonviolating_leg():
     plan = current_plan()
     plan["walking_constraint_check"] = {"status": "ok", "violations": []}
-    client = TestClient(app)
+    client = TestClient(app, headers={"X-PlayMap-Client": "stage2b"})
     response = client.post("/api/stage2b/alternatives", json={
         "plan_request": plan_request().model_dump(mode="json"),
         "current_plan": plan,
@@ -80,7 +80,7 @@ def test_alternatives_endpoint_rejects_nonviolating_leg():
 
 def test_alternatives_endpoint_requires_walk_constraint():
     req = plan_request().model_copy(update={"max_walk_minutes": None})
-    client = TestClient(app)
+    client = TestClient(app, headers={"X-PlayMap-Client": "stage2b"})
     response = client.post("/api/stage2b/alternatives", json={
         "plan_request": req.model_dump(mode="json"),
         "current_plan": current_plan(),
