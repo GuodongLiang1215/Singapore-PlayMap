@@ -9,11 +9,17 @@ from app.llm_connect.config import load_settings
 from app.llm_connect.errors import LLMConnectionError
 from app.stage2a import api as geo
 from .models import ChatRequest, ResolveRequest, ForgetRequest
+from app.stage2a.models import Contract
+from pydantic import Field
 from .engine import prepare, assemble, STORE, ChatError, PACER
 from .catalogue import LocalCatalogue
 from .wire_schema import WIRE_VERSION
 
 router=APIRouter(prefix='/api/stage2c',tags=['2C1 conversational proposals'])
+
+class VisitCategoryRequest(Contract):
+    entity_id: str = Field(min_length=1,max_length=512)
+    catalogue_build_id: str = Field(min_length=1,max_length=128)
 
 # Compatibility sentinel used by existing diagnostics/tests. Shared deployments no
 # longer serialize every user through this lock.
@@ -115,3 +121,20 @@ def forget(body:ForgetRequest):
     STORE.clear(body.session_id)
     return {'cleared_local_pending_proposals':True,'provider_data_deletion_requested':False,
             'notice':'只清理本地内存草案；不是删除服务商已收到的内容。'}
+
+
+@router.post('/visit-category')
+def visit_category(body: VisitCategoryRequest):
+    """Recover the catalogue category of an adopted visit without invoking the LLM."""
+    try:
+        cat=LocalCatalogue()
+        if cat.build_id != body.catalogue_build_id:
+            raise ChatError('CATALOGUE_CHANGED','目录版本改变，请重新计算后再找替代地点。',409)
+        entity=cat.by_id.get(body.entity_id)
+        if entity is None:
+            raise ChatError('VISIT_NOT_IN_CATALOGUE','当前停留点不在可用目录中，不能自动继承类别。',422)
+        allowed=('nature','food','heritage','monument','tourism')
+        categories=[x for x in (entity.get('categories') or [entity.get('category')]) if x in allowed]
+        return {'entity_id':body.entity_id,'categories':categories,'build_id':cat.build_id}
+    except ChatError as e:
+        raise HTTPException(e.status,detail=e.public()) from None
