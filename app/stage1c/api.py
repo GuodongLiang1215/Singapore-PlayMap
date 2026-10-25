@@ -201,15 +201,6 @@ def match_search_point(label: str, latitude: float, longitude: float, max_distan
             'distance_m':round(-best[1],2),'name_score':round(best[0],3)}
 
 
-@router.get('/match-search-point')
-def match_search_point_debug(label: str = Query(..., min_length=1, max_length=200),
-                             lat: float = Query(..., ge=1.15, le=1.48),
-                             lon: float = Query(..., ge=103.55, le=104.1)):
-    """Expose only the conservative match decision; no private data is stored."""
-    match=match_search_point(label,lat,lon)
-    return {'match':match,'matched':match is not None}
-
-
 @router.get('/nearby')
 def nearby(lat: float = Query(..., ge=1.15, le=1.48), lon: float = Query(..., ge=103.55, le=104.1),
            radius_m: float = Query(1000, gt=0, le=5000), category: str = Query('', max_length=40),
