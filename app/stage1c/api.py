@@ -141,6 +141,37 @@ def _nearby_rows(path, build_id):
         return _NEARBY_CACHE['rows']
 
 
+def match_search_point(label: str, latitude: float, longitude: float, max_distance_m: float = 80.0):
+    """Conservatively link a confirmed OneMap search point to one visible catalogue entity.
+
+    Coordinates are not replaced. A match only supplies catalogue metadata.
+    """
+    path, report = snapshot()
+    query_tokens={t for t in normal_name(label).split() if len(t)>=3}
+    if not query_tokens:
+        return None
+    candidates=[]
+    for r in _nearby_rows(path, report['build_id']):
+        d=_metres(latitude, longitude, r['latitude'], r['longitude'])
+        if d>max_distance_m:
+            continue
+        text_tokens={t for t in normal_name((r.get('display_title') or '')+' '+(r.get('search_text') or '')).split() if len(t)>=3}
+        overlap=len(query_tokens & text_tokens)/max(1,len(query_tokens))
+        # Require strong lexical support. Exact/coincident coordinates alone are
+        # not enough to assert that two named places are the same entity.
+        if overlap>=0.6:
+            candidates.append((overlap,-d,r))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x:(x[0],x[1]),reverse=True)
+    best=candidates[0]
+    # Ambiguous near-ties are intentionally left unmatched.
+    if len(candidates)>1 and best[0]-candidates[1][0]<0.15 and abs(best[1]-candidates[1][1])<20:
+        return None
+    return {'entity_id':best[2]['entity_id'],'build_id':report['build_id'],
+            'distance_m':round(-best[1],2),'token_overlap':round(best[0],3)}
+
+
 @router.get('/nearby')
 def nearby(lat: float = Query(..., ge=1.15, le=1.48), lon: float = Query(..., ge=103.55, le=104.1),
            radius_m: float = Query(1000, gt=0, le=5000), category: str = Query('', max_length=40),
