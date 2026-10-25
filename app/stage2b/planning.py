@@ -28,8 +28,19 @@ class PlanningError(Exception):
                 'complete_plan_created':False, 'synthetic_fallback_used':False}
 
 
-def resolve_point(point: PlacePoint, resolver: Callable | None):
+def resolve_point(point: PlacePoint, resolver: Callable | None, search_point_matcher: Callable | None = None):
     if point.source != 'catalogue_representative':
+        if point.source == 'onemap_search' and resolver is not None and search_point_matcher is not None:
+            match = search_point_matcher(point.label, point.latitude, point.longitude)
+            if match:
+                result = resolver(match['entity_id'], match['build_id'])
+                entity = result['entity']
+                return {'point':point, 'category':entity.get('category') or 'unknown',
+                        'suggested_duration':entity.get('suggested_duration'),
+                        'regular_hours_evidence':entity.get('regular_hours_evidence', []),
+                        'opening_hours_display':entity.get('opening_hours_display'),
+                        'source_checked':True, 'entrance_verified':False,
+                        'catalogue_metadata_match':match}
         return {'point':point, 'category':'unknown', 'regular_hours_evidence':[], 'opening_hours_display':None,
                 'source_checked':False, 'entrance_verified':False}
     if resolver is None:
@@ -50,12 +61,12 @@ def resolve_point(point: PlacePoint, resolver: Callable | None):
             'source_checked':True, 'entrance_verified':False}
 
 
-def prepare(request, resolver=None):
-    origin = resolve_point(request.origin, resolver)
-    finish = resolve_point(request.finish, resolver) if request.finish else None
+def prepare(request, resolver=None, search_point_matcher=None):
+    origin = resolve_point(request.origin, resolver, search_point_matcher)
+    finish = resolve_point(request.finish, resolver, search_point_matcher) if request.finish else None
     visits = []
     for v in request.visits:
-        place = resolve_point(v.point, resolver)
+        place = resolve_point(v.point, resolver, search_point_matcher)
         reviewed = place.get('suggested_duration')
         if v.stay_minutes is None and v.stay_profile == 'takeaway' and reviewed and reviewed.get('takeaway'):
             # Just buying something: short fixed time, no range.
@@ -119,7 +130,7 @@ def validate_route(route, mode):
 
 
 async def calculate(request: PlanRequest, client, cache, resolver=None, disconnected=None):
-    prepared = prepare(request, resolver)
+    prepared = prepare(request, resolver, search_point_matcher)
     generation = cache.generation(request.session_id)
     legs, cache_hits, provider_calls = [], 0, 0
     for index, (a,b) in enumerate(zip(prepared['points'], prepared['points'][1:])):
