@@ -81,7 +81,7 @@ def test_planning_integration_marks_visit_open(monkeypatch):
     prepared = planning.prepare(req, resolver)
     leg = {
         "leg_id": "leg-1", "index": 0, "origin": origin.model_dump(), "destination": place.model_dump(),
-        "mode": "walk", "distance_m": 700, "duration_s": 600,
+        "mode": "walk", "kind": "provider_route", "distance_m": 700, "duration_s": 600,
         "geometry": {"type": "LineString", "coordinates": [[103.85,1.30],[103.86,1.31]]},
         "endpoint_review_required": False,
         "diagnostics": {"large_detour_flag": False, "geometry_summary_mismatch": False},
