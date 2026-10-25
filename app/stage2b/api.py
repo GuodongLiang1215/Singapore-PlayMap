@@ -23,7 +23,20 @@ class ClearRequest(Contract):
 
 
 class SpatialRecommendationRequest(Contract):
-    session_id: str = Field(pattern=r'^[a-f0-9]{32}
+    session_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    revision: int = Field(default=0, ge=0)
+    anchor: __import__('app.stage2b.models', fromlist=['PlacePoint']).PlacePoint
+    mode: str = Field(default='walk', pattern=r'^(walk|drive|cycle)$')
+    radius_m: float = Field(default=1000, gt=0, le=5000)
+    category: str = Field(default='', max_length=40)
+    q: str = Field(default='', max_length=160)
+    limit: int = Field(default=20, ge=1, le=100)
+    max_suggestions: int = Field(default=5, ge=1, le=20)
+    max_travel_minutes: int | None = Field(default=None, gt=0, le=1440)
+    force_refresh: bool = False
+
+
+class AlternativeRequest(Contract):
     plan_request: PlanRequest
     current_plan: dict
     leg_id: str = Field(pattern=r'^leg-[1-9][0-9]*$')
