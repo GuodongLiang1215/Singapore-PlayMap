@@ -127,3 +127,41 @@ def test_planning_without_departure_time_does_not_claim_hours_checked():
     assert plan["visits"][0]["opening_status"] == "unknown"
     assert plan["opening_hours_checked"] is False
     assert plan["itinerary_feasible"] is None
+
+
+def test_onemap_matched_metadata_closes_artscience_after_1800():
+    from datetime import datetime
+    from app.stage2b import planning
+    from app.stage2b.models import PlanRequest, PlacePoint, Visit, TimeSettings
+
+    origin=PlacePoint(latitude=1.289842,longitude=103.778075,label="Origin",source="user_map",confirmed=True)
+    museum=PlacePoint(latitude=1.286223958762737,longitude=103.8592711215884,
+        label="MARINA BAY SANDS (ARTSCIENCE MUSEUM)",source="onemap_search",confirmed=True)
+    req=PlanRequest(session_id="e"*32,origin=origin,
+        visits=[Visit(visit_id="v1",point=museum,stay_minutes=60)],
+        mode="drive",time=TimeSettings(mode="estimate",
+            departure_at=datetime.fromisoformat("2026-10-25T20:11:00+08:00")))
+
+    def matcher(label,lat,lon):
+        return {"entity_id":"place:stb_attractions:1027","build_id":"build-1",
+                "distance_m":24.99,"name_score":0.94}
+    def resolver(uid,build):
+        return {"entity":{"category":"tourism",
+            "suggested_duration":{"short":45,"regular":90,"long":120,"basis":"estimate"},
+            "regular_hours_evidence":[],"opening_hours_display":"每日 9:00–18:00"}}
+
+    prepared=planning.prepare(req,resolver,matcher)
+    leg={"leg_id":"leg-1","index":0,"kind":"provider_route",
+        "origin":origin.model_dump(),"destination":museum.model_dump(),"provider":"OneMap","mode":"drive",
+        "queried_at":None,"distance_m":12600,"duration_s":1337,
+        "geometry":{"type":"LineString","coordinates":[[103.778075,1.289842],[103.8592711215884,1.286223958762737]]},
+        "endpoint_offsets_m":{"origin":0.0,"destination":0.0},"endpoint_review_required":False,
+        "diagnostics":{"large_detour_flag":False,"geometry_summary_mismatch":False},"reused_in_memory":False,"cache_age_s":0.0}
+    plan=planning.assemble(req,prepared,[leg])
+    visit=plan["visits"][0]
+    assert visit["category"]=="tourism"
+    assert visit["opening_hours_display"]=="每日 9:00–18:00"
+    assert visit["arrival_at"].startswith("2026-10-25T20:33")
+    assert visit["opening_status"]=="closed_at_arrival"
+    assert plan["opening_hours_checked"] is True
+    assert plan["itinerary_feasible"] is False
