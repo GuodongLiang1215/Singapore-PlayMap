@@ -83,3 +83,12 @@ def test_large_reviewed_destination_can_match_named_access_point_beyond_close_ra
     match=catalogue.match_search_point("SINGAPORE BOTANIC GARDENS (BOTANY CENTRE)",1.3105,103.8168)
     assert match["entity_id"]=="place:stb_attractions:988"
     assert match["match_scope"]=="reviewed_large_destination"
+
+
+def test_large_reviewed_destination_rejects_unrelated_name_even_when_within_wide_radius(monkeypatch):
+    from app.stage1c import api as catalogue
+    rows=[{"entity_id":"place:stb_attractions:988","display_title":"Singapore Botanic Gardens",
+           "latitude":1.3138,"longitude":103.8159,"entrance_count":3,"search_text":""}]
+    monkeypatch.setattr(catalogue,"snapshot",lambda build_id=None:("unused",{"build_id":"build-1"}))
+    monkeypatch.setattr(catalogue,"_nearby_rows",lambda path,build_id:rows)
+    assert catalogue.match_search_point("UNRELATED CAFE",1.31,103.82) is None
