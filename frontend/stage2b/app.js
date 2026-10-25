@@ -112,14 +112,24 @@ function renderResult(r){
  const labels={no_budget:'未提供时间预算：以上是这套玩法所需时长的建议，不是在推断你的空闲时间。',all_estimates_exceed:'当前顺序与停留范围均超过时间预算。未自动删地点或缩短停留。',reference_exceeds:'参考安排超过预算，但较短停留假设可能适合。请自行修改，不自动压缩。',reference_fits_upper_exceeds:'参考安排在预算内，但较长停留假设会超时。',all_estimates_fit:'按照当前通行及停留估计，参考值和停留范围均未超预算。'};
  const check=r.budget_check;$('budget-check').textContent=labels[check.status]+(check.slack_s===null?'':` 参考${check.slack_s>=0?'剩余':'超出'} ${T.minutes(Math.abs(check.slack_s))}。`);$('budget-check').className=check.status==='no_budget'||check.status==='all_estimates_fit'?'budget-ok':'budget-warning';
  $('journey-summary').textContent=`${r.visits.length} 处停留 · ${r.legs.length} 段连接 · 服务商累计 ${(x.distance_m/1000).toFixed(2)} km · ${MODE[r.mode]} · ${r.route_calls.provider_calls} 次新路径请求 / ${r.route_calls.cache_hits} 段短时复用。`;
- $('clock-note').textContent=(r.time.departure_at?'以下为新加坡时间 UTC+8。':'未指定出发时刻：以下 +HH:MM 表示从出发开始的相对时间。')+' 出发时刻仅排时间轴；未预测未来交通，也未核验开放时间。';
+ $('clock-note').textContent=(r.time.departure_at?'以下为新加坡时间 UTC+8。':'未指定出发时刻：以下 +HH:MM 表示从出发开始的相对时间。')+' 出发时刻仅排时间轴；未预测未来交通。'+(r.opening_hours_checked?' 已对可明确解析的目录营业时间做静态检查；复杂时段、临时关闭及最后入场仍需核验。':' 未能完成可用的营业时间检查。');
  $('plan-version').textContent='当前方案版本 '+r.revision;
  const flagged=r.legs.some(l=>l.endpoint_review_required||l.diagnostics.large_detour_flag||l.diagnostics.geometry_summary_mismatch);
  const walkingCheck=r.walking_constraint_check;
  const walkingViolated=walkingCheck?.status==='violation';
- $('plan-status').className=(flagged||walkingViolated)?'warning':'';
+ const hoursProblems=r.visits.filter(v=>['closed_at_arrival','insufficient_time'].includes(v.opening_status));
+ $('plan-status').className=(flagged||walkingViolated||hoursProblems.length)?'warning':'';
 
-if(walkingViolated){
+if(hoursProblems.length){
+    const detail=hoursProblems.map(v=>{
+      const h=v.opening_hours_display||'营业时间未显示';
+      return v.opening_status==='closed_at_arrival'
+        ? `${v.point.label}：预计到达时不在开放时段内（${h}）`
+        : `${v.point.label}：到达时仍开放，但按当前停留时长会超过关门时间（${h}）`;
+    }).join('；');
+    $('plan-status').textContent='营业时间检查发现当前行程可能不可行。'+detail+'。';
+
+}else if(walkingViolated){
     const violations=walkingCheck.violations;
 
     const detail=violations.map(v =>
@@ -144,7 +154,13 @@ if(walkingViolated){
   const time=node('div',undefined,'time-label');time.append(node('span',T.axisLabel(row)),node('span','↓ '+T.axisLabel(row,true)));const content=node('div',undefined,'timeline-content');
   content.append(node('span',row.kind==='travel'?'通行 · '+MODE[r.mode]:row.kind==='visit'?'停留 '+(row.visit_index+1):'整体预留','timeline-type'),node('strong',row.title),node('p',T.minutes(row.duration_s),'small'));
   if(row.kind==='travel'){const leg=r.legs[row.leg_index];content.append(node('p',leg.kind==='same_selected_coordinate'?'相同选定坐标：未生成连接线，按0转移时间。':`${(leg.distance_m/1000).toFixed(2)} km · ${leg.reused_in_memory?'短时复用':'本次请求'} · 端点偏移 ${leg.endpoint_offsets_m.origin.toFixed(0)} / ${leg.endpoint_offsets_m.destination.toFixed(0)} m`,'small'));if(leg.endpoint_review_required||leg.diagnostics.large_detour_flag)content.append(node('p','请核对这一段：端点偏移或明显绕行；没有自动换方式。','leg-warning'));}
-  if(row.kind==='visit'){const v=r.visits[row.visit_index];content.append(node('p',(v.stay_basis==='user_specified'?'用户指定停留':'项目初始停留假设')+` · 范围 ${v.stay_range_minutes.join('—')} 分钟 · 开放条件未核验`,'small'));}
+  if(row.kind==='visit'){const v=r.visits[row.visit_index],h=v.opening_hours_display;
+   const hoursText=v.opening_status==='feasible'?'营业时间检查：当前安排可行':
+    v.opening_status==='closed_at_arrival'?'营业时间检查：预计到达时已关闭':
+    v.opening_status==='insufficient_time'?'营业时间检查：当前停留会超过关门时间':
+    h?'营业时间规则需人工核对':'无可用营业时间';
+   content.append(node('p',(v.stay_basis==='user_specified'?'用户指定停留':'项目初始停留假设')+` · 范围 ${v.stay_range_minutes.join('—')} 分钟 · ${hoursText}${h?' · '+h:''}`,'small'));
+  }
   const focus=()=>{for(const e of panel.querySelectorAll('.is-focus'))e.classList.remove('is-focus');el.classList.add('is-focus');if(row.kind==='travel')mapView.focusLeg(row.leg_index);else if(row.kind==='visit')mapView.focusPoint(r.visits[row.visit_index].point);};el.onclick=focus;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus();}};el.append(time,content);panel.append(el);
  }
  $('plan-warnings').replaceChildren(...r.cautions.map(t=>node('p',t,'small')));
