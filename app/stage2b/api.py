@@ -8,7 +8,7 @@ from app.stage1c import api as catalogue
 from app.stage2a.models import Contract
 from app.stage2b.models import PlanRequest, MAX_VISITS
 from app.stage2b.cache import SegmentCache
-from app.stage2b.planning import calculate, PlanningError
+from app.stage2b.planning import calculate, PlanningError, resolve_point
 from app.stage2b.alternatives import suggest_alternatives
 
 router = APIRouter(prefix='/api/stage2b', tags=['Stage2B manually ordered itineraries'])
@@ -113,6 +113,24 @@ async def alternatives(body: AlternativeRequest, request: Request):
             'message':'当前方案与超限路段无法对应到可替换停留点；原行程未修改。',
             'itinerary_modified':False,
         }) from exc
+
+
+@router.post('/resolve-point-metadata')
+def resolve_point_metadata(point: __import__('app.stage2b.models',fromlist=['PlacePoint']).PlacePoint):
+    """Diagnostic: show planning metadata resolution for one confirmed point."""
+    resolved=resolve_point(
+        point,
+        resolver=lambda uid,build: catalogue.entity(uid,build),
+        search_point_matcher=catalogue.match_search_point,
+    )
+    return {
+        'source':point.source,
+        'category':resolved.get('category'),
+        'opening_hours_display':resolved.get('opening_hours_display'),
+        'suggested_duration':resolved.get('suggested_duration'),
+        'catalogue_metadata_match':resolved.get('catalogue_metadata_match'),
+        'source_checked':resolved.get('source_checked',False),
+    }
 
 
 @router.post('/clear-memory')
