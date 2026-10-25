@@ -1,11 +1,10 @@
-from app.stage2a.models import Location
-from app.stage2b.models import PlanRequest, Visit, TimeSettings
+from app.stage2b.models import PlanRequest, PlacePoint, Visit, TimeSettings
 from app.stage2b import planning
 
 
 def _plan(budget_minutes, stay_minutes=None):
-    origin=Location(latitude=1.30,longitude=103.80,label="Origin",source="user_map",confirmed=True)
-    place=Location(latitude=1.31,longitude=103.81,label="Park",source="user_map",confirmed=True)
+    origin=PlacePoint(latitude=1.30,longitude=103.80,label="Origin",source="user_map",confirmed=True)
+    place=PlacePoint(latitude=1.31,longitude=103.81,label="Park",source="user_map",confirmed=True)
     req=PlanRequest(
         session_id="f"*32, origin=origin,
         visits=[Visit(visit_id="v1",point=place,stay_minutes=stay_minutes)],
