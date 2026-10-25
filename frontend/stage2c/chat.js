@@ -136,6 +136,28 @@
    status(e.message+(e.code?' ['+e.code+']':'')+(hint?'；'+hint:'')+'；原行程未修改。','error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;}}
  }
+ function reportOpeningHours(plan){
+  const visits=plan?.visits||[];
+  const problems=[];
+  const unknown=[];
+  for(const visit of visits){
+   const check=visit.opening_hours_check||{};
+   const label=visit.point?.label||'该地点';
+   if(check.status==='closed_at_arrival'){
+    problems.push(`${label}：预计到达时不在已解析的开放时段内（${check.opening_hours_display||'营业时间未显示'}）。`);
+   }else if(check.status==='insufficient_time'){
+    problems.push(`${label}：到达时仍开放，但按当前停留时长会超过关门时间（${check.opening_hours_display||'营业时间未显示'}）。`);
+   }else if(check.status==='unknown'&&check.opening_hours_display){
+    unknown.push(`${label}：${check.opening_hours_display}`);
+   }
+  }
+  if(problems.length){
+   message('assistant','营业时间检查发现当前行程可能不可行：\n'+problems.join('\n')+'\n当前行程没有自动修改。');
+  }
+  if(unknown.length){
+   message('assistant','以下营业时间规则暂时无法可靠自动判断，请人工核对：\n'+unknown.join('\n'));
+  }
+ }
  async function suggestWalkingAlternatives(plan){
   const check=plan?.walking_constraint_check;
   if(!check||check.status!=='violation'||!check.violations?.length)return;
@@ -196,7 +218,7 @@
     message('assistant','还差一个出发点才能算时间。可以点搜索栏旁的定位钮，或直接说出起点名称。');
    status('草案已采用，地图与行程清单已同步。');
    controller=null;el('chat-cancel').disabled=true;el('chat-send').disabled=false;
-   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan){message('assistant','为你安排了 '+plan.visits.length+' 处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。下面是行程详情；营业与开放条件尚未核验。');await suggestWalkingAlternatives(plan);}else message('assistant','路线本次没能算出来，原因列在下面的行程总览里；行程仍可以继续改。');}
+   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan){message('assistant','为你安排了 '+plan.visits.length+' 处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。下面是行程详情。');reportOpeningHours(plan);await suggestWalkingAlternatives(plan);}else message('assistant','路线本次没能算出来，原因列在下面的行程总览里；行程仍可以继续改。');}
   }catch(e){if(e.name==='AbortError')return;metrics.failed++;metrics.error=e.code||'APPLY_FAILED';metrics.lastFailure=e.safeDetail||PlayMapChatState.safeErrorDetail({request_diagnostic:{phase:'resolve_validation',wire_version:PlayMapChatState.PATCH,generation_attempts:0}});PlayMapChatState.recordFailure(metrics,{generation_attempts:0});status(e.message+(e.code?' ['+e.code+']':''),'error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;el('chat-apply').disabled=!chosenEnough();}}
  }
