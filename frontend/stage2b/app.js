@@ -160,6 +160,12 @@ if(hoursProblems.length){
     v.opening_status==='insufficient_time'?'营业时间检查：当前停留会超过关门时间':
     h?'营业时间规则需人工核对':'无可用营业时间';
    content.append(node('p',(v.stay_basis==='user_specified'?'用户指定停留':'项目初始停留假设')+` · 范围 ${v.stay_range_minutes.join('—')} 分钟 · ${hoursText}${h?' · '+h:''}`,'small'));
+   if(v.selected_entrance){
+    const why=v.entrance_selection_basis==='fastest_reachable_entrance_candidate'?'按当前出发方向的 OneMap 实际通行时间选择':'当前仅有一个可用入口候选';
+    content.append(node('p',`建议通行点：${v.selected_entrance.label} · ${why} · 入口候选，未实地核验；离开时沿用同一通行点，不假设园内可穿行到其他出口。`,'small'));
+   }else if(v.entrance_selection_basis==='representative_point_all_candidates_unreachable'){
+    content.append(node('p','现有入口候选均未取得可用路线，本次退回景点代表点；请人工核对实际入口。','leg-warning'));
+   }
   }
   const focus=()=>{for(const e of panel.querySelectorAll('.is-focus'))e.classList.remove('is-focus');el.classList.add('is-focus');if(row.kind==='travel')mapView.focusLeg(row.leg_index);else if(row.kind==='visit')mapView.focusPoint(r.visits[row.visit_index].point);};el.onclick=focus;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus();}};el.append(time,content);panel.append(el);
  }
