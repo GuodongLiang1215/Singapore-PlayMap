@@ -116,3 +116,31 @@ def test_suggest_alternatives_filters_and_ranks_complete_plan_results():
     assert result["suggestions"][0]["route_duration_min"] == 8
     assert result["evaluated_count"] == 3
     assert result["feasible_count"] == 1
+
+
+def test_suggest_alternatives_passes_category_to_nearby_search():
+    req = request()
+    seen = {}
+
+    def nearby(**kwargs):
+        seen.update(kwargs)
+        return {
+            "build_id": "build-1",
+            "distance_kind": "straight_line_not_walking_route",
+            "places": [],
+        }
+
+    async def calculate_plan(_trial):
+        raise AssertionError("No candidates should be evaluated in this test")
+
+    result = asyncio.run(suggest_alternatives(
+        request=req,
+        current_plan=current_plan(),
+        leg_id="leg-1",
+        nearby=nearby,
+        calculate_plan=calculate_plan,
+        category="nature",
+    ))
+
+    assert seen["category"] == "nature"
+    assert result["status"] == "no_feasible_suggestion"
