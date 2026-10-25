@@ -45,3 +45,26 @@ def test_unmatched_onemap_search_point_stays_unknown():
     assert result["category"] == "unknown"
     assert result["opening_hours_display"] is None
     assert result["source_checked"] is False
+
+
+def test_verbose_onemap_artscience_label_uses_artscience_catalogue_metadata():
+    point = Location(
+        latitude=1.286223958762737, longitude=103.8592711215884,
+        label="MARINA BAY SANDS (ARTSCIENCE MUSEUM)",
+        source="onemap_search", confirmed=True,
+    )
+    # Regression contract: once the Stage1C matcher selects the reviewed
+    # ArtScience entity, planning must not substitute metadata from a nearby POI.
+    def matcher(label, lat, lon):
+        return {"entity_id":"place:stb_attractions:1027","build_id":"build-1",
+                "distance_m":0.01,"name_score":0.95}
+    def resolver(uid, build):
+        return {"entity":{
+            "category":"tourism",
+            "suggested_duration":{"short":45,"regular":90,"long":120,"basis":"estimate"},
+            "regular_hours_evidence":[],
+            "opening_hours_display":"每日 9:00–18:00",
+        }}
+    result=resolve_point(point,resolver,matcher)
+    assert result["category"]=="tourism"
+    assert result["opening_hours_display"]=="每日 9:00–18:00"
