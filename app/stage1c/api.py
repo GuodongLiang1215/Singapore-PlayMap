@@ -144,32 +144,61 @@ def _nearby_rows(path, build_id):
 def match_search_point(label: str, latitude: float, longitude: float, max_distance_m: float = 80.0):
     """Conservatively link a confirmed OneMap search point to one visible catalogue entity.
 
-    Coordinates are not replaced. A match only supplies catalogue metadata.
+    Identity evidence comes from place names; proximity only narrows candidates.
+    Coordinates are never replaced.
     """
     path, report = snapshot()
-    query_tokens={t for t in normal_name(label).split() if len(t)>=3}
+    query=normal_name(label)
+    query_tokens={t for t in query.split() if len(t)>=3}
     if not query_tokens:
         return None
+
+    def name_score(entity):
+        names=[entity.get('display_title') or '']
+        # _nearby_rows intentionally carries only compact fields. search_text is
+        # useful for retrieval but too broad for identity matching, so do not use
+        # it as positive identity evidence.
+        best=0.0
+        for raw in names:
+            name=normal_name(raw)
+            if not name:
+                continue
+            if name==query:
+                best=max(best,1.0)
+                continue
+            nt={t for t in name.split() if len(t)>=3}
+            if not nt:
+                continue
+            # The shorter catalogue title may be contained in a verbose OneMap
+            # building label, e.g. "MARINA BAY SANDS (ARTSCIENCE MUSEUM)".
+            coverage=len(nt & query_tokens)/len(nt)
+            query_coverage=len(nt & query_tokens)/len(query_tokens)
+            if coverage==1.0:
+                best=max(best,0.9+0.1*query_coverage)
+            elif coverage>=0.8 and query_coverage>=0.5:
+                best=max(best,0.8)
+        return best
+
     candidates=[]
     for r in _nearby_rows(path, report['build_id']):
         d=_metres(latitude, longitude, r['latitude'], r['longitude'])
         if d>max_distance_m:
             continue
-        text_tokens={t for t in normal_name((r.get('display_title') or '')+' '+(r.get('search_text') or '')).split() if len(t)>=3}
-        overlap=len(query_tokens & text_tokens)/max(1,len(query_tokens))
-        # Require strong lexical support. Exact/coincident coordinates alone are
-        # not enough to assert that two named places are the same entity.
-        if overlap>=0.6:
-            candidates.append((overlap,-d,r))
+        score=name_score(r)
+        if score>=0.9:
+            candidates.append((score,-d,r))
     if not candidates:
         return None
     candidates.sort(key=lambda x:(x[0],x[1]),reverse=True)
     best=candidates[0]
-    # Ambiguous near-ties are intentionally left unmatched.
-    if len(candidates)>1 and best[0]-candidates[1][0]<0.15 and abs(best[1]-candidates[1][1])<20:
-        return None
+    if len(candidates)>1:
+        second=candidates[1]
+        # If two nearby entities have equally convincing names, identity is
+        # ambiguous even when one coordinate is a little closer.
+        if best[0]-second[0]<0.05 and abs(best[1]-second[1])<20:
+            return None
     return {'entity_id':best[2]['entity_id'],'build_id':report['build_id'],
-            'distance_m':round(-best[1],2),'token_overlap':round(best[0],3)}
+            'distance_m':round(-best[1],2),'name_score':round(best[0],3)}
 
 
 @router.get('/nearby')
