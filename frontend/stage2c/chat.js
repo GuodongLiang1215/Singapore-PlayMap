@@ -167,16 +167,12 @@
   const legIndex=Number(match[1])-1;
   const visitIndex=Math.min(legIndex,(plan.visits?.length||1)-1);
   const visit=plan.visits?.[visitIndex];
-  const point=visit?.point;
-  if(!point?.entity_id||!point?.catalogue_build_id){
-   message('assistant','这段步行超过你的限制，但当前停留点没有可追溯的目录类别，暂时不能自动筛选同类替代地点。');
+  const category=visit?.category||'';
+  if(!category||category==='unknown'){
+   message('assistant','这段步行超过你的限制，但当前停留点没有可用类别，暂时不能自动筛选同类替代地点。');
    return;
   }
   try{
-   const categoryResult=await request('visit-category',{
-    entity_id:point.entity_id,catalogue_build_id:point.catalogue_build_id
-   });
-   const category=categoryResult.categories?.[0]||'';
    const snap=bridge.snapshot();
    const response=await fetch('/api/stage2b/alternatives',{
     method:'POST',
