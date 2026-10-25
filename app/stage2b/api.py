@@ -51,7 +51,8 @@ async def plan(body: PlanRequest, request: Request):
     try:
         result = await calculate(body,geo.client,cache,
             resolver=lambda uid,build:catalogue.entity(uid,build),
-            disconnected=request.is_disconnected)
+            disconnected=request.is_disconnected,
+            search_point_matcher=catalogue.match_search_point)
     except PlanningError as exc:
         with _lock: _counts['plans_cancelled' if exc.code=='CLIENT_CANCELLED' else 'plans_failed'] += 1
         raise HTTPException(exc.status,detail=exc.public()) from None
@@ -87,6 +88,7 @@ async def alternatives(body: AlternativeRequest, request: Request):
             trial, geo.client, cache,
             resolver=lambda uid,build: catalogue.entity(uid,build),
             disconnected=request.is_disconnected,
+            search_point_matcher=catalogue.match_search_point,
         )
 
     try:
