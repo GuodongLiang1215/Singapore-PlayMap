@@ -68,3 +68,18 @@ def test_verbose_onemap_artscience_label_uses_artscience_catalogue_metadata():
     result=resolve_point(point,resolver,matcher)
     assert result["category"]=="tourism"
     assert result["opening_hours_display"]=="每日 9:00–18:00"
+
+
+def test_large_reviewed_destination_can_match_named_access_point_beyond_close_radius(monkeypatch):
+    from app.stage1c import api as catalogue
+    rows=[
+        {"entity_id":"place:stb_attractions:988","display_title":"Singapore Botanic Gardens",
+         "latitude":1.3138,"longitude":103.8159,"entrance_count":3,"search_text":""},
+        {"entity_id":"place:overture_places:nearby-food","display_title":"Botanic Cafe",
+         "latitude":1.3140,"longitude":103.8158,"entrance_count":0,"search_text":""},
+    ]
+    monkeypatch.setattr(catalogue,"snapshot",lambda build_id=None:("unused",{"build_id":"build-1"}))
+    monkeypatch.setattr(catalogue,"_nearby_rows",lambda path,build_id:rows)
+    match=catalogue.match_search_point("SINGAPORE BOTANIC GARDENS (BOTANY CENTRE)",1.3105,103.8168)
+    assert match["entity_id"]=="place:stb_attractions:988"
+    assert match["match_scope"]=="reviewed_large_destination"
