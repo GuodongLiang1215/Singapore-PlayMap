@@ -144,8 +144,9 @@ def _nearby_rows(path, build_id):
 def match_search_point(label: str, latitude: float, longitude: float, max_distance_m: float = 80.0):
     """Conservatively link a confirmed OneMap search point to one visible catalogue entity.
 
-    Identity evidence comes from place names; proximity only narrows candidates.
-    Coordinates are never replaced.
+    Ordinary entities require close proximity. Reviewed core attractions may match
+    farther away when the place name is uniquely strong; this covers large parks
+    whose representative point and named access/search point are hundreds of metres apart.
     """
     path, report = snapshot()
     query=normal_name(label)
@@ -154,51 +155,46 @@ def match_search_point(label: str, latitude: float, longitude: float, max_distan
         return None
 
     def name_score(entity):
-        names=[entity.get('display_title') or '']
-        # _nearby_rows intentionally carries only compact fields. search_text is
-        # useful for retrieval but too broad for identity matching, so do not use
-        # it as positive identity evidence.
-        best=0.0
-        for raw in names:
-            name=normal_name(raw)
-            if not name:
-                continue
-            if name==query:
-                best=max(best,1.0)
-                continue
-            nt={t for t in name.split() if len(t)>=3}
-            if not nt:
-                continue
-            # The shorter catalogue title may be contained in a verbose OneMap
-            # building label, e.g. "MARINA BAY SANDS (ARTSCIENCE MUSEUM)".
-            coverage=len(nt & query_tokens)/len(nt)
-            query_coverage=len(nt & query_tokens)/len(query_tokens)
-            if coverage==1.0:
-                best=max(best,0.9+0.1*query_coverage)
-            elif coverage>=0.8 and query_coverage>=0.5:
-                best=max(best,0.8)
-        return best
+        name=normal_name(entity.get('display_title') or '')
+        if not name:
+            return 0.0
+        if name==query:
+            return 1.0
+        nt={t for t in name.split() if len(t)>=3}
+        if not nt:
+            return 0.0
+        coverage=len(nt & query_tokens)/len(nt)
+        query_coverage=len(nt & query_tokens)/len(query_tokens)
+        if coverage==1.0:
+            return 0.9+0.1*query_coverage
+        if coverage>=0.8 and query_coverage>=0.5:
+            return 0.8
+        return 0.0
 
-    candidates=[]
+    close=[]
+    reviewed_large=[]
     for r in _nearby_rows(path, report['build_id']):
         d=_metres(latitude, longitude, r['latitude'], r['longitude'])
-        if d>max_distance_m:
-            continue
         score=name_score(r)
-        if score>=0.9:
-            candidates.append((score,-d,r))
+        if score>=0.9 and d<=max_distance_m:
+            close.append((score,-d,r))
+            continue
+        # Large reviewed destinations are allowed a wider identity radius only
+        # with very strong name evidence and actual entrance metadata.
+        if score>=0.94 and d<=1500 and (r.get('entrance_count') or 0)>0:
+            reviewed_large.append((score,-d,r))
+    candidates=close or reviewed_large
     if not candidates:
         return None
     candidates.sort(key=lambda x:(x[0],x[1]),reverse=True)
     best=candidates[0]
     if len(candidates)>1:
         second=candidates[1]
-        # If two nearby entities have equally convincing names, identity is
-        # ambiguous even when one coordinate is a little closer.
-        if best[0]-second[0]<0.05 and abs(best[1]-second[1])<20:
+        if best[0]-second[0]<0.05 and abs(best[1]-second[1])<100:
             return None
     return {'entity_id':best[2]['entity_id'],'build_id':report['build_id'],
-            'distance_m':round(-best[1],2),'name_score':round(best[0],3)}
+            'distance_m':round(-best[1],2),'name_score':round(best[0],3),
+            'match_scope':'close' if -best[1]<=max_distance_m else 'reviewed_large_destination'}
 
 
 @router.get('/nearby')
