@@ -181,7 +181,7 @@ def match_search_point(label: str, latitude: float, longitude: float, max_distan
             continue
         # Large reviewed destinations are allowed a wider identity radius only
         # with very strong name evidence and actual entrance metadata.
-        if score>=0.94 and d<=1500 and (r.get('entrance_count') or 0)>0:
+        if score>=0.94 and d<=5000 and (r.get('entrance_count') or 0)>0:
             reviewed_large.append((score,-d,r))
     candidates=close or reviewed_large
     if not candidates:
