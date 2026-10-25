@@ -129,7 +129,7 @@ def validate_route(route, mode):
         raise PlanningError('INVALID_SEGMENT_RESPONSE','一段路径的模式、线形或时间未通过检查，没有用零或直线代替。',502) from None
 
 
-async def calculate(request: PlanRequest, client, cache, resolver=None, disconnected=None):
+async def calculate(request: PlanRequest, client, cache, resolver=None, disconnected=None, search_point_matcher=None):
     prepared = prepare(request, resolver, search_point_matcher)
     generation = cache.generation(request.session_id)
     legs, cache_hits, provider_calls = [], 0, 0
