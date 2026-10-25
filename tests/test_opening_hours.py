@@ -91,3 +91,39 @@ def test_planning_integration_marks_visit_open(monkeypatch):
     assert plan["visits"][0]["opening_status"] == "feasible"
     assert plan["opening_hours_checked"] is True
     assert plan["itinerary_feasible"] is True
+
+
+def test_planning_without_departure_time_does_not_claim_hours_checked():
+    from app.stage2b import planning
+    from app.stage2b.models import PlanRequest, PlacePoint, Visit
+
+    origin = PlacePoint(latitude=1.30, longitude=103.85, label="Origin", source="user_map", confirmed=True)
+    place = PlacePoint(
+        latitude=1.31, longitude=103.86, label="Museum", source="catalogue_representative",
+        entity_id="museum-1", catalogue_build_id="build-1", confirmed=True,
+    )
+    req = PlanRequest(
+        session_id="d" * 32, origin=origin,
+        visits=[Visit(visit_id="v1", point=place, stay_minutes=60)], mode="walk",
+    )
+
+    def resolver(uid, build):
+        return {"entity": {
+            "entity_id": uid, "default_exploration_visible": True,
+            "latitude": 1.31, "longitude": 103.86, "display_title": "Museum",
+            "category": "tourism", "suggested_duration": None, "regular_hours_evidence": [],
+            "opening_hours_display": "每日 10:00–18:00",
+        }}
+
+    prepared = planning.prepare(req, resolver)
+    leg = {
+        "leg_id": "leg-1", "index": 0, "origin": origin.model_dump(), "destination": place.model_dump(),
+        "mode": "walk", "kind": "provider_route", "distance_m": 700, "duration_s": 600,
+        "geometry": {"type": "LineString", "coordinates": [[103.85,1.30],[103.86,1.31]]},
+        "endpoint_review_required": False,
+        "diagnostics": {"large_detour_flag": False, "geometry_summary_mismatch": False},
+    }
+    plan = planning.assemble(req, prepared, [leg])
+    assert plan["visits"][0]["opening_status"] == "unknown"
+    assert plan["opening_hours_checked"] is False
+    assert plan["itinerary_feasible"] is None
