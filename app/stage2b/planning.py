@@ -9,6 +9,7 @@ from app.stage2a.models import RouteRequest, distance_m
 from app.stage2a.transport import ProviderError
 from app.stage2b.models import PlanRequest, PlacePoint
 from .spatial_constraints import validate_max_walking_time
+from .opening_hours import evaluate_visit_hours
 
 # Explicit, editable project assumptions. NOT empirical visitor-duration statistics.
 BASE_STAYS = {
@@ -29,7 +30,7 @@ class PlanningError(Exception):
 
 def resolve_point(point: PlacePoint, resolver: Callable | None):
     if point.source != 'catalogue_representative':
-        return {'point':point, 'category':'unknown', 'regular_hours_evidence':[],
+        return {'point':point, 'category':'unknown', 'regular_hours_evidence':[], 'opening_hours_display':None,
                 'source_checked':False, 'entrance_verified':False}
     if resolver is None:
         raise PlanningError('CATALOGUE_UNAVAILABLE', '全岛目录不可读，请恢复目录，或自行确认地图／搜索位置。', 409)
@@ -45,6 +46,7 @@ def resolve_point(point: PlacePoint, resolver: Callable | None):
     return {'point':normalized, 'category':entity.get('category') or 'unknown',
             'suggested_duration':entity.get('suggested_duration'),
             'regular_hours_evidence':entity.get('regular_hours_evidence', []),
+            'opening_hours_display':entity.get('opening_hours_display'),
             'source_checked':True, 'entrance_verified':False}
 
 
@@ -78,6 +80,7 @@ def prepare(request, resolver=None):
             'stay_basis':basis, 'stay_profile':v.stay_profile,
             'stay_note':'用户设定时长，未独立验证是否足够。' if basis == 'user_specified' else ('外带／顺路购买，按短时间计算，可修改。' if basis == 'place_takeaway' else '按细分类别的初始假设，可修改；不是实测游览时长。' if basis == 'place_category_default' else ('景点建议时长，可修改。' if basis.startswith('place_') else '类别／通用初始假设，可修改；不是实测游览时长或置信区间。')),
             'entrance_verified':False, 'opening_status':'not_checked',
+            'opening_hours_display':place.get('opening_hours_display'),
             'regular_hours_evidence_count':len(place['regular_hours_evidence']),
             'regular_hours_evidence':place['regular_hours_evidence']})
     points = [origin['point']] + [PlacePoint.model_validate(v['point']) for v in visits]
@@ -203,6 +206,11 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
             end = cursor+visit['stay_minutes']*60
             visit['arrival_offset_s'], visit['departure_offset_s'] = cursor, end
             visit['arrival_at'], visit['departure_at'] = stamp(cursor), stamp(end)
+            hours_check = evaluate_visit_hours(
+                arrival_at=visit['arrival_at'], departure_at=visit['departure_at'],
+                opening_hours_display=visit.get('opening_hours_display'))
+            visit['opening_hours_check'] = hours_check
+            visit['opening_status'] = hours_check['status']
             timeline.append({'kind':'visit','visit_id':visit['visit_id'],'visit_index':index,
                 'start_offset_s':cursor,'end_offset_s':end,'start_at':stamp(cursor),'end_at':stamp(end),
                 'duration_s':end-cursor,'title':visit['point']['label']})
@@ -224,7 +232,7 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
     cautions=[
         '按用户指定顺序逐段计算；没有自动推荐地点、优化顺序或调用LLM。',
         '通行时间沿用本次／短时复用的服务商结果；出发时刻仅用于排时间轴，不是未来时段交通预测。',
-        '未核验入口、开放时段、最后入场、票务或实时关闭；时间预算通过不等于整趟行程现实可行。',
+        '开放时段仅对可明确解析的目录营业时间做静态检查；复杂时段、最后入场、临时关闭和票务仍需核验。',
         '路线端点到所选点、场馆内部移动、驾车停车与步行接驳未单独计时；请核对位置与必要预留。',
         '建议范围仅反映设定的停留时长范围；不包含交通随机性，不是统计置信区间。',
     ]
@@ -256,8 +264,20 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
         'walking_constraint_check': walking_check,
         'device_location_used':bool(device),'device_location_accuracy_m':radius,
         'device_accuracy_included_in_estimates':False,
-        'schedule_status':'arithmetic_estimate_only','opening_hours_checked':False,
-        'entrances_verified':False,'itinerary_feasible':None,'route_order_optimised':False,
+        'schedule_status':'arithmetic_estimate_only',
+        'opening_hours_checked':bool(start) and any(v.get('opening_hours_check',{}).get('status')!='unknown' for v in visits),
+        'opening_hours_summary':{
+            'feasible':sum(v.get('opening_status')=='feasible' for v in visits),
+            'closed_at_arrival':sum(v.get('opening_status')=='closed_at_arrival' for v in visits),
+            'insufficient_time':sum(v.get('opening_status')=='insufficient_time' for v in visits),
+            'unknown':sum(v.get('opening_status')=='unknown' for v in visits),
+        },
+        'entrances_verified':False,
+        'itinerary_feasible':(
+            False if any(v.get('opening_status') in ('closed_at_arrival','insufficient_time') for v in visits)
+            else None if any(v.get('opening_status')=='unknown' for v in visits)
+            else True
+        ),'route_order_optimised':False,
         'live_llm':False,'complete_plan_created':True,'all_legs_accounted_for':True,
         'joins':gaps,'route_calls':{'requested_segments':len(legs),'provider_calls':provider_calls,
             'cache_hits':cache_hits,'cache_ttl_seconds':ttl_seconds,
