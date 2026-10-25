@@ -136,6 +136,50 @@
    status(e.message+(e.code?' ['+e.code+']':'')+(hint?'；'+hint:'')+'；原行程未修改。','error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;}}
  }
+ async function suggestWalkingAlternatives(plan){
+  const check=plan?.walking_constraint_check;
+  if(!check||check.status!=='violation'||!check.violations?.length)return;
+  const violation=check.violations[0];
+  const match=/^leg-([1-9][0-9]*)$/.exec(violation.leg_id||'');
+  if(!match)return;
+  const legIndex=Number(match[1])-1;
+  const visitIndex=Math.min(legIndex,(plan.visits?.length||1)-1);
+  const visit=plan.visits?.[visitIndex];
+  const point=visit?.point;
+  if(!point?.entity_id||!point?.catalogue_build_id){
+   message('assistant','这段步行超过你的限制，但当前停留点没有可追溯的目录类别，暂时不能自动筛选同类替代地点。');
+   return;
+  }
+  try{
+   const categoryResult=await request('visit-category',{
+    entity_id:point.entity_id,catalogue_build_id:point.catalogue_build_id
+   });
+   const category=categoryResult.categories?.[0]||'';
+   const snap=bridge.snapshot();
+   const response=await fetch('/api/stage2b/alternatives',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-PlayMap-Client':'stage2b'},
+    body:JSON.stringify({
+     plan_request:{session_id:snap.session_id,revision:snap.revision,...snap.draft},
+     current_plan:plan,leg_id:violation.leg_id,category,
+     radius_m:1000,limit:20,max_suggestions:5
+    }),
+    cache:'no-store'
+   });
+   const result=await response.json();
+   if(!response.ok)throw Error(result.detail?.message||'替代地点筛选失败');
+   if(!result.suggestions?.length){
+    message('assistant',`这段步行约 ${violation.duration_minutes} 分钟，超过你设置的 ${snap.draft.max_walk_minutes} 分钟；附近暂时没有找到满足限制的同类替代地点。`);
+    return;
+   }
+   const lines=result.suggestions.map((x,i)=>
+    `${i+1}. ${x.label}（步行约 ${x.route_duration_min} 分钟）`);
+   message('assistant',
+    `这段步行约 ${violation.duration_minutes} 分钟，超过你设置的 ${snap.draft.max_walk_minutes} 分钟。找到这些符合步行限制的附近同类地点：\n${lines.join('\n')}\n你可以告诉我想换成哪一个；当前行程还没有自动修改。`);
+  }catch(e){
+   message('assistant','这段步行超过你的限制，但替代地点筛选这次没有完成；当前行程没有修改。');
+  }
+ }
  async function adopt(){
   if(!proposal||!chosenEnough())return;const r=proposal,rev=bridge.currentRevision();
   if(r.base_revision!==rev){cancel('草案已过期，请重新发送。');return;}
@@ -152,7 +196,7 @@
     message('assistant','还差一个出发点才能算时间。可以点搜索栏旁的定位钮，或直接说出起点名称。');
    status('草案已采用，地图与行程清单已同步。');
    controller=null;el('chat-cancel').disabled=true;el('chat-send').disabled=false;
-   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan)message('assistant','为你安排了 '+plan.visits.length+' 处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。下面是行程详情；营业与开放条件尚未核验。');else message('assistant','路线本次没能算出来，原因列在下面的行程总览里；行程仍可以继续改。');}
+   if(resolved.ready_to_calculate){const appliedRevision=bridge.currentRevision();await bridge.calculate();if(bridge.currentRevision()!==appliedRevision)return;const plan=bridge.activePlan();if(plan){message('assistant','为你安排了 '+plan.visits.length+' 处停留，参考总时长 '+PlayMapTrip.duration(plan.totals.reference_duration_s)+'。下面是行程详情；营业与开放条件尚未核验。');await suggestWalkingAlternatives(plan);}else message('assistant','路线本次没能算出来，原因列在下面的行程总览里；行程仍可以继续改。');}
   }catch(e){if(e.name==='AbortError')return;metrics.failed++;metrics.error=e.code||'APPLY_FAILED';metrics.lastFailure=e.safeDetail||PlayMapChatState.safeErrorDetail({request_diagnostic:{phase:'resolve_validation',wire_version:PlayMapChatState.PATCH,generation_attempts:0}});PlayMapChatState.recordFailure(metrics,{generation_attempts:0});status(e.message+(e.code?' ['+e.code+']':''),'error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;el('chat-apply').disabled=!chosenEnough();}}
  }
