@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import math
 import shutil
 import sqlite3
@@ -51,6 +52,7 @@ SOURCE_KEY = 'overture_places'
 POINTER = ROOT / 'data' / 'processed' / 'stage1c_current.json'
 STAGE1C_DIR = Path('data') / 'processed' / 'stage1c'
 DUPLICATE_RADIUS_M = 150.0
+SAME_NAME_RADIUS_M = 220.0  # exact same name; neighbour grid cells still cover it
 NAME_SIMILARITY = 0.86
 GRID = 0.002  # degrees, about 220 m; neighbour cells cover the 150 m radius
 
@@ -107,6 +109,9 @@ def app_category(top: str | None, sub: str | None) -> str:
         return 'food'
     if top == 'cultural_and_historic':
         return 'heritage'
+    # Theme / water parks are attractions, not nature, even though the name contains "park".
+    if any(w in sub for w in ('water_park', 'amusement_park', 'theme_park', 'fairgrounds')) or 'rental' in sub:
+        return 'tourism'
     if top in ('geographic_entities', 'sports_and_recreation') and any(w in sub for w in NATURE_WORDS):
         return 'nature'
     if top == 'geographic_entities' and not any(w in sub for w in ('quay', 'pier', 'bridge', 'marina')):
@@ -264,7 +269,9 @@ def find_duplicates(records, official):
     grid = defaultdict(list)
     for e in official:
         if isinstance(e.get('latitude'), (int, float)) and isinstance(e.get('longitude'), (int, float)):
-            names = {normal_name(x) for x in [e['display_title'], *e.get('aliases', [])]} - {''}
+            # Also the cleaned name ("Adventure Cove Waterpark" for "Adventure Cove Waterparkâ„¢ Singapore").
+            cleaned = clean_title(str(e.get('primary_uid', '')).split(':')[0], e['display_title'])
+            names = {normal_name(x) for x in [e['display_title'], cleaned, *e.get('aliases', [])]} - {''}
             grid[cell(e['latitude'], e['longitude'])].append((e, names))
     result = {}
     for r in records:
@@ -276,9 +283,12 @@ def find_duplicates(records, official):
             for dj in (-1, 0, 1):
                 for e, names in grid.get((ci + di, cj + dj), []):
                     d = metres(r['latitude'], r['longitude'], e['latitude'], e['longitude'])
-                    if d > DUPLICATE_RADIUS_M:
+                    if d > SAME_NAME_RADIUS_M:
                         continue
                     s = max(similar(r['normalised_name'], n) for n in names)
+                    # Exactly the same name may be a bit further away (big sites such as water parks).
+                    if d > DUPLICATE_RADIUS_M and s < 1.0:
+                        continue
                     if s >= NAME_SIMILARITY and (best is None or (s, -d) > (best[1], -best[2])):
                         best = (e, s, d)
         if best:
@@ -287,6 +297,101 @@ def find_duplicates(records, official):
 
 
 OVERTURE_DUPLICATE_RADIUS_M = 50.0
+
+# Overture sometimes labels non-park places as park / nature ("Alpha Building, Science Park 2",
+# "East Coast Park Carpark D1", "Hazel Park Condo"). Names with these words are not places for a
+# day out in nature, so the records are hidden (not deleted) and listed for review.
+NOT_NATURE_WORDS = re.compile(
+    r"\b(industrial park|business park|science park|tech ?park|car ?park|carpark|parking|condo|condominium|"
+    r"residences?|apartments?|estate|building|bldg|hotel|mall|plaza|atm|rental|leasing|motor|furniture|"
+    r"terminal|anchorage|camp|signboard|office|jewellery|pte\.? ?ltd|block \d+|blk \d+)\b", re.I)
+# Real nature places whose names also contain one of the words above ("Quarry Wetland | Rifle Range Nature Park").
+STRONG_NATURE = re.compile(r"\b(nature park|nature reserve|wetlands?|lookout|trail|playground)\b", re.I)
+ADDRESS_ONLY = re.compile(r"^(\d+\s|#|blk\b|block\b)|#\d", re.I)
+# A bare street name ("Baghdad Street, Singapore", "Chuan Drive").
+STREET_ONLY = re.compile(r"^[\w' ]+ (street|road|drive|crescent|avenue|lane|close)(, singapore)?$", re.I)
+# Overture points inside Singapore that are named after places abroad (user-added mistakes).
+FOREIGN = re.compile(r"(japan|china|phuket|negros|lijiang|widarapayung|wundragore|新山|ピョウタン)", re.I)
+
+
+def looks_mislabelled_nature(name: str) -> str | None:
+    """Reason text when an Overture "nature" record clearly is not a park / nature place.
+
+    Only clear evidence counts. Many real places have no "park" word in the name
+    (Chek Jawa, Supertree Grove, Mount Faber), so a missing word is not a reason.
+    """
+    if NOT_NATURE_WORDS.search(name) and not STRONG_NATURE.search(name):
+        return 'name_not_a_park'
+    if ADDRESS_ONLY.search(name) or STREET_ONLY.match(name.strip()):
+        return 'address_only'
+    if FOREIGN.search(name):
+        return 'place_abroad'
+    return None
+
+
+# Overture "historic_site" is mostly condos and HDB blocks ("Kovan Residences", "Block 19 HDB Ghim Moh").
+# Keep only names that look like heritage places.
+HERITAGE_WORDS = re.compile(
+    r"\b(historic(al)?|heritage|memorial|monument|museum|fort|battery|temple|church|mosque|masjid|cathedral|"
+    r"chapel|shrine|keramat|tomb|cemetery|old|former|kampong|kampung|lighthouse|statue|bunker|pillbox|war|"
+    r"monastery|clan|bridge|clock tower|gate|red house|freemasons|power station|waterboat|peranakan|matilda house|"
+    r"rail|view ?point|lookout|emerald hill|pearl.s hill|muscat street|joo chiat)\b|[廟庙宫宮寺堂祠墓]|烏敏島", re.I)
+# Homes and offices that still match a heritage word ("Residences at Emerald Hill", "6 Battery Road").
+HOME_WORDS = re.compile(r"\b(residences?|condo(minium)?|hdb|blk|block|stay with|one fort)\b|^\d", re.I)
+ANY_NOT_A_PLACE = re.compile(r"\batm\b|^\d+ [^,]+,.*singapore \d{6}|\b(federation|endowments board|religious council|"
+                             r"sikh gurdwara board)\b", re.I)
+ABROAD = re.compile(r"(kuala lumpur|, johor|柬埔寨)", re.I)
+
+
+def looks_mislabelled(e) -> str | None:
+    """Reason text when an Overture record clearly is not the kind of place its category says."""
+    name = e['display_title']
+    sub = (e.get('overture') or {}).get('category') or ''
+    if ANY_NOT_A_PLACE.search(name):
+        return 'not_a_place'  # ATMs, full postal addresses, sport federations / boards (offices)
+    if ABROAD.search(name):
+        return 'place_abroad'
+    if sub == 'historic_site' and (not HERITAGE_WORDS.search(name) or HOME_WORDS.search(name)):
+        return 'historic_site_not_heritage'
+    if e.get('category') == 'nature':
+        return looks_mislabelled_nature(name)
+    return None
+
+
+# Indoor kids' play centres (Airzone, Bouncing Kids, SuperPark) are tagged playground / park in Overture,
+# so they landed in "nature". They are paid indoor venues: move them to tourism.
+OUTDOOR_PLAY = re.compile(r"\b(playground|playfield|park|garden|blk|block|close|way|terrace|playwoods|water)\b", re.I)
+INDOOR_PLAY = re.compile(r"\b(indoor|kidz\w*|superpark|zoomoov|playtopia|playland\w*|dig dig land|excavator)\b", re.I)
+
+
+def move_indoor_play_to_tourism(db):
+    moved = []
+    for (row,) in db.execute("SELECT data_json FROM entities WHERE entity_id LIKE 'place:overture_places:%' "
+                             "AND visible=1 AND category='nature'").fetchall():
+        e = json.loads(row)
+        sub, name = (e.get('overture') or {}).get('category'), e['display_title']
+        if INDOOR_PLAY.search(name) or (sub == 'playground' and not OUTDOOR_PLAY.search(name)):
+            e['category'], e['categories'] = 'tourism', ['tourism']
+            db.execute('UPDATE entities SET category=?, data_json=? WHERE entity_id=?', ('tourism', j(e), e['entity_id']))
+            moved.append(name)
+    return moved
+
+
+def hide_mislabelled_overture(db):
+    rows = [json.loads(r[0]) for r in db.execute(
+        "SELECT data_json FROM entities WHERE entity_id LIKE 'place:overture_places:%' AND visible=1").fetchall()]
+    hidden = []
+    for e in rows:
+        reason = looks_mislabelled(e)
+        if not reason:
+            continue
+        e['default_exploration_visible'] = False
+        e['visit_status'] = 'category_label_review_hold'
+        e['hidden_reason'] = f"Overture 类别疑似错误：标为 {e['overture'].get('category')}，但名称不像这类地点（{reason}）"
+        db.execute('UPDATE entities SET visible=0, data_json=? WHERE entity_id=?', (j(e), e['entity_id']))
+        hidden.append({'entity_id': e['entity_id'], 'name': e['display_title'], 'app_category': e.get('category'),
+                       'overture_category': e['overture'].get('category'), 'reason': reason})
+    return hidden
 
 
 def hide_overture_internal_duplicates(db):
@@ -545,6 +650,8 @@ def main():
 
         renamed = clean_official_titles(db)
         internal_dups = hide_overture_internal_duplicates(db)
+        mislabelled = hide_mislabelled_overture(db)
+        indoor_play = move_indoor_play_to_tourism(db)
         durations = apply_duration_defaults(db)
         core = apply_core_review(db)
         osm_hours = apply_osm_hours(db)
@@ -557,7 +664,7 @@ def main():
             'added_entities': len(entities),
             'skipped_probable_official_duplicates': len(dups), 'records_without_drawable_point': skipped_invalid,
             'added_by_app_category': dict(Counter(e['category'] for e in entities)),
-            'duplicate_rule': f'within {DUPLICATE_RADIUS_M:.0f} m of an official entity and name similarity >= {NAME_SIMILARITY}',
+            'duplicate_rule': f'within {DUPLICATE_RADIUS_M:.0f} m of an official entity and name similarity >= {NAME_SIMILARITY}, or the exact same name within {SAME_NAME_RADIUS_M:.0f} m',
             'category_mapping': 'overture_taxonomy_to_existing_5_categories_v1',
             'licence_url': SOURCE['licence_url'],
             'cautions': ['Overture is third-party merged data, not an official source.',
@@ -579,6 +686,8 @@ def main():
             'osm_opening_hours': osm_hours,
             'attribution': ATTRIBUTION,
             'overture_internal_duplicates_hidden': len(internal_dups),
+            'overture_mislabelled_hidden': len(mislabelled),
+            'overture_indoor_play_to_tourism': indoor_play,
         })
         db.execute("UPDATE metadata SET value_json=? WHERE key='report'", (j(report),))
         if db.execute('PRAGMA foreign_key_check').fetchall():
@@ -595,6 +704,7 @@ def main():
             if (base_dir / name).is_file():
                 shutil.copy2(base_dir / name, out / name)
         dump_json(out / 'stage1c_profile.json', report)
+        dump_json(out / 'overture_mislabelled.json', {'count': len(mislabelled), 'records': mislabelled})
         dump_json(out / 'overture_possible_duplicates.json', {
             'rule': supplement['duplicate_rule'], 'count': len(dups),
             'pairs': [{'overture_uid': uid, 'overture_name': next(r['name'] for r in records if r['record_uid'] == uid),
@@ -611,6 +721,8 @@ def main():
                             'report_relative_path': (STAGE1C_DIR / stamp / 'stage1c_profile.json').as_posix()})
     print(f'[ADD] {len(entities)} Overture places added: {supplement["added_by_app_category"]}')
     print(f'[NAMES] {renamed} official names cleaned (old names kept as aliases)')
+    print(f'[PLAY] {len(indoor_play)} indoor play centres moved from nature to tourism')
+    print(f'[LABELS] {len(mislabelled)} Overture records hidden: name does not fit the category (see overture_mislabelled.json)')
     print(f'[DEDUP] {len(internal_dups)} Overture records hidden as duplicates of another Overture record (same name, <= 50 m)')
     print(f"[DURATION] category defaults set for {durations.get('applied', 0)} places"
           f"{'; unmatched ' + str(durations['unmatched']) if durations.get('unmatched') else ''} (core attractions override below)")

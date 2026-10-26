@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "stage": "1C",
-  "build_id": "20261024T021858337131Z",
-  "generated_at": "2026-10-24T02:19:02.499915+00:00",
+  "build_id": "20261026T015024189051Z",
+  "generated_at": "2026-10-26T01:50:28.682684+00:00",
   "scope": "Singapore nationwide",
   "geographic_filter": null,
   "source_stage1b_build_id": "20260914T011834808781Z",
@@ -18,7 +18,7 @@
     "nparks_parks": 462,
     "nparks_tracks": 15425,
     "stb_attractions": 109,
-    "overture_places": 17812
+    "overture_places": 17793
   },
   "source_spatial_association": {
     "metric_crs": "EPSG:3414",
@@ -60,8 +60,8 @@
   "original_sources_modified": false,
   "all_candidate_source_records_retained_in_sidecar": true,
   "as_of": "2026-09-14",
-  "input_candidate_source_records": 18689,
-  "entity_display_count": 18681,
+  "input_candidate_source_records": 18670,
+  "entity_display_count": 18662,
   "reviewed_group_count": 8,
   "display_record_reduction": 8,
   "deleted_source_records": 0,
@@ -76,7 +76,7 @@
   "field_reviews_unapplied": 0,
   "legacy_hold_entities": 3,
   "historical_source_status_hold_entities": 6,
-  "default_exploration_entity_count": 18595,
+  "default_exploration_entity_count": 17159,
   "regular_hours_entity_count": 3,
   "regular_hours_entity_count_within_review_period": 3,
   "access_boundary_links_retained": 196,
@@ -106,8 +106,8 @@
     104.05443900681144,
     1.464189982913446
   ],
-  "snapshot_relative_path": "data/processed/stage1c/20261024T021858337131Z",
-  "database_relative_path": "data/processed/stage1c/20261024T021858337131Z/entities.sqlite3",
+  "snapshot_relative_path": "data/processed/stage1c/20261026T015024189051Z",
+  "database_relative_path": "data/processed/stage1c/20261026T015024189051Z/entities.sqlite3",
   "cautions": [
     "Entity identity is not an entry or operational-status guarantee.",
     "Display coordinates are selected source coordinates, not averaged or new geocodes.",
@@ -198,16 +198,16 @@
       "psychic_advising": 6,
       "adult_entertainment_venue": 4
     },
-    "added_entities": 17812,
-    "skipped_probable_official_duplicates": 258,
+    "added_entities": 17793,
+    "skipped_probable_official_duplicates": 277,
     "records_without_drawable_point": 0,
     "added_by_app_category": {
-      "tourism": 4007,
+      "tourism": 4013,
       "food": 10555,
-      "heritage": 2600,
-      "nature": 650
+      "heritage": 2599,
+      "nature": 626
     },
-    "duplicate_rule": "within 150 m of an official entity and name similarity >= 0.86",
+    "duplicate_rule": "within 150 m of an official entity and name similarity >= 0.86, or the exact same name within 220 m",
     "category_mapping": "overture_taxonomy_to_existing_5_categories_v1",
     "licence_url": "https://docs.overturemaps.org/attribution",
     "cautions": [
@@ -217,8 +217,10 @@
     ]
   },
   "core_review": {
-    "applied": 47,
-    "missing_entities": [],
+    "applied": 46,
+    "missing_entities": [
+      "place:overture_places:eb4ed8cd-3059-4abe-8e2f-6704c7b2c6c4"
+    ],
     "hidden": [
       "place:overture_places:d50564ad-bee0-4ea7-acaa-38b9770c2a21",
       "place:stb_attractions:990",
@@ -228,34 +230,27 @@
       "place:nhb_monuments:1684"
     ],
     "overture_duplicates_of_core_hidden": [
-      "place:overture_places:02325846-30af-40fb-aa3e-497037606abd",
       "place:overture_places:09120307-852e-43df-94f1-97712786dd03",
       "place:overture_places:364a0881-b84f-4737-a6ca-3e6ce582f5bb",
-      "place:overture_places:3cadb452-1f12-4653-bde3-df9f0be55860",
       "place:overture_places:42c88c7d-73d4-4a93-8664-a49eec66f816",
-      "place:overture_places:4d60849b-dbed-4892-98b5-bf5df9c7bfc8",
       "place:overture_places:8184c6d7-7088-40a0-8906-c031beb15933",
-      "place:overture_places:9bc6ee2e-85e2-4491-8676-cf1d7a06237a",
       "place:overture_places:a35abe05-09af-4d78-8a10-dfa767ac4b42",
       "place:overture_places:ae33c008-7618-4ef9-b51a-c7ca08e127ff",
-      "place:overture_places:b2617eaa-b446-456b-9f90-f4511f362b8a",
-      "place:overture_places:bb1e2950-2710-47b0-bb7e-eeeb03484bf5",
       "place:overture_places:cc79f2f7-4a4d-4cbe-88cd-a6f4f6a776dc",
-      "place:overture_places:dcfb407b-30a8-43b4-991c-0c6fdb15a063",
       "place:overture_places:e411fed8-9e16-4c12-be6d-29ede3f8c5fc"
     ],
     "exported_on": "2026-10-22"
   },
   "official_titles_cleaned": 531,
   "duration_defaults": {
-    "applied": 18680,
+    "applied": 18661,
     "unmatched": 1,
     "by_rule": {
       "quick_food": 1562,
       "heritage_marker": 100,
       "heritage_site": 1467,
       "small_park": 264,
-      "park": 573,
+      "park": 567,
       "nature_reserve": 87,
       "stb_other": 104,
       "indoor_fun": 236,
@@ -264,26 +259,26 @@
       "cafe": 2437,
       "shop": 244,
       "show": 342,
-      "mall": 740,
-      "worship": 1190,
+      "mall": 739,
+      "worship": 1189,
       "nightlife": 731,
       "dessert": 820,
-      "gallery": 193,
+      "gallery": 192,
       "beach": 61,
-      "museum": 86,
+      "museum": 81,
       "buffet": 49,
-      "theme_park": 61,
+      "theme_park": 60,
       "trail": 36,
       "casino": 14,
-      "culture": 117,
-      "viewpoint": 149,
+      "culture": 116,
+      "viewpoint": 147,
       "market": 16,
       "water_sport": 70,
-      "zoo_aquarium": 45
+      "zoo_aquarium": 44
     }
   },
   "osm_opening_hours": {
-    "applied": 748,
+    "applied": 746,
     "osm_places_with_hours": 4742,
     "osm_retrieved_at": "2026-10-22T12:29:37+00:00",
     "licence": "ODbL; © OpenStreetMap contributors"
@@ -294,5 +289,33 @@
     "Singapore government open data via data.gov.sg (STB, NParks, NHB, NEA), Singapore Open Data Licence",
     "OneMap (Singapore Land Authority) for entrance coordinates of core attractions"
   ],
-  "overture_internal_duplicates_hidden": 59
+  "overture_internal_duplicates_hidden": 59,
+  "overture_mislabelled_hidden": 1424,
+  "overture_indoor_play_to_tourism": [
+    "Little O'Zone",
+    "Tickle Tickle",
+    "SAFRA Kidz Amaze Indoor Playground (SAFRA Toa Payoh)",
+    "Playful Elves",
+    "Jumperzillas",
+    "Tayo Station",
+    "Zoomoov Jolly Fields",
+    "Bouncing Kids",
+    "Splashzone",
+    "Playtopia Indoor",
+    "My Little Climbing Room",
+    "Mofunland Marina Square",
+    "Bouncy Paradise",
+    "Rainforest Kidzworld",
+    "Little Play Social",
+    "Jurong Play Grounds",
+    "PlaylandatDawson",
+    "Amazonia Singapore",
+    "Waka Waka",
+    "Dig Dig Land | Kid Excavator & Playground Singapore",
+    "Rainforest Kidzworld",
+    "Airzone",
+    "SuperPark Singapore",
+    "Discovery Slides",
+    "Little Bear's House"
+  ]
 }

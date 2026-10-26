@@ -1,6 +1,6 @@
 {
-  "rule": "within 150 m of an official entity and name similarity >= 0.86",
-  "count": 258,
+  "rule": "within 150 m of an official entity and name similarity >= 0.86, or the exact same name within 220 m",
+  "count": 277,
   "pairs": [
     {
       "overture_uid": "overture_places:01a3fd97-36b6-4270-b811-3e7e70eb7e64",
@@ -9,6 +9,15 @@
       "official_name": "Toa Payoh Lorong 4 Blk 74 (Toa Payoh Vista Market)",
       "name_similarity": 0.9,
       "straight_line_metres": 84.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:02325846-30af-40fb-aa3e-497037606abd",
+      "overture_name": "Science Centre Singapore",
+      "official_entity_id": "place:stb_attractions:962",
+      "official_name": "Singapore Science Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 44.1,
       "decision": "not_added_needs_review"
     },
     {
@@ -70,7 +79,7 @@
       "overture_name": "Singapore Zoo",
       "official_entity_id": "place:stb_attractions:989",
       "official_name": "Singapore Zoo: Attractions & Things to Do",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 38.6,
       "decision": "not_added_needs_review"
     },
@@ -102,11 +111,20 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:0c82d2f8-8777-4efa-acb8-7f3a229b23b9",
+      "overture_name": "Adventure Cove Waterpark",
+      "official_entity_id": "place:stb_attractions:971",
+      "official_name": "Adventure Cove Waterparkâ„¢ Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 214.5,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:0f6d75fc-7efd-4e89-ac9d-d2ff9353dc14",
       "overture_name": "National Design Centre",
       "official_entity_id": "place:stb_attractions:1047",
       "official_name": "National Design Centre, Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 42.4,
       "decision": "not_added_needs_review"
     },
@@ -149,10 +167,10 @@
     {
       "overture_uid": "overture_places:18a22747-4763-419d-a677-9db781ef19f7",
       "overture_name": "Raffles Hotel Museum",
-      "official_entity_id": "place:nhb_monuments:1742",
-      "official_name": "Raffles Hotel",
+      "official_entity_id": "place:stb_attractions:1025",
+      "official_name": "Raffles Singapore",
       "name_similarity": 0.9,
-      "straight_line_metres": 85.2,
+      "straight_line_metres": 36.4,
       "decision": "not_added_needs_review"
     },
     {
@@ -196,7 +214,7 @@
       "overture_name": "Universal Studios Singapore",
       "official_entity_id": "place:stb_attractions:961",
       "official_name": "Universal Studios Singaporeâ„¢ Theme Park",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 21.9,
       "decision": "not_added_needs_review"
     },
@@ -273,12 +291,30 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:24fc0e66-d932-426c-9c88-a4139bb1f178",
+      "overture_name": "East Coast Park Area G",
+      "official_entity_id": "place:nparks_parks:120447",
+      "official_name": "EAST COAST PARK AREA G",
+      "name_similarity": 1.0,
+      "straight_line_metres": 154.5,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:25bd543c-6c1a-4483-8a43-e98332c7771e",
       "overture_name": "Pasir Panjang Machine-gun Pillbox",
       "official_entity_id": "place:nhb_historic_sites:2323",
       "official_name": "Pasir Panjang Machine-Gun Pillbox",
       "name_similarity": 1.0,
       "straight_line_metres": 4.1,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:26cb2d61-8f95-4986-a2c3-5ee64cfccd51",
+      "overture_name": "Bukit Batok Nature Park",
+      "official_entity_id": "place:nparks_parks:120232",
+      "official_name": "BUKIT BATOK NATURE PARK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 169.5,
       "decision": "not_added_needs_review"
     },
     {
@@ -295,7 +331,7 @@
       "overture_name": "Dalhousie Obelisk",
       "official_entity_id": "place:stb_attractions:1054",
       "official_name": "Dalhousie Obelisk, a Singapore Landmark",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 53.7,
       "decision": "not_added_needs_review"
     },
@@ -358,7 +394,7 @@
       "overture_name": "Katong Antique House",
       "official_entity_id": "place:stb_attractions:964",
       "official_name": "Katong Antique House Singapore: Peranakan Heritage",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 26.5,
       "decision": "not_added_needs_review"
     },
@@ -412,7 +448,7 @@
       "overture_name": "Chinese Heritage Centre",
       "official_entity_id": "place:stb_attractions:1040",
       "official_name": "Chinese Heritage Centre, Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 32.5,
       "decision": "not_added_needs_review"
     },
@@ -468,6 +504,15 @@
       "official_name": "NAMLY PK",
       "name_similarity": 1.0,
       "straight_line_metres": 12.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:3cadb452-1f12-4653-bde3-df9f0be55860",
+      "overture_name": "Science Centre Singapore",
+      "official_entity_id": "place:stb_attractions:962",
+      "official_name": "Singapore Science Centre",
+      "name_similarity": 1.0,
+      "straight_line_metres": 106.8,
       "decision": "not_added_needs_review"
     },
     {
@@ -682,7 +727,7 @@
       "overture_name": "Kampong Glam",
       "official_entity_id": "place:stb_attractions:1041",
       "official_name": "Kampong Glam & Malay Culture in Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 81.4,
       "decision": "not_added_needs_review"
     },
@@ -743,10 +788,10 @@
     {
       "overture_uid": "overture_places:58fee50b-3dfe-4427-8c05-8d5b87ad0f98",
       "overture_name": "Hong San See Temple",
-      "official_entity_id": "place:nhb_monuments:1734",
-      "official_name": "Hong San See",
-      "name_similarity": 0.9,
-      "straight_line_metres": 6.9,
+      "official_entity_id": "place:stb_attractions:1039",
+      "official_name": "Hong San See Temple Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 45.9,
       "decision": "not_added_needs_review"
     },
     {
@@ -831,6 +876,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:619c75cd-3859-41b4-ab69-c87fc583fc63",
+      "overture_name": "Singapore River One",
+      "official_entity_id": "place:stb_attractions:973",
+      "official_name": "Singapore River: History & Culture Tours",
+      "name_similarity": 0.882,
+      "straight_line_metres": 57.1,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:624e4906-5b08-4b36-85a5-73808d02af4c",
       "overture_name": "St Andrew's Cathedral",
       "official_entity_id": "place:nhb_monuments:1716",
@@ -880,7 +934,7 @@
       "overture_name": "Changi Point Ferry Terminal",
       "official_entity_id": "place:nparks_parks:120310",
       "official_name": "CHANGI PT FERRY TERMINAL",
-      "name_similarity": 0.941,
+      "name_similarity": 1.0,
       "straight_line_metres": 48.3,
       "decision": "not_added_needs_review"
     },
@@ -939,6 +993,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:6f11b001-95ab-4f7b-bdc6-ae419af73eef",
+      "overture_name": "Farrer Park",
+      "official_entity_id": "place:nhb_historic_sites:2261",
+      "official_name": "Farrer Park",
+      "name_similarity": 1.0,
+      "straight_line_metres": 185.1,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:6f2d8e8f-e4b7-4aa6-936b-b6482887b47c",
       "overture_name": "Berseh Food Centre",
       "official_entity_id": "place:nea_hawker_centres:119476",
@@ -968,10 +1031,10 @@
     {
       "overture_uid": "overture_places:70efa032-4f6a-41a3-9774-158344592460",
       "overture_name": "Former Ford Factory",
-      "official_entity_id": "place:nhb_monuments:1736",
-      "official_name": "Former Ford Factory (now Memories at Old Ford Factory)",
-      "name_similarity": 0.9,
-      "straight_line_metres": 50.7,
+      "official_entity_id": "place:stb_attractions:1057",
+      "official_name": "Old Ford Factory Singapore Museum",
+      "name_similarity": 1.0,
+      "straight_line_metres": 61.2,
       "decision": "not_added_needs_review"
     },
     {
@@ -1155,6 +1218,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:8772bbd7-a7dd-43df-8274-fed322dd30d3",
+      "overture_name": "Bedok Town Park",
+      "official_entity_id": "place:nparks_parks:120357",
+      "official_name": "BEDOK TOWN PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 200.9,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:88c40b6e-e56d-42a8-9b07-3fea995c247a",
       "overture_name": "Greenwood Crescent Playground",
       "official_entity_id": "place:nparks_parks:120170",
@@ -1191,6 +1263,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:8c82ba36-46ac-422b-a873-555b90532e00",
+      "overture_name": "HarbourFront Centre",
+      "official_entity_id": "place:stb_attractions:999",
+      "official_name": "HarbourFront, Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 76.6,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:8cf62014-9044-4823-aace-282803672122",
       "overture_name": "Jurong Central Park",
       "official_entity_id": "place:nparks_parks:120404",
@@ -1204,8 +1285,17 @@
       "overture_name": "Night Safari",
       "official_entity_id": "place:stb_attractions:992",
       "official_name": "Night Safari, Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 34.3,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:90be01f8-4476-4aec-9949-bfa2d3caab52",
+      "overture_name": "Changi Chapel and Museum",
+      "official_entity_id": "place:stb_attractions:1060",
+      "official_name": "Changi Museum Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 35.1,
       "decision": "not_added_needs_review"
     },
     {
@@ -1229,10 +1319,10 @@
     {
       "overture_uid": "overture_places:94364360-e5ab-4df1-8c13-64043f86160c",
       "overture_name": "Civilian War Memorial",
-      "official_entity_id": "place:nhb_monuments:1728",
-      "official_name": "Civilian War Memorial",
+      "official_entity_id": "place:stb_attractions:1067",
+      "official_name": "The Civilian War Memorial park in Singapore",
       "name_similarity": 1.0,
-      "straight_line_metres": 30.8,
+      "straight_line_metres": 17.4,
       "decision": "not_added_needs_review"
     },
     {
@@ -1299,11 +1389,29 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:9a335602-6059-48cb-9a40-aaa85e359c98",
+      "overture_name": "Merdeka Bridge",
+      "official_entity_id": "place:nhb_historic_sites:2295",
+      "official_name": "Merdeka Bridge",
+      "name_similarity": 1.0,
+      "straight_line_metres": 151.9,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:9bc6ee2e-85e2-4491-8676-cf1d7a06237a",
+      "overture_name": "Fort Canning Park",
+      "official_entity_id": "place:nparks_parks:120073",
+      "official_name": "Fort Canning Park",
+      "name_similarity": 1.0,
+      "straight_line_metres": 166.4,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:9ce3cfa8-eb7f-456d-8eb3-b0aea8fa6d61",
       "overture_name": "Singapore Coins And Notes Museum",
       "official_entity_id": "place:stb_attractions:1058",
       "official_name": "Singapore Coins and Notes Museum & Museum Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 42.9,
       "decision": "not_added_needs_review"
     },
@@ -1312,7 +1420,7 @@
       "overture_name": "MINT Museum of Toys",
       "official_entity_id": "place:stb_attractions:1061",
       "official_name": "MINT Museum of Toys Singapore & Toy Museum",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 36.1,
       "decision": "not_added_needs_review"
     },
@@ -1330,7 +1438,7 @@
       "overture_name": "Reflections at Bukit Chandu",
       "official_entity_id": "place:stb_attractions:1065",
       "official_name": "Reflections at Bukit Chandu: Singapore War Memorial",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 31.7,
       "decision": "not_added_needs_review"
     },
@@ -1366,7 +1474,7 @@
       "overture_name": "NUS Baba House",
       "official_entity_id": "place:stb_attractions:1038",
       "official_name": "NUS Baba House - Singapore Peranakan Architecture",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 24.9,
       "decision": "not_added_needs_review"
     },
@@ -1447,7 +1555,7 @@
       "overture_name": "Red Dot Design Museum",
       "official_entity_id": "place:stb_attractions:1044",
       "official_name": "Red Dot Design Museum, Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 25.2,
       "decision": "not_added_needs_review"
     },
@@ -1524,6 +1632,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:af1f7622-fe7a-4777-af8f-fea1c9349974",
+      "overture_name": "Gillman Barracks Art",
+      "official_entity_id": "place:stb_attractions:1026",
+      "official_name": "Gillman Barracks – YourSingapore",
+      "name_similarity": 0.889,
+      "straight_line_metres": 42.5,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:afdf025e-e114-4cc7-a743-26b5c369b049",
       "overture_name": "Yunnan Park",
       "official_entity_id": "place:nparks_parks:120425",
@@ -1548,6 +1665,15 @@
       "official_name": "Tanjong Pagar Plaza Blk 6 (Blk 6 Tanjong Pagar Plaza Market and Food Centre)",
       "name_similarity": 0.9,
       "straight_line_metres": 114.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:b2617eaa-b446-456b-9f90-f4511f362b8a",
+      "overture_name": "Buddha Tooth Relic Temple and Museum 佛牙寺",
+      "official_entity_id": "place:stb_attractions:977",
+      "official_name": "Buddha Tooth Relic Temple & Museum in Singapore",
+      "name_similarity": 0.947,
+      "straight_line_metres": 57.7,
       "decision": "not_added_needs_review"
     },
     {
@@ -1582,7 +1708,7 @@
       "overture_name": "ArtScience Museum",
       "official_entity_id": "place:stb_attractions:1027",
       "official_name": "ArtScience Museum Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 16.6,
       "decision": "not_added_needs_review"
     },
@@ -1647,6 +1773,15 @@
       "official_name": "Cathedral of the Good Shepherd",
       "name_similarity": 1.0,
       "straight_line_metres": 20.8,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:bb1e2950-2710-47b0-bb7e-eeeb03484bf5",
+      "overture_name": "HortPark",
+      "official_entity_id": "place:nparks_parks:120345",
+      "official_name": "HortPark",
+      "name_similarity": 1.0,
+      "straight_line_metres": 199.8,
       "decision": "not_added_needs_review"
     },
     {
@@ -1913,10 +2048,10 @@
     {
       "overture_uid": "overture_places:d16f9120-e907-4ac5-827f-54cfcc1b934a",
       "overture_name": "Chinese Garden",
-      "official_entity_id": "place:nparks_parks:120458",
-      "official_name": "CHINESE GARDENS",
-      "name_similarity": 0.9,
-      "straight_line_metres": 57.1,
+      "official_entity_id": "place:stb_attractions:965",
+      "official_name": "Chinese Garden Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 62.0,
       "decision": "not_added_needs_review"
     },
     {
@@ -1965,6 +2100,15 @@
       "decision": "not_added_needs_review"
     },
     {
+      "overture_uid": "overture_places:daca881a-9bd0-4012-b6e5-2f9109fb6c1b",
+      "overture_name": "NUS Museum",
+      "official_entity_id": "place:stb_attractions:1049",
+      "official_name": "NUS University Museum, Singapore",
+      "name_similarity": 1.0,
+      "straight_line_metres": 72.1,
+      "decision": "not_added_needs_review"
+    },
+    {
       "overture_uid": "overture_places:daec7cc9-e74d-43e1-973d-f0d9986d4fe5",
       "overture_name": "Lower Pierce Reservoir",
       "official_entity_id": "place:nhb_historic_sites:2265",
@@ -1998,6 +2142,15 @@
       "official_name": "CHANGI BEACH PK",
       "name_similarity": 0.9,
       "straight_line_metres": 21.4,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:dcfb407b-30a8-43b4-991c-0c6fdb15a063",
+      "overture_name": "ACM (Asian Civilisations Museum)",
+      "official_entity_id": "place:stb_attractions:1051",
+      "official_name": "Asian Civilisations Museum & Singapore Museum",
+      "name_similarity": 0.929,
+      "straight_line_metres": 67.0,
       "decision": "not_added_needs_review"
     },
     {
@@ -2077,7 +2230,7 @@
       "overture_name": "Raffles' Landing Site",
       "official_entity_id": "place:stb_attractions:1055",
       "official_name": "Raffles Statue – Sir Stamford Raffles Landing Site",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 32.2,
       "decision": "not_added_needs_review"
     },
@@ -2124,6 +2277,15 @@
       "official_name": "BUKIT GOMBAK PARK",
       "name_similarity": 1.0,
       "straight_line_metres": 45.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:eb4ed8cd-3059-4abe-8e2f-6704c7b2c6c4",
+      "overture_name": "River Wonders",
+      "official_entity_id": "place:stb_attractions:990",
+      "official_name": "River Safari Singapore",
+      "name_similarity": 0.9,
+      "straight_line_metres": 148.6,
       "decision": "not_added_needs_review"
     },
     {
@@ -2176,7 +2338,7 @@
       "overture_name": "Malay Heritage Centre",
       "official_entity_id": "place:stb_attractions:1023",
       "official_name": "Malay Heritage Centre, Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 22.9,
       "decision": "not_added_needs_review"
     },
@@ -2230,7 +2392,7 @@
       "overture_name": "Sri Veeramakaliamman Temple",
       "official_entity_id": "place:stb_attractions:1068",
       "official_name": "Sri Veeramakaliamman Temple: Hindu Temple in Singapore",
-      "name_similarity": 0.9,
+      "name_similarity": 1.0,
       "straight_line_metres": 28.3,
       "decision": "not_added_needs_review"
     },
@@ -2250,6 +2412,15 @@
       "official_name": "Fuk Tak Chi",
       "name_similarity": 0.9,
       "straight_line_metres": 15.5,
+      "decision": "not_added_needs_review"
+    },
+    {
+      "overture_uid": "overture_places:f8af4559-90b7-4d1c-8e33-762c0c5465e9",
+      "overture_name": "Duxton Plain Park",
+      "official_entity_id": "place:nparks_parks:120080",
+      "official_name": "DUXTON PLAIN PK",
+      "name_similarity": 1.0,
+      "straight_line_metres": 183.7,
       "decision": "not_added_needs_review"
     },
     {
