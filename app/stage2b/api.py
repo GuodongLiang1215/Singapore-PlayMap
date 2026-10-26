@@ -52,13 +52,18 @@ def status():
     with _lock: counts = dict(_counts)
     return {'stage':'2B','scope':'Singapore nationwide','geographic_filter':None,
         'catalogue':base['catalogue'],'credentials':base['credentials'],
-        'manual_itinerary_implemented':True,'automatic_selection_implemented':False,
+        'manual_itinerary_implemented':True,
+        'spatial_recommendation_implemented':True,
+        'constraint_aware_alternatives_implemented':True,
+        'opening_hours_feasibility_implemented':True,
+        'entrance_candidate_routing_implemented':True,
+        'entrance_candidates_field_verified':False,
         'order_optimisation_implemented':False,'live_llm':False,
         'implemented_modes':['walk','drive','cycle'],'public_transport_implemented':False,
         'max_visits_per_request':MAX_VISITS,'cache_ttl_seconds':cache.ttl_seconds,
         'cache_scope':'per-browser-session, RAM only','private_queries_saved_to_disk':False,
         'runtime_counters_since_server_start':counts,
-        'notice':'多地点通行与停留汇总不等于入口、开放和实时交通已核验。'}
+        'notice':'支持路线核验的附近推荐、约束替代、可解析营业时间检查和入口候选路由；入口候选未实地核验，复杂营业时间与实时交通仍需人工确认。'}
 
 
 @router.post('/plan')
