@@ -21,7 +21,7 @@ class SemanticSegment(Strict):
     type: SegmentType
     name: str = Field(default='', max_length=64)
     value: ConstraintValue = None
-    scope: str = Field(default='global', max_length=64)
+    scope: str = Field(default='global', max_length=128)
     hardness: ConstraintHardness = 'unknown'
     status: ConstraintStatus = 'understood'
     source: ConstraintSource = 'user_explicit'
@@ -40,7 +40,7 @@ class ActiveConstraint(Strict):
     """A constraint that remains active across turns until replaced or cleared."""
     name: str = Field(min_length=1, max_length=64)
     value: ConstraintValue = None
-    scope: str = Field(default='global', max_length=64)
+    scope: str = Field(default='global', max_length=128)
     hardness: ConstraintHardness = 'unknown'
     status: ConstraintStatus = 'understood'
     source: ConstraintSource = 'user_explicit'

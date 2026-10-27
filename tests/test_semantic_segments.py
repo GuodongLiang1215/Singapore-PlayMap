@@ -14,6 +14,7 @@ from app.stage2c.semantic import (
 )
 from app.stage2c.engine import merge_preferences
 from app.stage2c.models import Preferences
+from app.stage2c.models import Draft, MoveAction
 
 
 def test_constraint_segment_keeps_scope_and_provenance():
@@ -105,6 +106,21 @@ def test_conflicting_hard_constraints_are_kept_as_conflict():
     assert {item.status for item in result} == {'conflicting'}
 
 
+def test_a_soft_alternative_in_the_same_turn_cannot_replace_or_conflict_with_hard_value():
+    incoming = [
+        SemanticSegment(type='constraint', name='place_type', value='cafe', scope='visit:2',
+                        hardness='hard', quote='必须是咖啡馆'),
+        SemanticSegment(type='constraint', name='place_type', value='restaurant', scope='visit:2',
+                        hardness='soft', quote='如果可能也看看餐厅'),
+    ]
+
+    result = merge_active_constraints([], incoming, turn_index=1)
+
+    assert {(item.value, item.hardness, item.status) for item in result} == {
+        ('cafe', 'hard', 'understood'), ('restaurant', 'soft', 'understood'),
+    }
+
+
 def test_provider_cannot_claim_opening_hours_were_satisfied():
     incoming = [SemanticSegment(
         type='constraint', name='must_be_open', value='14:00', scope='visit:2',
@@ -115,6 +131,15 @@ def test_provider_cannot_claim_opening_hours_were_satisfied():
     result = merge_active_constraints([], incoming, turn_index=3)
 
     assert result[0].status == 'unresolved'
+
+
+def test_unsupported_constraint_does_not_become_understood_in_the_ledger():
+    segment = SemanticSegment(type='constraint', name='wheelchair_access', value='no_stairs',
+                              hardness='hard', status='unsupported', quote='必须全程无台阶')
+
+    result = merge_active_constraints([], [segment], turn_index=1)
+
+    assert result[0].status == 'unsupported'
 
 
 def test_matching_hard_constraint_requires_a_supporting_command():
@@ -153,6 +178,35 @@ def test_hard_constraint_without_command_or_question_fails_closed():
         validate_segment_command_consistency(segments, parsed)
 
 
+def test_matching_quote_does_not_excuse_the_wrong_place_type():
+    segment = SemanticSegment(
+        type='constraint', name='place_type', value='cafe', scope='visit:2',
+        hardness='hard', quote='第二站换成咖啡馆',
+    )
+    parsed = Interpretation(acknowledgement='替换第二站', actions=[LocationAction(
+        op='replace_visit', target_id='visit-2',
+        place=PlaceSpec(categories=['nature']), quote='第二站换成咖啡馆',
+    )])
+
+    with pytest.raises(SemanticConsistencyError):
+        validate_segment_command_consistency([segment], parsed)
+
+
+def test_a_hard_trip_budget_is_supported_by_the_time_command_value():
+    from app.stage2c.models import TimeAction
+
+    segment = SemanticSegment(type='constraint', name='budget_minutes', value=240,
+                              hardness='hard', quote='整个行程最多四小时')
+    parsed = Interpretation(acknowledgement='预算', actions=[TimeAction(
+        op='set_time', mode='budget', budget_minutes=240, quote='整个行程最多四小时',
+    )])
+
+    validate_segment_command_consistency([segment], parsed)
+    parsed.actions[0].budget_minutes = 120
+    with pytest.raises(SemanticConsistencyError):
+        validate_segment_command_consistency([segment], parsed)
+
+
 def test_conflicting_hard_constraint_is_safe_when_a_question_is_returned():
     parsed = Interpretation(acknowledgement='需要澄清', questions=['第二站要咖啡馆还是博物馆？'])
     segments = [SemanticSegment(
@@ -179,3 +233,80 @@ def test_preference_merge_keeps_active_constraints_as_structured_state():
     assert len(result.active_constraints) == 1
     assert result.active_constraints[0].scope == 'visit:2'
     assert result.active_constraints[0].turn_index == 4
+
+
+def test_visit_constraint_follows_the_same_visit_after_reordering():
+    draft = Draft.model_validate({'visits': [
+        {'visit_id': f'stop-{index}', 'point': {
+            'label': f'Synthetic {index}', 'latitude': 1.3, 'longitude': 103.8,
+            'source': 'user_map', 'confirmed': True,
+        }} for index in (1, 2)
+    ]})
+    old = Preferences(active_constraints=[ActiveConstraint(
+        name='place_type', value='cafe', scope='visit:2', hardness='hard',
+        quote='第二站是咖啡馆', turn_index=1,
+    )])
+    move = Interpretation(acknowledgement='调整顺序', actions=[MoveAction(
+        op='move_visit', target_id='stop-2', position=1, quote='第二站移到第一位',
+    )])
+    after_move = merge_preferences(old, move, draft=draft, turn_index=2)
+    draft.visits.reverse()
+    replace = Interpretation(acknowledgement='换餐厅', semantic_segments=[SemanticSegment(
+        type='constraint', name='place_type', value='restaurant', scope='visit:1',
+        hardness='hard', quote='现在第一站改餐厅',
+    )])
+
+    after_replace = merge_preferences(after_move, replace, draft=draft, turn_index=3)
+
+    assert len(after_replace.active_constraints) == 1
+    assert after_replace.active_constraints[0].scope == 'visit_id:stop-2'
+    assert after_replace.active_constraints[0].value == 'restaurant'
+
+
+def test_removing_a_visit_removes_only_its_scoped_constraints():
+    from app.stage2c.models import RemoveAction
+    draft = Draft.model_validate({'visits': [{'visit_id': 'stop-2', 'point': {
+        'label': 'Synthetic', 'latitude': 1.3, 'longitude': 103.8,
+        'source': 'user_map', 'confirmed': True,
+    }}]})
+    old = Preferences(active_constraints=[
+        ActiveConstraint(name='place_type', value='cafe', scope='visit_id:stop-2',
+                         hardness='hard', quote='咖啡馆', turn_index=1),
+        ActiveConstraint(name='max_walk_minutes', value=10, hardness='hard',
+                         quote='最多10分钟', turn_index=1),
+    ])
+    parsed = Interpretation(acknowledgement='删除', actions=[RemoveAction(
+        op='remove_visit', target_id='stop-2', quote='删除第一站',
+    )])
+
+    result = merge_preferences(old, parsed, draft=draft, turn_index=2)
+
+    assert [item.name for item in result.active_constraints] == ['max_walk_minutes']
+
+
+def test_new_visit_constraints_bind_to_the_reserved_visit_identifier():
+    parsed = Interpretation(acknowledgement='添加咖啡馆', semantic_segments=[SemanticSegment(
+        type='constraint', name='place_type', value='cafe', scope='visit:new',
+        hardness='hard', quote='加一家咖啡馆',
+    )])
+
+    result = merge_preferences(Preferences(), parsed, draft=Draft(),
+                               new_visit_ids=['reserved-stop'], turn_index=1)
+
+    assert result.active_constraints[0].scope == 'visit_id:reserved-stop'
+
+
+def test_a_preserve_segment_blocks_a_conflicting_location_edit():
+    draft = Draft.model_validate({'visits': [{'visit_id': 'first', 'point': {
+        'label': 'Synthetic', 'latitude': 1.3, 'longitude': 103.8,
+        'source': 'user_map', 'confirmed': True,
+    }}]})
+    preserve = SemanticSegment(type='preserve', name='preserve_visit', scope='visit:1',
+                               hardness='hard', quote='第一站不动')
+    parsed = Interpretation(acknowledgement='替换', actions=[LocationAction(
+        op='replace_visit', target_id='first', place=PlaceSpec(categories=['food']),
+        quote='第一站不动',
+    )])
+
+    with pytest.raises(SemanticConsistencyError):
+        validate_segment_command_consistency([preserve], parsed, draft=draft)

@@ -1,7 +1,7 @@
 /* Revision gate and value-free failure diagnostics. No raw model response export. */
 (function(root){'use strict';
  const clone=x=>JSON.parse(JSON.stringify(x));
- const PATCH='2C1-F6';
+ const PATCH='2C1-F7';
  const KINDS=new Set(['SCHEMA_COMPLEXITY','SCHEMA_FIELD','SCHEMA_VALIDATION','GENERATION_PARAMETER','BILLING_OR_REGION','UNKNOWN']);
  const STATUSES=new Set(['INVALID_ARGUMENT','FAILED_PRECONDITION','UNAUTHENTICATED','PERMISSION_DENIED','NOT_FOUND','RESOURCE_EXHAUSTED','INTERNAL','UNAVAILABLE','DEADLINE_EXCEEDED','UNKNOWN']);
  const FIELDS=new Set(['generationConfig.responseJsonSchema','generationConfig.responseSchema','generationConfig.responseFormat','generationConfig.responseMimeType','generationConfig.maxOutputTokens','generationConfig.candidateCount','generationConfig.thinkingConfig','generationConfig.temperature','systemInstruction','contents','$defs','$ref','anyOf','oneOf','const','exclusiveMinimum','maxLength','minLength']);
@@ -40,7 +40,7 @@
    kind:KINDS.has(p.kind)?p.kind:null,
    field_hints:Array.isArray(p.field_hints)?p.field_hints.filter(x=>FIELDS.has(x)).slice(0,10):[],
    phase:PHASES.has(r.phase)?r.phase:null,
-   wire_version:['2C1-F1','2C1-F2','2C1-F3','2C1-F4','2C1-F5',PATCH].includes(r.wire_version)?r.wire_version:null,
+   wire_version:['2C1-F1','2C1-F2','2C1-F3','2C1-F4','2C1-F5','2C1-F6',PATCH].includes(r.wire_version)?r.wire_version:null,
    generation_attempts:integer(r.generation_attempts,0,2),
    completed_generation_responses:integer(r.completed_generation_responses,0,2),schema,
    validation:safeValidation(r.validation),normalization:safeNormalization(r.normalization),time_update:safeTimeUpdate(r.time_update),

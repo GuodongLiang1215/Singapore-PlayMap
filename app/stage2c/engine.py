@@ -18,7 +18,7 @@ from .proposal_status import acknowledgement, slot_label
 from .prompts import INTERPRET, SELECT, PROMPT_VERSION
 from .wire_schema import interpretation_schema, selection_schema, schema_stats, WIRE_VERSION
 from .operation_adapter import parse_interpretation, OperationFormatError, validation_from_exception, safe_validation
-from .semantic import merge_active_constraints, validate_segment_command_consistency, SemanticConsistencyError
+from .semantic import bind_constraint_scopes, merge_active_constraints, takeaway_intent_for_action, validate_segment_command_consistency, SemanticConsistencyError
 
 # Words in the user's own request that mean "just buy something and go" (e.g. "grab a coffee to go").
 TAKEAWAY_WORDS = re.compile(r'(\bto go\b|take ?-?away|\bgrab (a|an|some)\b|\bpick up (a|an|some)\b|\bbuy (a|an|some)\b|'
@@ -90,13 +90,22 @@ class ProposalStore:
 STORE=ProposalStore()
 
 
-def merge_preferences(old, parsed, *, turn_index=0):
+def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()):
     d=old.model_dump()
     for field in ('preferred','excluded','notes'):
         remove=getattr(parsed,field+'_remove');add=getattr(parsed,field+'_add')
         d[field]=list(dict.fromkeys([x for x in d[field] if x not in remove]+add))
+    active = old.active_constraints
+    segments = parsed.semantic_segments
+    if draft is not None:
+        active = bind_constraint_scopes(active, draft)
+        segments = bind_constraint_scopes(segments, draft, new_visit_ids=new_visit_ids)
     d['active_constraints'] = [item.model_dump(mode='json') for item in merge_active_constraints(
-        old.active_constraints, parsed.semantic_segments, turn_index=turn_index)]
+        active, segments, turn_index=turn_index)]
+    removed_scopes = {'visit_id:' + a.target_id for a in parsed.actions if a.op == 'remove_visit'}
+    if draft is not None and any(a.op == 'clear_visits' for a in parsed.actions):
+        removed_scopes.update('visit_id:' + visit.visit_id for visit in draft.visits)
+    d['active_constraints'] = [item for item in d['active_constraints'] if item['scope'] not in removed_scopes]
     if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','同一偏好同时被要求和排除，请明确以哪一条为准。')
     if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','偏好说明过长，请拆分需求。')
     return Preferences.model_validate(d)
@@ -119,6 +128,7 @@ def model_context(body,cat=None):
                        'categories':categories(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
             'finish_policy':body.draft.finish_policy,'finish':point(body.draft.finish),
             'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json'),
+            'max_walk_minutes':body.draft.max_walk_minutes,
             'active_constraints':[item.model_dump(mode='json') for item in body.preferences.active_constraints]}
 
 DISTANCE_BANDS=((1000,'<1km'),(3000,'1-3km'),(10000,'3-10km'))
@@ -141,6 +151,8 @@ def distance_band(metres):
 
 def validate_actions(body,parsed):
     quotes=[body.message]+([body.pending.user_message] if body.pending else [])
+    if any(not any(segment.quote in text for text in quotes) for segment in parsed.semantic_segments):
+        raise ChatError('UNSUPPORTED_EDIT_EVIDENCE','语义约束没有对应原话，未应用。请用更明确的短句重试。')
     ids={v.visit_id for v in body.draft.visits}; removed=set(); mutated=set()
     place_count=0
     for a in parsed.actions:
@@ -196,10 +208,18 @@ def assemble(record,choices,*,strict=False,cat=None):
     body,parsed=record['body'],record['parsed'];d=body.draft.model_copy(deep=True)
     if parsed.max_walk_minutes is not None:
         d.max_walk_minutes = parsed.max_walk_minutes
+    elif 'max_walk_minutes' in parsed.model_fields_set and any(
+        s.type == 'constraint' and s.name == 'max_walk_minutes' and
+        s.scope == 'global' and s.value is None for s in parsed.semantic_segments
+    ):
+        d.max_walk_minutes = None
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     d.time=time_update.settings
     time_changes_added=False
     slots={s['action_index']:s for s in record['slots']};prefs=record['preferences'];changes=[];missing=[]
+    semantic_conflict = any(c.hardness == 'hard' and c.status == 'conflicting' for c in prefs.active_constraints)
+    if strict and semantic_conflict:
+        raise ChatError('SEMANTIC_CONFLICT','明确约束仍有冲突，请先澄清后再采用；原行程保留。')
     expected={s['slot_id'] for s in record['slots']}
     if not set(choices).issubset(expected):raise ChatError('UNKNOWN_CHOICE','选择项不属于这份草案。')
     def find(uid):
@@ -214,15 +234,21 @@ def assemble(record,choices,*,strict=False,cat=None):
                 if key:raise ChatError('UNTRUSTED_PLACE','地点选择不在本次真实检索结果中。')
                 missing.append(s['slot_id']);continue
             p=PlacePoint.model_validate(option['point'])
+            explicit_takeaway = takeaway_intent_for_action(parsed, a, body.draft)
+            takeaway = explicit_takeaway if explicit_takeaway is not None else bool(TAKEAWAY_WORDS.search(a.quote or ''))
             if a.op=='set_origin':d.origin=p;changes.append('起点 → '+p.label)
             elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('结束位置 → '+p.label)
             elif a.op=='replace_visit':
                 visit=find(a.target_id)
                 visit.point=p
-                if TAKEAWAY_WORDS.search(a.quote or ''):
+                if takeaway:
                     visit.stay_profile='takeaway'
                     visit.stay_minutes=None
                     changes.append('替换停留地点 → '+p.label+'（外带／顺路购买，按短时间计）')
+                elif explicit_takeaway is False:
+                    visit.stay_profile='regular'
+                    visit.stay_minutes=None
+                    changes.append('替换停留地点 → '+p.label+'（取消外带，停留按一般估计）')
                 else:
                     changes.append('替换停留地点 → '+p.label+'（原停留时间保留）')
             else:
@@ -230,7 +256,6 @@ def assemble(record,choices,*,strict=False,cat=None):
                 if not s['explicit_location_confirmation'] and any((v.point.entity_id and v.point.entity_id==p.entity_id) or
                     (v.point.latitude==p.latitude and v.point.longitude==p.longitude) for v in d.visits):
                     raise ChatError('DUPLICATE_SUGGESTION','候选与已有停留重复，请在草案中选择另一处。')
-                takeaway=bool(TAKEAWAY_WORDS.search(a.quote or ''))
                 d.visits.append(Visit(visit_id=record['new_ids'][i],point=p,stay_profile='takeaway' if takeaway else 'regular'))
                 changes.append('新增停留 → '+p.label+('（外带／顺路购买，停留按短时间计）' if takeaway else '（停留先用可改初值）'))
         elif a.op=='remove_visit':d.visits=[v for v in d.visits if v.visit_id!=a.target_id];changes.append('删除指定停留点')
@@ -249,6 +274,7 @@ def assemble(record,choices,*,strict=False,cat=None):
     d=Draft.model_validate(d.model_dump())
     if strict and missing:raise ChatError('CONFIRM_PLACE','请先为每个有歧义或尚未确定的地点选择真实候选。')
     warnings=list(record.get('warnings',[]))
+    if semantic_conflict:warnings.append('明确约束有冲突；澄清前不能采用或计算这份草案。')
     if not d.origin:warnings.append('尚无已确认起点：可以先采用停留草案，然后在地图选起点，或继续说出起点名称。')
     if d.finish_policy=='custom' and not d.finish:warnings.append('还需要明确最后结束位置。')
     if prefs.notes:warnings.append('以下要求仅记录、尚无完整校验能力：'+'；'.join(prefs.notes))
@@ -257,8 +283,8 @@ def assemble(record,choices,*,strict=False,cat=None):
     if strict and conflicts:raise ChatError('EXCLUDED_VISIT_REMAINS','清单中仍有被排除类别的可识别地点，请先修改草案或明确允许。')
     return {'draft':d.model_dump(mode='json'),'preferences':prefs.model_dump(),'changes':changes,
         'unresolved_slots':missing,'warnings':list(dict.fromkeys(warnings)),
-        'can_apply':not missing and not conflicts,
-        'ready_to_calculate':bool(d.origin and d.visits and (d.finish_policy!='custom' or d.finish)) and not missing and not conflicts,
+        'can_apply':not missing and not conflicts and not semantic_conflict,
+        'ready_to_calculate':bool(d.origin and d.visits and (d.finish_policy!='custom' or d.finish)) and not missing and not conflicts and not semantic_conflict,
         'time_update':time_update.diagnostic,
         'time_budget_is_user_constraint':d.time.mode!='estimate', 'opening_hours_checked':False,
         'entrances_verified':False,'order_optimisation':False,'route_calculated':False}
@@ -314,7 +340,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     _trace['normalization']=adaptation
     _trace['phase']='semantic_validation'
     try:
-        validate_segment_command_consistency(parsed.semantic_segments, parsed)
+        validate_segment_command_consistency(parsed.semantic_segments, parsed, draft=body.draft)
     except SemanticConsistencyError:
         raise ChatError('SEMANTIC_COMMAND_MISMATCH','用户的明确约束没有对应的安全操作或澄清问题；原行程保留。',422) from None
     _trace['phase']='action_validation'
@@ -324,7 +350,9 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     _trace['time_update']=time_update.diagnostic
     _trace['phase']='preference_merge'
-    prefs=merge_preferences(body.preferences, parsed, turn_index=body.revision+1)
+    new_ids={i:secrets.token_hex(16) for i,a in enumerate(parsed.actions) if a.op=='add_visit'}
+    prefs=merge_preferences(body.preferences, parsed, turn_index=body.revision+1,
+                            draft=body.draft, new_visit_ids=list(new_ids.values()))
     _trace['phase']='retrieval'
     anchor=None if any(a.op=='set_origin' for a in parsed.actions) else body.draft.origin
     existing={v.point.entity_id for v in body.draft.visits if v.point.entity_id}
@@ -360,7 +388,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
             if o is None or o['identity'] in used:raise ChatError('INVALID_SELECTION','模型选择了不存在或重复的候选，未编造替代地点。',502)
             used.add(o['identity']);s.update(recommended_key=pick.candidate_key,selected_key=pick.candidate_key,reason=pick.reason,selection_basis='llm_suggestion_from_retrieved_candidates')
     rec={'body':body,'parsed':parsed,'preferences':prefs,'slots':slots,'warnings':warnings,
-         'new_ids':{i:secrets.token_hex(16) for i,a in enumerate(parsed.actions) if a.op=='add_visit'},
+         'new_ids':new_ids,
          'build_id':cat.build_id,'calls':call_metadata}
     _trace['phase']='proposal_assembly'
     preview=assemble(rec,{},cat=cat)
