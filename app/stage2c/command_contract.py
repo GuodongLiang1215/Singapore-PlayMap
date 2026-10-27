@@ -86,14 +86,25 @@ def scoped_schema():
     for op in OPERATIONS:
         fields = {k: copy.deepcopy(v) for k, v in specs.items() if k in ARGUMENTS[op] | {'order', 'quote'}}
         commands[op] = array(_object(fields, [k for k in fields if k in REQUIRED[op]]))
-    fields = {'acknowledgement': copy.deepcopy(text)}
+    segment = _object({
+        'type': {'type': 'string', 'enum': ['operation', 'constraint', 'preference', 'preserve', 'conflict']},
+        'name': text,
+        'value': {'type': ['string', 'number', 'boolean', 'null']},
+        'scope': text,
+        'hardness': {'type': 'string', 'enum': ['hard', 'soft', 'unknown']},
+        'status': {'type': 'string', 'enum': ['understood', 'unresolved', 'satisfied', 'conflicting', 'unsupported']},
+        'source': {'type': 'string', 'enum': ['user_explicit', 'inferred', 'catalogue', 'route']},
+        'quote': text,
+    }, ['type', 'quote'])
+    fields = {'acknowledgement': copy.deepcopy(text),
+              'semantic_segments': array(segment)}
     fields['max_walk_minutes'] = {'type': ['integer', 'null']}
     for k in ('preferred_add', 'preferred_remove', 'excluded_add', 'excluded_remove'):
         fields[k] = array({'type': 'string', 'enum': list(get_args(Topic))})
     for k in ('notes_add', 'notes_remove', 'questions'):
         fields[k] = array(copy.deepcopy(text))
     fields['commands'] = _object(commands, [])
-    return _object(fields, ['acknowledgement', 'commands'])
+    return _object(fields, ['acknowledgement', 'semantic_segments', 'commands'])
 
 
 def _fail(path, kind, op=None):

@@ -18,6 +18,7 @@ from .proposal_status import acknowledgement, slot_label
 from .prompts import INTERPRET, SELECT, PROMPT_VERSION
 from .wire_schema import interpretation_schema, selection_schema, schema_stats, WIRE_VERSION
 from .operation_adapter import parse_interpretation, OperationFormatError, validation_from_exception, safe_validation
+from .semantic import merge_active_constraints, validate_segment_command_consistency, SemanticConsistencyError
 
 # Words in the user's own request that mean "just buy something and go" (e.g. "grab a coffee to go").
 TAKEAWAY_WORDS = re.compile(r'(\bto go\b|take ?-?away|\bgrab (a|an|some)\b|\bpick up (a|an|some)\b|\bbuy (a|an|some)\b|'
@@ -89,11 +90,13 @@ class ProposalStore:
 STORE=ProposalStore()
 
 
-def merge_preferences(old,parsed):
+def merge_preferences(old, parsed, *, turn_index=0):
     d=old.model_dump()
     for field in ('preferred','excluded','notes'):
         remove=getattr(parsed,field+'_remove');add=getattr(parsed,field+'_add')
         d[field]=list(dict.fromkeys([x for x in d[field] if x not in remove]+add))
+    d['active_constraints'] = [item.model_dump(mode='json') for item in merge_active_constraints(
+        old.active_constraints, parsed.semantic_segments, turn_index=turn_index)]
     if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','同一偏好同时被要求和排除，请明确以哪一条为准。')
     if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','偏好说明过长，请拆分需求。')
     return Preferences.model_validate(d)
@@ -115,7 +118,8 @@ def model_context(body,cat=None):
             'visits':[{'visit_id':v.visit_id,'position':i+1,'place':point(v.point),
                        'categories':categories(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
             'finish_policy':body.draft.finish_policy,'finish':point(body.draft.finish),
-            'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json')}
+            'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json'),
+            'active_constraints':[item.model_dump(mode='json') for item in body.preferences.active_constraints]}
 
 DISTANCE_BANDS=((1000,'<1km'),(3000,'1-3km'),(10000,'3-10km'))
 
@@ -212,7 +216,15 @@ def assemble(record,choices,*,strict=False,cat=None):
             p=PlacePoint.model_validate(option['point'])
             if a.op=='set_origin':d.origin=p;changes.append('起点 → '+p.label)
             elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('结束位置 → '+p.label)
-            elif a.op=='replace_visit':find(a.target_id).point=p;changes.append('替换停留地点 → '+p.label+'（原停留时间保留）')
+            elif a.op=='replace_visit':
+                visit=find(a.target_id)
+                visit.point=p
+                if TAKEAWAY_WORDS.search(a.quote or ''):
+                    visit.stay_profile='takeaway'
+                    visit.stay_minutes=None
+                    changes.append('替换停留地点 → '+p.label+'（外带／顺路购买，按短时间计）')
+                else:
+                    changes.append('替换停留地点 → '+p.label+'（原停留时间保留）')
             else:
                 # Generic recommendations cannot silently duplicate a current visit.
                 if not s['explicit_location_confirmation'] and any((v.point.entity_id and v.point.entity_id==p.entity_id) or
@@ -294,12 +306,17 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
              'singapore_now':datetime.now(SGT).replace(microsecond=0).isoformat()}
     raw=generate(INTERPRET,payload,interpretation_schema())
     _trace['phase']='interpretation_validation'
-    try:parsed,adaptation=parse_interpretation(raw,body.draft)
+    try:parsed,adaptation=parse_interpretation(raw,body.draft,turn_index=body.revision+1)
     except OperationFormatError as error:
         _trace['validation']=error.validation
         _trace['normalization']=error.normalization
         raise ChatError('MODEL_SCHEMA','模型操作格式未通过本地检查；原行程保留。请导出字段诊断，无需为此简化正常需求。',502) from None
     _trace['normalization']=adaptation
+    _trace['phase']='semantic_validation'
+    try:
+        validate_segment_command_consistency(parsed.semantic_segments, parsed)
+    except SemanticConsistencyError:
+        raise ChatError('SEMANTIC_COMMAND_MISMATCH','用户的明确约束没有对应的安全操作或澄清问题；原行程保留。',422) from None
     _trace['phase']='action_validation'
     validate_actions(body,parsed)
     _trace['phase']='time_merge_validation'
@@ -307,7 +324,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     _trace['time_update']=time_update.diagnostic
     _trace['phase']='preference_merge'
-    prefs=merge_preferences(body.preferences,parsed)
+    prefs=merge_preferences(body.preferences, parsed, turn_index=body.revision+1)
     _trace['phase']='retrieval'
     anchor=None if any(a.op=='set_origin' for a in parsed.actions) else body.draft.origin
     existing={v.point.entity_id for v in body.draft.visits if v.point.entity_id}
@@ -324,7 +341,9 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         # the backend, and anchor distances are coarsened so the start point is not exported
         # as an exact distance set. Exact metres stay local for ranking and for this browser.
         short=[{'slot_id':s['slot_id'],'categories':s['categories'],
-            'candidates':[{**{k:o[k] for k in ('candidate_key','identity','label','categories')},
+            'candidates':[{**{k:o[k] for k in ('candidate_key','identity','label','categories','address','basis',
+                                                 'data_source','suggested_duration','opening_hours_display',
+                                                 'opening_hours_source','entrance_count')},
                 'distance_band':distance_band(o['distance_hint_m'])} for o in s['options']]} for s in generic]
         raw_selection=generate(SELECT,{'slots':short,'preferences':prefs.model_dump()},selection_schema())
         _trace['phase']='selection_validation'

@@ -14,7 +14,7 @@ import json
 from typing import get_args
 from .models import Topic, Category
 
-WIRE_VERSION = '2C1-F5'
+WIRE_VERSION = '2C1-F6'
 OPERATIONS = (
     'set_origin', 'set_finish', 'add_visit', 'replace_visit',
     'remove_visit', 'move_visit', 'set_stay', 'set_finish_policy',

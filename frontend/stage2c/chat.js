@@ -2,7 +2,7 @@
 (function(){'use strict';
  const el=id=>document.getElementById(id),bridge=PlayMapChatBridge,clone=x=>JSON.parse(JSON.stringify(x));
  const gate=new PlayMapChatState.Gate();
- let controller=null,proposal=null,pending=null,preferences={preferred:[],excluded:[],notes:[]},prefHistory=[],applying=false,originAsked=false;
+ let controller=null,proposal=null,pending=null,preferences={preferred:[],excluded:[],notes:[],active_constraints:[]},prefHistory=[],applying=false,originAsked=false;
  const metrics={completed:0,failed:0,calls:0,applied:0,cancelled:0,tokens:{},model:null,error:null,lastFailure:null,failedAttempts:0,failedUnknown:0,lastAdaptation:null};
  const names={park:'公园',food:'吃饭',museum:'博物馆',shopping:'购物',heritage:'历史文化',architecture:'建筑',art:'艺术',nature:'自然',photography:'拍照'};
  function make(tag,text,cls){const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;}
@@ -45,8 +45,8 @@
  window.addEventListener('playmap:edit',event=>{
   const kind=event.detail.kind;
   if(kind==='change'){prefHistory.push(clone(preferences));if(prefHistory.length>20)prefHistory.shift();}
-  else if(kind==='undo')preferences=prefHistory.pop()||{preferred:[],excluded:[],notes:[]};
-  else if(kind==='clear'){preferences={preferred:[],excluded:[],notes:[]};prefHistory=[];pending=null;}
+  else if(kind==='undo')preferences=prefHistory.pop()||{preferred:[],excluded:[],notes:[],active_constraints:[]};
+  else if(kind==='clear'){preferences={preferred:[],excluded:[],notes:[],active_constraints:[]};prefHistory=[];pending=null;}
   showPrefs();
   if(!applying&&(proposal||controller)){pending=null;cancel('地图或清单已经修改，旧聊天草案已失效。按当前行程重新发送即可。');el('chat-proposal').hidden=true;}
  });
@@ -156,7 +156,7 @@
   }catch(e){if(e.name==='AbortError')return;metrics.failed++;metrics.error=e.code||'APPLY_FAILED';metrics.lastFailure=e.safeDetail||PlayMapChatState.safeErrorDetail({request_diagnostic:{phase:'resolve_validation',wire_version:PlayMapChatState.PATCH,generation_attempts:0}});PlayMapChatState.recordFailure(metrics,{generation_attempts:0});status(e.message+(e.code?' ['+e.code+']':''),'error');}
   finally{if(controller===local){controller=null;el('chat-send').disabled=false;el('chat-cancel').disabled=true;el('chat-apply').disabled=!chosenEnough();}}
  }
- async function refresh(){try{const r=await fetch('/api/stage2c/status',{cache:'no-store'}).then(x=>x.json());el('chat-model').textContent=r.configured?'Gemini · '+r.model+' · CHAT FIX 5 · 按发送调用':'模型尚未配置：'+(r.error?.message||'请检查.env');if(r.model)metrics.model=r.model;}catch{el('chat-model').textContent='无法读取模型状态，请确认使用stage2c_main入口。';}}
+ async function refresh(){try{const r=await fetch('/api/stage2c/status',{cache:'no-store'}).then(x=>x.json());el('chat-model').textContent=r.configured?'Gemini · '+r.model+' · CHAT FIX 6 · 按发送调用':'模型尚未配置：'+(r.error?.message||'请检查.env');if(r.model)metrics.model=r.model;}catch{el('chat-model').textContent='无法读取模型状态，请确认使用stage2c_main入口。';}}
  function download(){const d=PlayMapChatState.diagnose(metrics,bridge.diagnostic(),proposal,selections()),url=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'})),a=make('a');a.href=url;a.download='stage2c1_chat_report.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);status('已导出无原话、地点名、坐标或Key的本地报告；失败请求可能已消耗额度，精确用量以Google控制台为准。');}
  el('chat-form').onsubmit=send;el('chat-apply').onclick=adopt;el('chat-cancel').onclick=()=>cancel();el('chat-export').onclick=download;
  // Starting a new thread only parks the transcript; the adopted itinerary stays.
@@ -185,6 +185,6 @@
  const grow=()=>{const t=el('chat-input');t.style.height='auto';
   t.style.height=Math.min(t.scrollHeight,76)+'px';};
  el('chat-input').addEventListener('input',grow);
- el('chat-reset').onclick=async()=>{if(!window.confirm('清除本页对话、偏好和待采用草案？地图中的已采用行程保留；此操作不删除Google已收到的内容。'))return;cancel(null);preferences={preferred:[],excluded:[],notes:[]};prefHistory=[];pending=null;proposal=null;originAsked=false;el('chat-proposal').hidden=true;log.clear();renderLog();renderHistory();showPrefs();try{await request('forget',{session_id:bridge.currentSession()});}catch{}status('本地对话与待采用草案已清理；已有行程保留。');};
+ el('chat-reset').onclick=async()=>{if(!window.confirm('清除本页对话、偏好和待采用草案？地图中的已采用行程保留；此操作不删除Google已收到的内容。'))return;cancel(null);preferences={preferred:[],excluded:[],notes:[],active_constraints:[]};prefHistory=[];pending=null;proposal=null;originAsked=false;el('chat-proposal').hidden=true;log.clear();renderLog();renderHistory();showPrefs();try{await request('forget',{session_id:bridge.currentSession()});}catch{}status('本地对话与待采用草案已清理；已有行程保留。');};
  showPrefs();renderHistory();refresh();
 })();

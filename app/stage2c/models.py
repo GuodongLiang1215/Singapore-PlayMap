@@ -9,11 +9,49 @@ class Strict(BaseModel):
 
 Topic = Literal['park','food','museum','shopping','heritage','architecture','art','nature','photography']
 Category = Literal['nature','food','heritage','monument','tourism']
+SegmentType = Literal['operation','constraint','preference','preserve','conflict']
+ConstraintHardness = Literal['hard','soft','unknown']
+ConstraintStatus = Literal['understood','unresolved','satisfied','conflicting','unsupported']
+ConstraintSource = Literal['user_explicit','inferred','catalogue','route']
+ConstraintValue = str | int | float | bool | list[str] | None
+
+
+class SemanticSegment(Strict):
+    """One independently auditable meaning unit from the latest user turn."""
+    type: SegmentType
+    name: str = Field(default='', max_length=64)
+    value: ConstraintValue = None
+    scope: str = Field(default='global', max_length=64)
+    hardness: ConstraintHardness = 'unknown'
+    status: ConstraintStatus = 'understood'
+    source: ConstraintSource = 'user_explicit'
+    quote: str = Field(min_length=1, max_length=240)
+    # The adapter assigns this locally; the provider does not get to invent it.
+    turn_index: int = Field(default=0, ge=0, le=2**31 - 1, strict=True)
+
+    @model_validator(mode='after')
+    def named_non_operation(self):
+        if self.type != 'operation' and not self.name.strip():
+            raise ValueError('Non-operation semantic segments require a name')
+        return self
+
+
+class ActiveConstraint(Strict):
+    """A constraint that remains active across turns until replaced or cleared."""
+    name: str = Field(min_length=1, max_length=64)
+    value: ConstraintValue = None
+    scope: str = Field(default='global', max_length=64)
+    hardness: ConstraintHardness = 'unknown'
+    status: ConstraintStatus = 'understood'
+    source: ConstraintSource = 'user_explicit'
+    quote: str = Field(min_length=1, max_length=240)
+    turn_index: int = Field(ge=0, le=2**31 - 1, strict=True)
 
 class Preferences(Strict):
     preferred: list[Topic] = Field(default_factory=list, max_length=10)
     excluded: list[Topic] = Field(default_factory=list, max_length=10)
     notes: list[str] = Field(default_factory=list, max_length=12)
+    active_constraints: list[ActiveConstraint] = Field(default_factory=list, max_length=32)
 
 class Draft(Strict):
     origin: PlacePoint | None = None
@@ -83,6 +121,7 @@ Action = Union[LocationAction,RemoveAction,MoveAction,StayAction,FinishAction,Mo
 class Interpretation(Strict):
     acknowledgement: str = Field(max_length=400)
     max_walk_minutes: int | None = Field(default=None,gt=0)
+    semantic_segments: list[SemanticSegment] = Field(default_factory=list, max_length=32)
     preferred_add: list[Topic] = Field(default_factory=list,max_length=10)
     preferred_remove: list[Topic] = Field(default_factory=list,max_length=10)
     excluded_add: list[Topic] = Field(default_factory=list,max_length=10)

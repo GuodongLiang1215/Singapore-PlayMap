@@ -11,7 +11,8 @@ from __future__ import annotations
 import copy
 from pydantic import ValidationError
 from .models import (Interpretation, LocationAction, RemoveAction, MoveAction,
-                     StayAction, FinishAction, ModeAction, TimeAction, ClearAction)
+                     StayAction, FinishAction, ModeAction, TimeAction, ClearAction,
+                     SemanticSegment)
 
 ACTION_MODELS = {
     'set_origin': LocationAction, 'set_finish': LocationAction,
@@ -25,6 +26,7 @@ KNOWN_FIELDS = frozenset(
     {k for cls in ACTION_MODELS.values() for k in cls.model_fields} | {'target_position'})
 PATH_PARTS = frozenset(KNOWN_FIELDS | set(Interpretation.model_fields) |
     {'commands', 'order', 'transport_mode', 'finish_policy', 'time_mode', *ACTION_MODELS, 'query', 'categories', 'keywords', 'picks', 'slot_id', 'candidate_key', 'reason',
+     'type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'turn_index',
      '<unknown>', '<root>'})
 ERROR_TYPES = frozenset({
     'missing', 'extra_forbidden', 'int_type', 'int_parsing', 'string_type',
@@ -101,7 +103,7 @@ def _unused_placeholder(field, value):
     return False
 
 
-def parse_interpretation(raw, draft):
+def parse_interpretation(raw, draft, *, turn_index=0):
     """Return validated Interpretation and value-free adaptation counts.
 
     target_position is a NEW documented wire field, not a fallback for an absent
@@ -119,6 +121,24 @@ def parse_interpretation(raw, draft):
     for key in data:
         if key not in Interpretation.model_fields:
             _fail(('<unknown>',), 'unknown_field', norm=norm)
+    segments = data.get('semantic_segments', [])
+    if not isinstance(segments, list):
+        _fail(('semantic_segments',), 'list_type', norm=norm)
+    if len(segments) > 32:
+        _fail(('semantic_segments',), 'too_long', norm=norm)
+    cooked_segments = []
+    for index, original in enumerate(segments):
+        prefix = ('semantic_segments', index)
+        if not isinstance(original, dict):
+            _fail(prefix, 'invalid_structure', norm=norm)
+        if 'turn_index' in original:
+            _fail(prefix + ('turn_index',), 'irrelevant_field_value', norm=norm)
+        try:
+            segment = SemanticSegment.model_validate({**original, 'turn_index': turn_index})
+        except ValidationError as error:
+            raise OperationFormatError(validation_from_exception(error, prefix=prefix), norm) from None
+        cooked_segments.append(segment.model_dump(mode='json'))
+    data['semantic_segments'] = cooked_segments
     actions = data.get('actions', [])
     if not isinstance(actions, list):
         _fail(('actions',), 'list_type', norm=norm)

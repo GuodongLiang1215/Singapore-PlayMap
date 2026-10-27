@@ -1,0 +1,3 @@
+{"case_id":"m01_replace_preserve","language":"zh","turns":["找一个公园和一个吃饭的地方。","第二站换成咖啡馆，第一站保留。"],"gold_active_constraints":[{"name":"place_type","value":"cafe","scope":"visit:2","hardness":"hard","status":"understood"}],"expected_status":"second_stop_replaced_first_preserved"}
+{"case_id":"m02_takeaway_replacement","language":"en","turns":["Add a restaurant after the museum.","Replace the second stop with a cafe; just grab it to go."],"gold_active_constraints":[{"name":"takeaway","value":"true","scope":"visit:2","hardness":"hard","status":"understood"}],"expected_status":"replacement_keeps_takeaway"}
+{"case_id":"m03_cancel_walk_limit","language":"zh","turns":["每段步行不要超过10分钟。","取消步行限制，其他条件不变。"],"gold_active_constraints":[],"expected_status":"explicit_constraint_removed"}
