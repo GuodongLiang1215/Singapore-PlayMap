@@ -48,6 +48,8 @@ F1 使用严格规范值，不做词义相似度猜测。不同合理分段、�
 
 原始预测每行使用 `case_id` 和 `turn_index` 对齐标注；`prompt_version`、`wire_version`、`prompt_sha256`、`fixtures_sha256` 记录实际输入版本，避免提示词或样例改动后混淆实验；`model` 记录选择的模型；`metadata` 保留服务商返回的耗时、模型版本及 token 用量，便于核对调用次数。失败时只记录安全错误码，不记录密钥或异常全文。
 
+评分报告的 `prompt_version` / `wire_version` 来自已记录的预测；`local_scoring_contract` 是执行离线校验的代码版本。因此“F7 输出在 F8 本地检查器中重放”不会被标成 F8 模型实测。首次实验限流后只继续未发送的样例，后半段的 `collection_subset_sha256` 标识收集子集，`fixtures_sha256` 仍指向完整基准。
+
 报告只输出样例 ID、计数、判断和汇总指标，不输出用户原话或地点坐标。当前样例全为合成数据；未来使用真实数据必须另行处理授权和脱敏。
 
 ## 当前开发版本的修正
@@ -62,3 +64,7 @@ F1 使用严格规范值，不做词义相似度猜测。不同合理分段、�
 - takeaway 使用对应站点的结构化意图；“不要外带”不会因出现“外带”二字而被判为外带。
 
 这些行为由离线回归测试检查。最终验收仍需对照工作计划中的阈值，并人工检查营业承诺、澄清内容和端到端行为。
+
+F8 增加了 `preserve_location` 名称：它只保护地点，允许修改停留时间；`preserve_visit` 仍保护整站。provider 必须输出全部八个语义字段，不能输出 satisfied 或把自己的语义判断标为 catalogue/route 来源；本地模型保留这些状态，以便未来接收确定性证据。已支持的 departure_at、finish_by、transport_mode、stay_minutes、finish_policy 使用明确字段对照校验，不再一律要求澄清。
+
+空 quote 仍由本地校验拒绝。Google 当前说明字符串长度约束不会由解码器强制执行，所以不能声称添加 `minLength` 就解决了空引用问题；见 [Gemini structured outputs 官方说明](https://ai.google.dev/gemini-api/docs/structured-output)。F8 schema 尚未发往服务商验证。

@@ -92,10 +92,10 @@ def scoped_schema():
         'value': {'type': ['string', 'number', 'boolean', 'null']},
         'scope': text,
         'hardness': {'type': 'string', 'enum': ['hard', 'soft', 'unknown']},
-        'status': {'type': 'string', 'enum': ['understood', 'unresolved', 'satisfied', 'conflicting', 'unsupported']},
-        'source': {'type': 'string', 'enum': ['user_explicit', 'inferred', 'catalogue', 'route']},
-        'quote': text,
-    }, ['type', 'quote'])
+        'status': {'type': 'string', 'enum': ['understood', 'unresolved', 'conflicting', 'unsupported']},
+        'source': {'type': 'string', 'enum': ['user_explicit', 'inferred']},
+        'quote': {'type': 'string', 'description': 'A nonempty exact substring of the latest or pending user message. Never quote current_draft or other context.'},
+    }, ['type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote'])
     fields = {'acknowledgement': copy.deepcopy(text),
               'semantic_segments': array(segment)}
     fields['max_walk_minutes'] = {'type': ['integer', 'null']}

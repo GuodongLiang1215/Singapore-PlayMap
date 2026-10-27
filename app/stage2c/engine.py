@@ -332,6 +332,8 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
              'singapore_now':datetime.now(SGT).replace(microsecond=0).isoformat()}
     raw=generate(INTERPRET,payload,interpretation_schema())
     _trace['phase']='interpretation_validation'
+    if not isinstance(raw, dict) or not {'acknowledgement', 'semantic_segments', 'commands'} <= raw.keys():
+        raise ChatError('MODEL_SCHEMA','模型缺少语义分段或操作字段；原行程保留。',502)
     try:parsed,adaptation=parse_interpretation(raw,body.draft,turn_index=body.revision+1)
     except OperationFormatError as error:
         _trace['validation']=error.validation

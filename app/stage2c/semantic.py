@@ -10,6 +10,24 @@ from collections import defaultdict
 from copy import deepcopy
 
 from .models import ActiveConstraint, Interpretation, SemanticSegment
+from .retrieval_rules import ALIAS_CATEGORY, normalise
+
+
+COMMAND_CONSTRAINT_FIELDS = {
+    'budget_minutes': ('set_time', 'budget_minutes'),
+    'departure_at': ('set_time', 'departure_at'),
+    'finish_by': ('set_time', 'finish_by'),
+    'transport_mode': ('set_mode', 'value'),
+    'travel_mode': ('set_mode', 'value'),
+    'stay_minutes': ('set_stay', 'minutes'),
+    'finish_policy': ('set_finish_policy', 'value'),
+}
+PRESERVED_OPERATIONS = {
+    'preserve_origin': {'set_origin'},
+    'preserve_visit': {'replace_visit', 'remove_visit', 'move_visit', 'set_stay', 'clear_visits'},
+    'preserve_visits': {'replace_visit', 'remove_visit', 'move_visit', 'set_stay', 'clear_visits'},
+    'preserve_location': {'replace_visit', 'remove_visit', 'clear_visits'},
+}
 
 
 class SemanticConsistencyError(ValueError):
@@ -123,7 +141,9 @@ def _location_constraint_supported(segment: SemanticSegment, parsed: Interpretat
             *(place.keywords or []),
             *(place.categories or []),
         ]).casefold()
-        if value in haystack and _matches_scope(segment, action, draft, parsed):
+        broad_category = ALIAS_CATEGORY.get(normalise(value))
+        matches = value in haystack or broad_category is not None and broad_category in place.categories
+        if matches and _matches_scope(segment, action, draft, parsed):
             return True
     return False
 
@@ -148,9 +168,13 @@ def _constraint_supported(segment: SemanticSegment, parsed: Interpretation, draf
         return type(segment.value) is bool and any(action.op in {'add_visit', 'replace_visit'} and
                    _matches_scope(segment, action, draft, parsed)
                    for action in parsed.actions)
-    if segment.name == 'budget_minutes' and segment.status not in {'unsupported', 'unresolved'}:
-        return any(action.op == 'set_time' and action.budget_minutes == segment.value
-                   for action in parsed.actions)
+    if segment.name in COMMAND_CONSTRAINT_FIELDS and segment.status not in {'unsupported', 'unresolved'}:
+        operation, field = COMMAND_CONSTRAINT_FIELDS[segment.name]
+        return segment.value is not None and any(
+            action.op == operation and getattr(action, field) == segment.value and
+            _matches_scope(segment, action, draft, parsed) for action in parsed.actions)
+    if segment.name == 'excluded_topic':
+        return segment.value in parsed.excluded_add
     # A question is an explicit safe outcome for a hard requirement that the
     # current command contract cannot execute yet, such as opening hours.
     return bool(parsed.questions)
@@ -165,14 +189,10 @@ def validate_segment_command_consistency(segments, parsed: Interpretation, *, dr
     for segment in segments:
         if segment.type == 'preserve':
             for action in parsed.actions:
-                preserves_visits = segment.name in {'preserve_visit', 'preserve_visits'}
-                changes_visit = getattr(action, 'target_id', None) is not None
-                if preserves_visits and action.op == 'clear_visits':
-                    raise SemanticConsistencyError('Preserved visits cannot be cleared')
-                if changes_visit and preserves_visits and _matches_scope(segment, action, draft, parsed):
-                    raise SemanticConsistencyError('Preserved visit has a conflicting command')
-                if segment.name == 'preserve_origin' and action.op == 'set_origin':
-                    raise SemanticConsistencyError('Preserved origin has a conflicting command')
+                forbidden = PRESERVED_OPERATIONS.get(segment.name, set())
+                applies = action.op in {'set_origin', 'clear_visits'} or _matches_scope(segment, action, draft, parsed)
+                if action.op in forbidden and applies:
+                    raise SemanticConsistencyError('Preserved state has a conflicting command')
         if segment.type != 'constraint' or segment.hardness != 'hard':
             continue
         if segment.status == 'conflicting':

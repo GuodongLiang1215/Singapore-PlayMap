@@ -153,3 +153,18 @@ def test_conflicting_hard_requirements_cannot_be_adopted_even_with_a_question():
         assemble(record, {}, strict=True)
     assert error.value.code == 'SEMANTIC_CONFLICT'
     assert body.draft.max_walk_minutes is None
+
+
+def test_provider_cannot_skip_the_semantic_envelope_and_still_change_the_draft():
+    class MissingSegmentsClient(FakeClient):
+        def generate_json(self, **kwargs):
+            return {'data': {'acknowledgement': 'walking limit', 'commands': {},
+                             'max_walk_minutes': 10}, 'metadata': {}}
+
+    body = ChatRequest(session_id='1' * 32, revision=0, message='每段最多10分钟',
+                       draft=Draft(), consent=True)
+    with pytest.raises(ChatError) as error:
+        prepare(body, None, client=MissingSegmentsClient(), pace=CallPacer(interval=0))
+
+    assert error.value.code == 'MODEL_SCHEMA'
+    assert body.draft.max_walk_minutes is None

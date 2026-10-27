@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 from collections import Counter
 
 from app.llm_connect.errors import LLMConnectionError
@@ -171,9 +172,16 @@ def score_predictions(cases, predictions):
         groups[f'single_standard_{language}'] = [r for r in results if r['cohort'] == 'standard' and r['language'] == language]
     groups['single_boundary'] = [r for r in results if r['cohort'] == 'boundary']
     groups['multiturn'] = [r for r in results if r['cohort'] == 'multiturn']
+    prompt_versions = sorted({p['prompt_version'] for p in predictions
+                              if isinstance(p.get('prompt_version'), str) and re.fullmatch(r'2C1-F[0-9]+', p['prompt_version'])})
+    wire_versions = sorted({p['wire_version'] for p in predictions
+                            if isinstance(p.get('wire_version'), str) and re.fullmatch(r'2C1-F[0-9]+', p['wire_version'])})
     return {
         'evaluation_scope': 'controlled_interpretation_and_ledger',
-        'prompt_version': PROMPT_VERSION, 'wire_version': WIRE_VERSION,
+        'prompt_version': prompt_versions[0] if len(prompt_versions) == 1 else None,
+        'wire_version': wire_versions[0] if len(wire_versions) == 1 else None,
+        'prediction_prompt_versions': prompt_versions, 'prediction_wire_versions': wire_versions,
+        'local_scoring_contract': WIRE_VERSION,
         'expected_turns': total, 'received_turns': len(received),
         'missing_turns': total - len(received), 'acceptance': acceptance,
         'metrics': metrics, 'groups': {name: _summarize_group(rows) for name, rows in groups.items() if rows},

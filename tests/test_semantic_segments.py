@@ -310,3 +310,45 @@ def test_a_preserve_segment_blocks_a_conflicting_location_edit():
 
     with pytest.raises(SemanticConsistencyError):
         validate_segment_command_consistency([preserve], parsed, draft=draft)
+
+
+@pytest.mark.parametrize('name,value,action', [
+    ('transport_mode', 'cycle', {'op': 'set_mode', 'value': 'cycle', 'quote': 'cycle'}),
+    ('departure_at', '2026-10-28T09:00:00+08:00', {
+        'op': 'set_time', 'departure_at': '2026-10-28T09:00:00+08:00', 'quote': 'departure',
+    }),
+])
+def test_existing_executable_fields_do_not_require_an_unnecessary_question(name, value, action):
+    parsed = Interpretation.model_validate({'acknowledgement': 'proposal', 'actions': [action]})
+    segment = SemanticSegment(type='constraint', name=name, value=value,
+                              hardness='hard', quote=action['quote'])
+
+    validate_segment_command_consistency([segment], parsed)
+
+
+def test_broad_park_intent_uses_the_existing_retrieval_alias():
+    parsed = Interpretation(acknowledgement='公园', actions=[LocationAction(
+        op='add_visit', place=PlaceSpec(categories=['nature']), quote='找个公园',
+    )])
+    segment = SemanticSegment(type='constraint', name='place_type', value='park',
+                              scope='visit:new', hardness='hard', quote='公园')
+
+    validate_segment_command_consistency([segment], parsed)
+
+
+def test_preserving_the_location_allows_a_stay_edit_but_rejects_a_replacement():
+    from app.stage2c.models import StayAction
+    draft = Draft.model_validate({'visits': [{'visit_id': 'first', 'point': {
+        'label': 'Synthetic', 'latitude': 1.3, 'longitude': 103.8,
+        'source': 'user_map', 'confirmed': True,
+    }}]})
+    preserve = SemanticSegment(type='preserve', name='preserve_location', scope='visit:1',
+                               hardness='hard', quote='Keep the same place')
+    parsed = Interpretation(acknowledgement='stay', actions=[StayAction(
+        op='set_stay', target_id='first', minutes=45, quote='spend 45 minutes',
+    )])
+    validate_segment_command_consistency([preserve], parsed, draft=draft)
+    parsed.actions = [LocationAction(op='replace_visit', target_id='first',
+                                     place=PlaceSpec(categories=['food']), quote='Keep the same place')]
+    with pytest.raises(SemanticConsistencyError):
+        validate_segment_command_consistency([preserve], parsed, draft=draft)

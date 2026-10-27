@@ -14,6 +14,16 @@ def test_provider_schema_exposes_semantic_segments():
     assert 'quote' in item['required']
 
 
+def test_provider_must_supply_a_complete_segment_and_cannot_assert_verification():
+    item = scoped_schema()['properties']['semantic_segments']['items']
+
+    assert set(item['required']) == {
+        'type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote',
+    }
+    assert 'satisfied' not in item['properties']['status']['enum']
+    assert item['properties']['source']['enum'] == ['user_explicit', 'inferred']
+
+
 def test_operation_adapter_preserves_segments_when_compiling_commands():
     raw = {
         'acknowledgement': '替换第二站',
