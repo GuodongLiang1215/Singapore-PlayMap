@@ -2,7 +2,7 @@ import pytest
 from types import SimpleNamespace
 
 from app.stage2c.catalogue import LocalCatalogue, retrieve_slot
-from app.stage2c.models import LocationAction, PlaceSpec, Preferences, SemanticSegment
+from app.stage2c.models import ActiveConstraint, LocationAction, PlaceSpec, Preferences, SemanticSegment
 from app.stage2c.retrieval_rules import SUPPORTED_PLACE_TYPES, canonical_place_type
 from app.stage2a.transport import ProviderError
 
@@ -43,6 +43,46 @@ def test_park_discovery_keeps_the_fine_type_instead_of_all_nature():
 class NoGeocoder:
     def search(self, *args):
         raise AssertionError('Generic discovery must use catalogue types')
+
+
+@pytest.mark.parametrize('operation,scope,hardness,expected_count', [
+    ('add_visit', 'future_visits', 'hard', 0),
+    ('replace_visit', 'future_visits', 'hard', 1),
+    ('set_origin', 'future_visits', 'hard', 1),
+    ('replace_visit', 'global', 'hard', 0),
+    ('add_visit', 'global', 'soft', 1),
+])
+def test_retrieval_applies_exclusions_only_to_their_operation(operation, scope, hardness, expected_count):
+    catalogue = LocalCatalogue(rows=[catalogue_place('museum', 'City Museum', 'tourism', 'museum')])
+    prefs = Preferences(excluded=['museum'], active_constraints=[ActiveConstraint(
+        name='excluded_topic', value='museum', scope=scope, hardness=hardness,
+        quote='博物馆', turn_index=1)])
+    action = LocationAction(op=operation, target_id='old-visit' if operation == 'replace_visit' else None,
+                           place=PlaceSpec(query='City Museum' if operation == 'set_origin' else '',
+                                           categories=['tourism'], keywords=['museum']), quote='博物馆')
+
+    slot = retrieve_slot(0, action, catalogue, prefs, None, set(), NoGeocoder())
+
+    assert len(slot['options']) == expected_count
+    assert prefs.excluded == ['museum']
+
+
+@pytest.mark.parametrize('operation,expected_count', [('add_visit', 0), ('replace_visit', 1)])
+def test_onemap_fallback_respects_future_only_exclusion(operation, expected_count):
+    class Geocoder:
+        def search(self, query, page):
+            return {'results': [{'label': 'City Museum', 'latitude': 1.3, 'longitude': 103.8}]}
+
+    prefs = Preferences(excluded=['museum'], active_constraints=[ActiveConstraint(
+        name='excluded_topic', value='museum', scope='future_visits', hardness='hard',
+        quote='之后不加博物馆', turn_index=1)])
+    action = LocationAction(op=operation, target_id='old-visit' if operation == 'replace_visit' else None,
+                           place=PlaceSpec(query='City Museum'), quote='City Museum')
+
+    slot = retrieve_slot(0, action, LocalCatalogue(rows=[]), prefs, None, set(), Geocoder())
+
+    assert slot['retrieval_diagnostic']['geocoder_attempted'] is True
+    assert len(slot['options']) == expected_count
 
 
 def test_generic_cafe_query_discovers_coffee_shop_without_geocoding():

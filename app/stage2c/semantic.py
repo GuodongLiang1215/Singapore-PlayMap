@@ -138,10 +138,12 @@ def merge_active_constraints(active, segments, *, turn_index: int):
 
 
 def synchronize_action_constraints(active, parsed, draft, *, new_visit_ids=(), turn_index: int):
-    """Keep command-backed stay values in the ledger in the same atomic proposal."""
+    """Synchronize numeric stay commands in the same atomic proposal.
+
+    Takeaway rows already come from the semantic merge. Rebuilding them from
+    compiled actions would lose their source and bypass hardness protection.
+    """
     current = [row.model_copy(deep=True) for row in active]
-    bound_segments = bind_constraint_scopes(
-        parsed.semantic_segments, draft, new_visit_ids=new_visit_ids)
     new_ids = iter(new_visit_ids)
     for action in parsed.actions:
         scope = None
@@ -157,16 +159,6 @@ def synchronize_action_constraints(active, parsed, draft, *, new_visit_ids=(), t
                 current.append(ActiveConstraint(name='stay_minutes', value=action.minutes,
                     scope=scope, hardness='hard', status='understood', source='user_explicit',
                     quote=action.quote, turn_index=turn_index))
-        profile = getattr(action, 'stay_profile', None)
-        if profile is None:
-            continue
-        clear_requested = any(row.name == 'takeaway' and row.scope == scope and row.effect == 'clear'
-                              for row in bound_segments)
-        current = [row for row in current if not (row.name == 'takeaway' and row.scope == scope)]
-        if not clear_requested:
-            current.append(ActiveConstraint(name='takeaway', value=profile == 'takeaway',
-                scope=scope, hardness='hard', status='understood', source='user_explicit',
-                quote=action.quote, turn_index=turn_index))
     return current
 
 
@@ -230,7 +222,8 @@ def compile_takeaway_actions(parsed, draft):
     """Compile scoped takeaway meaning into the locally validated action list."""
     actions = list(parsed.actions)
     for segment in parsed.semantic_segments:
-        if segment.type != 'constraint' or segment.name != 'takeaway' or segment.effect not in {'set', 'clear'}:
+        if (segment.type != 'constraint' or segment.name != 'takeaway' or
+                segment.hardness != 'hard' or segment.effect not in {'set', 'clear'}):
             continue
         profile = 'regular' if segment.effect == 'clear' or segment.value is False else 'takeaway'
         matching = [index for index, action in enumerate(actions)

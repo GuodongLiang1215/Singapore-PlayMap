@@ -277,7 +277,27 @@ class LocalCatalogue:
             notices.append('餐饮候选来自熟食中心官方目录及Overture第三方数据（餐厅、咖啡馆、酒吧等），不保证覆盖全部；营业、菜品及饮食限制仍未核验。')
         return result,notices,False,diagnostic
 
+def global_exclusions_for_slot(preferences, slot):
+    rows_by_topic = {}
+    for row in preferences.active_constraints:
+        if row.name == 'excluded_topic' and isinstance(row.value, str):
+            rows_by_topic.setdefault(row.value, []).append(row)
+    result = []
+    for topic in preferences.excluded:
+        rows = rows_by_topic.get(topic, [])
+        hard_rows = [row for row in rows if row.hardness == 'hard']
+        if not rows:
+            result.append(topic)
+        elif any(row.scope == 'global' for row in hard_rows):
+            result.append(topic)
+        elif slot and slot.get('operation') == 'add_visit' and any(
+                row.scope == 'future_visits' for row in hard_rows):
+            result.append(topic)
+    return result
+
+
 def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=()):
+    prefs=prefs.model_copy(update={'excluded':global_exclusions_for_slot(prefs,{'operation':action.op})},deep=True)
     requirements=tuple(requirements)
     anchor,radius_m,spatial=resolve_spatial_requirement(requirements,anchor,cat,geo)
     spec,normalization=canonical_spec(action.place,action.op)

@@ -84,7 +84,7 @@ F9 合成候选 fixture 有 21 个单轮案例，尺度 1–5 分别为 **5 / 6 
 
 | 检查 | 结果 | 覆盖范围 |
 |---|---:|---|
-| `.venv/Scripts/python.exe -m pytest -q --tb=short` | **170 passed** | 全部 Python 回归；含状态 reducer、候选检索、外带和确认事件 |
+| `.venv/Scripts/python.exe -m pytest -q --tb=short` | **180 passed** | 全部 Python 回归；含状态 reducer、候选检索、外带和确认事件；含合并前新增的 10 项回归 |
 | `node tests/test_chat_adoption.cjs` | **23 passed** | 前端 proposal/确认/取消/过期/迟到响应和核验失效行为替身 |
 | 默认 F7 fixture 检查 | **60 cases / 71 turns / 0 model calls** | 历史契约检查，不计算新模型质量 |
 | F9 fixture 检查 | **24 cases / 28 turns / 0 model calls** | 修订候选合约检查；仍为 `synthetic_unreviewed` |
@@ -92,6 +92,8 @@ F9 合成候选 fixture 有 21 个单轮案例，尺度 1–5 分别为 **5 / 6 
 | `git diff --check` | 通过 | 有 Windows 工作区 LF/CRLF 提示，没有 whitespace error |
 
 F7 fixture SHA256：`1eef5f436972351e3cae714f295875d201e281aa9faeafe6b7c39893ae91599b`。F9 fixture SHA256：`dd8f72d720cd676e4229778a501a5e186588d46910c6796918965f1c4f922d39`。人工复核原 JSON/CSV 和历史预测 hash 已在 dry-run 输出中核对；正文不包含原话或密钥。
+
+合并前复查补充（2026-10-28）：修复软性外带 set/clear 通过动作编译取消硬约束的问题；软性外带只记入语义状态，不编译为停留修改，外带账本保留解析来源。将按操作计算排除项的逻辑共用于本地检索、OneMap 候选过滤和 SELECT：`future_visits` 只约束新增站点，替换站点和起终点不受误伤。新增 10 项离线回归，全量 Python 180 项和 Node 23 项通过；没有发起真实模型或地图 API 调用。
 
 ## 模型效果状态
 

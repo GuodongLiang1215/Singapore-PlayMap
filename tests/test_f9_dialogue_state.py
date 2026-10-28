@@ -271,6 +271,49 @@ def test_cancelling_takeaway_updates_existing_visit_and_removes_stale_note():
     assert result['preferences']['active_constraints'] == []
 
 
+@pytest.mark.parametrize('effect,value', [('clear', None), ('set', False)])
+def test_soft_takeaway_changes_preserve_the_hard_profile_and_note(effect, value):
+    draft = Draft(visits=[{'visit_id': 'coffee', 'stay_profile': 'takeaway', 'point': {
+        'label': 'Coffee', 'latitude': 1.3, 'longitude': 103.8,
+        'source': 'user_map', 'confirmed': True}}])
+    prefs = Preferences(notes=['外带咖啡，买完就走'], active_constraints=[ActiveConstraint(
+        name='takeaway', value=True, scope='visit_id:coffee', hardness='hard', quote='外带', turn_index=1)])
+    message = '第一站或许可以坐下喝'
+    _, (record, _) = interpret({'acknowledgement': '记录偏好', 'commands': {},
+        'semantic_segments': [segment('takeaway', value, message, scope='visit:1',
+                                      effect=effect, hardness='soft', source='inferred')]},
+        message, draft=draft, preferences=prefs)
+
+    result = assemble(record, {}, strict=True)
+
+    assert result['draft']['visits'][0]['stay_profile'] == 'takeaway'
+    assert result['preferences']['notes'] == prefs.notes
+    hard_rows = [row for row in result['preferences']['active_constraints'] if row['hardness'] == 'hard']
+    assert len(hard_rows) == 1
+    assert hard_rows[0]['value'] is True
+    if effect == 'set':
+        soft_row = next(row for row in result['preferences']['active_constraints'] if row['hardness'] == 'soft')
+        assert soft_row['source'] == 'inferred'
+        assert soft_row['value'] is False
+
+
+def test_compiled_takeaway_preserves_the_semantic_source():
+    draft = Draft(visits=[{'visit_id': 'coffee', 'point': {
+        'label': 'Coffee', 'latitude': 1.3, 'longitude': 103.8,
+        'source': 'user_map', 'confirmed': True}}])
+    message = '第一站买完就走'
+    _, (record, _) = interpret({'acknowledgement': '外带', 'commands': {},
+        'semantic_segments': [segment('takeaway', True, message, scope='visit:1', source='inferred')]},
+        message, draft=draft)
+
+    result = assemble(record, {}, strict=True)
+
+    assert result['draft']['visits'][0]['stay_profile'] == 'takeaway'
+    row, = result['preferences']['active_constraints']
+    assert row['source'] == 'inferred'
+    assert row['hardness'] == 'hard'
+
+
 def test_preserving_a_visit_blocks_an_uncommanded_takeaway_change():
     message = '保留第一站，取消外带'
     preserve = {

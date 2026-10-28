@@ -12,7 +12,7 @@ from app.llm_connect.errors import LLMConnectionError
 from app.stage2b.models import TimeSettings, Visit, PlacePoint, SGT
 from .time_updates import merge_time_updates, safe_time_diagnostic, TimeUpdateError
 from .models import (ChatRequest,Draft,Preferences,Interpretation,LocationAction,TimeAction,Selection,SemanticSegment)
-from .catalogue import LocalCatalogue, retrieve_slot, blocked
+from .catalogue import LocalCatalogue, retrieve_slot, blocked, global_exclusions_for_slot
 from .command_contract import pending_to_commands, CONTRACT_NAME
 from .proposal_status import acknowledgement, slot_label
 from .prompts import INTERPRET, SELECT, PROMPT_VERSION
@@ -146,7 +146,8 @@ def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()
                    (row['scope'] in {'global', 'future_visits'} if field == 'excluded'
                     else row['scope'] == 'global')]
         d[field] = list(dict.fromkeys([value for value in d[field] if value not in managed] + current))
-    if any(row.name == 'takeaway' and (row.effect == 'clear' or row.value is False) for row in segments):
+    if any(row.name == 'takeaway' and row.hardness == 'hard' and
+           (row.effect == 'clear' or row.value is False) for row in segments):
         d['notes'] = [note for note in d['notes'] if not TAKEAWAY_WORDS.search(note)]
     if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','同一偏好同时被要求和排除，请明确以哪一条为准。')
     if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','偏好说明过长，请拆分需求。')
@@ -173,25 +174,6 @@ def model_context(body,cat=None):
             'max_walk_minutes':body.draft.max_walk_minutes}
 
 DISTANCE_BANDS=((1000,'<1km'),(3000,'1-3km'),(10000,'3-10km'))
-
-
-def global_exclusions_for_slot(preferences, slot):
-    rows_by_topic = {}
-    for row in preferences.active_constraints:
-        if row.name == 'excluded_topic' and isinstance(row.value, str):
-            rows_by_topic.setdefault(row.value, []).append(row)
-    result = []
-    for topic in preferences.excluded:
-        rows = rows_by_topic.get(topic, [])
-        hard_rows = [row for row in rows if row.hardness == 'hard']
-        if not rows:
-            result.append(topic)
-        elif any(row.scope == 'global' for row in hard_rows):
-            result.append(topic)
-        elif slot and slot.get('operation') == 'add_visit' and any(
-                row.scope == 'future_visits' for row in hard_rows):
-            result.append(topic)
-    return result
 
 
 def selection_preferences(preferences, slot):
