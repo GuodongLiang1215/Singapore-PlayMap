@@ -321,3 +321,14 @@ body>footer{padding:5px 12px;font-size:10px;line-height:1.5;max-height:40px;over
 .place-close{position:absolute;top:6px;right:6px;width:24px;height:24px;padding:0;border:0;
  background:transparent;border-radius:6px;font-size:15px;line-height:1;cursor:pointer;color:#4b5a53}
 .place-close:hover{background:#eff6f1}
+
+/* Longer English labels and unofficial place translations stay inside the cards. */
+.chat-history-head{flex-wrap:wrap}
+.chat-history-head strong{min-width:0;overflow-wrap:anywhere}
+#chat-apply,.ov-drawer button,.chat-actions button{white-space:normal;max-width:100%}
+.ov-thread #result-panel .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ov-thread #result-panel .metrics div{min-width:0}
+.ov-thread #result-panel .metrics strong{font-size:18px;white-space:normal;overflow-wrap:anywhere}
+.ov-thread .section-heading{flex-wrap:wrap}
+
+.chat-thread{white-space:normal;overflow-wrap:anywhere}

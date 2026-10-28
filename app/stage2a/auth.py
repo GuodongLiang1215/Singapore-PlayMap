@@ -27,7 +27,7 @@ def env_values(root: Path) -> dict:
     if not path.exists():
         return {}
     if path.stat().st_size > 256 * 1024:
-        raise ProviderError('ENV_TOO_LARGE', '本地.env文件异常，请检查配置。', 503)
+        raise ProviderError('ENV_TOO_LARGE', 'The local .env file is too large. Check the configuration.', 503)
     values = {}
     for line in path.read_text(encoding='utf-8-sig').splitlines():
         s = line.strip()
@@ -46,9 +46,9 @@ def clean_token(token: str):
     if token.lower().startswith('bearer '):
         token = token[7:].strip()
     if not token or token.lower() in ('your_token', 'your_access_token', 'replace_me'):
-        raise ProviderError('TOKEN_REQUIRED', '尚未配置OneMap Token或自动刷新凭据。', 503)
+        raise ProviderError('TOKEN_REQUIRED', 'No OneMap token or automatic refresh credentials are configured.', 503)
     if len(token) > 8192 or len(token) < 8 or not re.fullmatch(r'[A-Za-z0-9._~+/-]+=*', token):
-        raise ProviderError('TOKEN_FORMAT', 'Token格式无效；应只输入access_token，不是整段JSON或账户密码。', 503)
+        raise ProviderError('TOKEN_FORMAT', 'Invalid token format. Enter only the access_token value, without the JSON response or account password.', 503)
     return token
 
 
@@ -73,14 +73,14 @@ class TokenStore:
         try:
             return env_values(self.root)
         except (OSError, UnicodeError):
-            raise ProviderError('ENV_UNREADABLE', '无法读取本机.env文件，请检查文件权限和UTF-8编码。', 503) from None
+            raise ProviderError('ENV_UNREADABLE', 'Cannot read the local .env file. Check its permissions and UTF-8 encoding.', 503) from None
 
     def credentials(self) -> tuple[str, str]:
         local = self._local()
         email = _first(local, EMAIL_KEYS)
         password = _first(local, PASSWORD_KEYS)
         if bool(email) != bool(password):
-            raise ProviderError('AUTO_AUTH_INCOMPLETE', 'OneMap自动刷新配置不完整；邮箱和密码必须同时配置。', 503)
+            raise ProviderError('AUTO_AUTH_INCOMPLETE', 'OneMap automatic refresh requires both an email address and a password.', 503)
         return email, password
 
     def can_refresh(self) -> bool:
@@ -116,7 +116,7 @@ class TokenStore:
     def _refresh(self, transport, *, force=False):
         email, password = self.credentials()
         if not email or not password:
-            raise ProviderError('TOKEN_REQUIRED', '尚未配置OneMap Token；共享部署可配置OneMap邮箱和密码用于自动刷新。', 503)
+            raise ProviderError('TOKEN_REQUIRED', 'No OneMap token is configured. A shared deployment can use a OneMap email address and password for automatic refresh.', 503)
         with self._refresh_lock:
             if not force and self._runtime_token and (self._runtime_expiry is None or self._runtime_expiry > time.time() + 60):
                 return self._runtime_token
@@ -138,14 +138,14 @@ class TokenStore:
             else:
                 # Configured token exists but is expired/near expiry.
                 if exp is not None and exp <= time.time() + 15 and transport is None:
-                    raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期；请检查本机 OneMap 凭据配置，运行时会在可用时自动刷新。', 503)
+                    raise ProviderError('TOKEN_EXPIRED', 'The local token has expired or will expire soon. Check the OneMap credentials; automatic refresh will be used when available.', 503)
         if transport is not None and self.can_refresh():
             return self._refresh(transport, force=force_refresh)
         if token:
             clean_token(token)
             if exp is not None and exp <= time.time() + 15:
-                raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期；请检查本机 OneMap 凭据配置，运行时会在可用时自动刷新。', 503)
-        raise ProviderError('TOKEN_REQUIRED', '尚未配置OneMap Token。请在本机登录，或在共享服务器配置自动刷新凭据。', 503)
+                raise ProviderError('TOKEN_EXPIRED', 'The local token has expired or will expire soon. Check the OneMap credentials; automatic refresh will be used when available.', 503)
+        raise ProviderError('TOKEN_REQUIRED', 'No OneMap token is configured. Sign in locally or configure automatic refresh credentials on the shared server.', 503)
 
     def status(self):
         token, exp, source = self.raw()
@@ -203,7 +203,7 @@ def persist_token(root: Path, token: str, expiry=None):
 
 def authenticate(transport, email, password):
     if not email.strip() or '@' not in email or not password:
-        raise ProviderError('EMPTY_CREDENTIALS', '请输入已注册的OneMap邮箱和密码。', 400)
+        raise ProviderError('EMPTY_CREDENTIALS', 'Enter the email address and password of a registered OneMap account.', 400)
     payload = transport.request('auth', body={'email': email.strip(), 'password': password})
     check_payload_error(payload)
     try:
@@ -212,5 +212,5 @@ def authenticate(transport, email, password):
         if expiry <= time.time() or expiry > 4102444800:
             raise ValueError()
     except (ValueError, KeyError, TypeError, ProviderError):
-        raise ProviderError('AUTH_RESPONSE_INVALID', '认证响应缺少有效Token或expiry_timestamp；没有保存凭据。', 503) from None
+        raise ProviderError('AUTH_RESPONSE_INVALID', 'The authentication response is missing a valid token or expiry_timestamp. No credentials were saved.', 503) from None
     return token, expiry

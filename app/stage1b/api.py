@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 from app.config import ROOT
+from app.english import english_view
 from app.stage1.build import read_json, safe_path
 from app.stage1.normalise import normal_name
 from app.db import ro_connect
@@ -69,7 +70,7 @@ def features(layer:str='places', q:str=Query('',max_length=160),category:str=Que
         p.update({k:e.get(k) for k in ('display_title','search_tags','search_text','facility_class','facility_group',
                  'facility_group_label','source_status_interpreted','source_period_label','review_hold',
                  'default_exploration_visible','coordinate_role','source_permissions','is_staircase_source')})
-        items.append({'type':'Feature','id':r['record_uid'],'properties':p,'geometry':r['geometry']})
+        items.append({'type':'Feature','id':r['record_uid'],'properties':english_view(p),'geometry':r['geometry']})
     nxt=offset+len(items) if offset+len(items)<total else None
     return {'type':'FeatureCollection','features':items,'build_id':report['build_id'],'layer':layer,
             'view':view,'matched_total':total,'returned_count':len(items),'next_offset':nxt,
@@ -104,6 +105,6 @@ def record(uid:str=Query(...,min_length=1,max_length=512),build_id:str|None=None
                 access.append({**link,'longitude':ar['longitude'],'latitude':ar['latitude'],
                                'display_title':ae['display_title']})
         pairs=[p for p in report['duplicate_pairs'] if uid in (p['left_uid'],p['right_uid'])]
-    return {'record':r,'raw_source_feature':raw,'enrichment':e,'build_id':report['build_id'],
+    return english_view({'record':r,'raw_source_feature':raw,'enrichment':e,'build_id':report['build_id'],
             'access_point_candidates':access,'boundary_candidates':boundaries,'duplicate_candidates':pairs,
-            'candidate_links_verified':False}
+            'candidate_links_verified':False})

@@ -21,10 +21,24 @@ Person C implementation is feature-complete for the agreed GIS/planning scope. T
    - Travel + visit stay + buffer.
    - Supports duration budget and explicit departure/finish window.
    - Distinguishes all-fit, upper-range-only exceedance, reference exceedance, and all-estimates exceedance.
+   - `itinerary_feasible` combines reference total time, requested walking limits,
+     and every visit's opening-hours result. `feasibility_check` explains the
+     checks, known failures, unresolved evidence and reference-estimate basis.
+   - A known failure returns `false`, even if another check is unknown. With no
+     failure, unresolved evidence returns `null`; all applicable checks passing
+     returns `true`. Unrequested budget/walking constraints are neutral.
+   - A reference estimate can fit while the upper duration estimate exceeds the
+     budget. The existing range warning and stricter chat budget verification
+     remain separate; `true` is not a guarantee about the duration range or live conditions.
 
 4. **Constraint-aware alternative POIs**
    - `POST /api/stage2b/alternatives`.
-   - Starts from a reported walking violation, generates nearby same-category candidates, recalculates the complete itinerary, filters infeasible candidates, and ranks feasible replacements.
+   - Starts from a reported walking violation, generates nearby same-category candidates,
+     and recalculates the complete itinerary with the same feasibility checks.
+   - Excludes known closing-time, stay-overrun, budget and walking conflicts,
+     including conflicts at unchanged stops. Checked candidates rank before
+     unresolved candidates. Unresolved suggestions retain `feasible=null` and
+     an explicit review label; they are not counted in `feasible_count`.
    - Never adopts a replacement without user confirmation.
 
 5. **OneMap route recalculation**
@@ -35,6 +49,13 @@ Person C implementation is feature-complete for the agreed GIS/planning scope. T
 6. **Opening-hours feasibility**
    - Uses catalogue metadata when a rule is safely parseable and a departure time exists.
    - Reports `feasible`, `closed_at_arrival`, `insufficient_time`, or `unknown`.
+   - Evaluates complete daily or supported weekly rules, including split hours,
+     `24:00` closing and overnight intervals, in Singapore time. Raw catalogue
+     schedules are checked before English presentation is applied.
+   - Only a bounded subset of the [OSM opening-hours grammar](https://wiki.openstreetmap.org/wiki/Key:opening_hours/specification)
+     is supported. Ambiguous overrides, holiday/seasonal exceptions, unsupported
+     annotations and malformed rules remain unknown rather than being reduced
+     to their first time interval.
    - Complex schedules, temporary closures, and last-admission edge cases remain explicitly unverified.
 
 7. **Entrance-aware routing V1**

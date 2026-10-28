@@ -13,7 +13,7 @@ class Contract(BaseModel):
 class Location(Contract):
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
-    label: str = Field(default='用户选点', min_length=1, max_length=200)
+    label: str = Field(default='Selected point', min_length=1, max_length=200)
     # 'device_location' is a browser geolocation reading the user then confirmed.
     # It is a named provenance precisely so nothing downstream can mistake it for
     # a point the user identified on the map.

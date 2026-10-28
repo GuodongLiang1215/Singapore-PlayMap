@@ -58,7 +58,7 @@ def parse_search(payload, query, requested_page):
         found, total, current = int(payload['found']), int(payload['totalNumPages']), int(payload['pageNum'])
         if min(found, total, current) < 0 or current != requested_page or (found > 0 and total < 1): raise ValueError()
     except (KeyError, TypeError, ValueError):
-        raise ProviderError('SEARCH_SCHEMA_CHANGED', '搜索响应缺少有效分页或结果字段；本版未自动猜测坐标。') from None
+        raise ProviderError('SEARCH_SCHEMA_CHANGED', 'The search response is missing valid pagination or result fields. No coordinates were inferred.') from None
     items, rejected = [], 0
     for index, row in enumerate(rows):
         try:
@@ -68,7 +68,7 @@ def parse_search(payload, query, requested_page):
             def text(k):
                 v = row.get(k)
                 return str(v)[:500] if isinstance(v, (str, int, float)) and str(v).upper() != 'NIL' else ''
-            title = text('BUILDING') or text('SEARCHVAL') or text('ADDRESS') or 'OneMap搜索候选'
+            title = text('BUILDING') or text('SEARCHVAL') or text('ADDRESS') or 'OneMap search result'
             items.append({'candidate_key': f'{current}:{index}', 'label':title,
                 'address':text('ADDRESS'), 'postal_code':text('POSTAL'),
                 'latitude':lat,'longitude':lon,'source':'onemap_search','entrance_verified':False,
@@ -78,7 +78,7 @@ def parse_search(payload, query, requested_page):
             'next_page':current+1 if current < total and current < 1000 else None,
             'page_limit_reached':current == 1000 and current < total,
             'results':items,'invalid_rows_on_page':rejected,'selected_automatically':False,
-            'queried_at':utc_now(), 'notice':'候选坐标不等于核验入口；请明确选择，不自动使用第一条结果。'}
+            'queried_at':utc_now(), 'notice':'Search coordinates are not verified entrances. Select a result explicitly; the first result is not selected automatically.'}
 
 
 def parse_route(payload, request: RouteRequest):
@@ -87,8 +87,8 @@ def parse_route(payload, request: RouteRequest):
     if status is not None and str(status) != '0':
         message = str(payload.get('status_message','')).lower()
         if 'token' in message or 'unauthor' in message:
-            raise ProviderError('AUTH_REJECTED', 'OneMap拒绝认证，请重新登录。', 503)
-        raise ProviderError('PROVIDER_NO_ROUTE', 'OneMap本次未返回可用路线；这不是现实中绝对不可达的证明。', 422)
+            raise ProviderError('AUTH_REJECTED', 'OneMap rejected authentication. Sign in again.', 503)
+        raise ProviderError('PROVIDER_NO_ROUTE', 'OneMap did not return a usable route for this request. This does not prove that the destination is unreachable.', 422)
     try:
         summary = payload['route_summary']
         seconds, metres = number(summary['total_time']), number(summary['total_distance'])
@@ -101,12 +101,12 @@ def parse_route(payload, request: RouteRequest):
         # Detect reversed geometry/incorrect scaling rather than silently repairing it.
         if max(start_offset, end_offset) > 5000: raise ValueError()
     except (KeyError, ValueError, TypeError, OverflowError):
-        raise ProviderError('ROUTE_SCHEMA_OR_GEOMETRY', '路线摘要或几何未通过检查：不绘制直线替代，不猜测缺失的时间或距离。') from None
-    warnings = ['结果是所选两点间的服务商通行估计，不是完整游玩时长，也不保证景点营业或允许入内。',
-                '手选点及搜索候选未被升级为核验入口；返回路线不等于实时封路、排队或无障碍核验。']
+        raise ProviderError('ROUTE_SCHEMA_OR_GEOMETRY', 'The route summary or geometry failed validation. No substitute line, time or distance was generated.') from None
+    warnings = ['This is the provider travel estimate between the selected points. It excludes visit time and does not verify opening hours or entry access.',
+                'Map points and search results remain unverified entrances. Routes do not verify live closures, queues or accessibility.']
     review_needed = max(start_offset,end_offset) > ENDPOINT_REVIEW_METRES
     if review_needed:
-        warnings.append('路径端点与所选点存在明显偏移；请查看路径端点标记并重新选择通行点。未绘制连接线，偏移段时间未知。')
+        warnings.append('The route endpoints differ substantially from the selected points. Check the endpoint markers and select access points again. The gaps are not connected and their travel times are unknown.')
     return {'provider':'OneMap','mode':request.mode,'revision':request.revision,'queried_at':utc_now(),
             'origin':origin.model_dump(),'destination':destination.model_dump(),
             'geometry':{'type':'LineString','coordinates':coordinates},

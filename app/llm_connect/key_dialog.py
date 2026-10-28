@@ -20,9 +20,9 @@ class KeyDialog:
         self.window.protocol('WM_DELETE_WINDOW', self.cancel)
         panel = ttk.Frame(window, padding=20)
         panel.pack(fill='both', expand=True)
-        ttk.Label(panel, text='只在本机保存 Gemini API Key', font=('', 13, 'bold')).pack(anchor='w')
+        ttk.Label(panel, text='Save the Gemini API key on this computer', font=('', 13, 'bold')).pack(anchor='w')
         ttk.Label(panel, text='Model: ' + self.model).pack(anchor='w', pady=(8, 0))
-        ttk.Label(panel, text='在下方密码框按 Ctrl+V 粘贴完整 Key；不要复制遮掩预览或项目名称。',
+        ttk.Label(panel, text='Press Ctrl+V to paste the full key into the masked field below. Do not paste a masked preview or project name.',
                   wraplength=640).pack(anchor='w', pady=(10, 8))
         self.entry = ttk.Entry(panel, show='*', width=70)
         self.entry.pack(fill='x')
@@ -30,13 +30,13 @@ class KeyDialog:
         self.entry.bind('<Control-a>', self.select_all)
         self.entry.bind('<Control-A>', self.select_all)
         self.entry.bind('<Return>', lambda event: self.save())
-        self.status = tk.StringVar(value='仅写入本机 .env；不联网、不验证额度、不显示密钥。')
+        self.status = tk.StringVar(value='Saves only to the local .env file. No network request, quota check or key display.')
         ttk.Label(panel, textvariable=self.status, wraplength=640).pack(anchor='w', pady=(12, 10))
         buttons = ttk.Frame(panel)
         buttons.pack(fill='x', pady=(5, 10))
-        ttk.Button(buttons, text='保存到本机', command=self.save).pack(side='left')
-        ttk.Button(buttons, text='取消', command=self.cancel).pack(side='left', padx=10)
-        ttk.Label(panel, text='.env 是明文配置文件，请勿截图、上传或提交到 Git。',
+        ttk.Button(buttons, text='Save locally', command=self.save).pack(side='left')
+        ttk.Button(buttons, text='Cancel', command=self.cancel).pack(side='left', padx=10)
+        ttk.Label(panel, text='The .env file stores plain text. Do not share screenshots, upload it or commit it to Git.',
                   wraplength=640).pack(anchor='w', pady=(7, 0))
         self.window.bind('<Escape>', lambda event: self.cancel())
 
@@ -55,7 +55,7 @@ class KeyDialog:
             self.entry.selection_range(0, 'end')
             return
         except Exception:
-            self.status.set('[ERROR] 本机保存失败；未显示异常细节或密钥。请检查文件权限。')
+            self.status.set('[ERROR] Could not save locally. Check file permissions. Error details and the key are not displayed.')
             return
         finally:
             key = None

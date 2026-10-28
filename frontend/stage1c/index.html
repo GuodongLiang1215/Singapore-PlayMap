@@ -1,18 +1,18 @@
-<!doctype html><html lang="zh-CN"><head>
+<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Singapore PlayMap · 核查后地点目录</title>
+<title>Singapore PlayMap · Reviewed place catalogue</title>
 <link rel="stylesheet" href="/stage1-static/style.css"><link rel="stylesheet" href="/stage1c-static/style.css">
 <script src="/stage1c-static/map.js" defer></script></head><body>
-<header><div><span class="eyebrow">SINGAPORE PLAYMAP / STAGE 1C</span><h1>核查后地点目录</h1></div><nav><a href="/map-1b" target="_blank" rel="noopener">全量原始图层 ↗</a> <a href="/api/stage1c/status" target="_blank" rel="noopener">本次报告 ↗</a></nav></header>
-<section class="metrics"><div><span>候选来源记录 · 全部保留</span><strong id="records">—</strong></div><div><span>地点展示组 · 非完整去重数</span><strong id="entities">—</strong></div><div><span>本轮归为同一地点</span><strong id="groups">—</strong></div><div><span>归档或源状态待复核</span><strong id="holds">—</strong></div></section>
-<div class="notice">地点身份、来源坐标和实际入口是不同信息。本版按明确证据归组，补充部分官网时段并隔离过时地点记录；不是实时营业地图，尚未接入导航或LLM。</div>
-<main><aside class="left"><h2>探索全岛地点</h2><label for="search">名称、地址或类别词</label><input id="search" maxlength="160" placeholder="例如 Gardens、Phoenix、自然、美食">
-<label for="category">类别</label><select id="category"><option value="">全部类别</option><option value="tourism">景点、购物与娱乐</option><option value="nature">公园与自然</option><option value="heritage">历史地点</option><option value="monument">古迹</option><option value="food">餐饮</option></select>
-<label class="check"><input type="checkbox" id="include-holds">包括旧址归档与状态待复核记录</label><p id="hold-note" class="small">正在读取真实本地数据…</p>
-<p class="small">分组保留每个来源。未出现不代表现实中不存在；检索旧址时可开启上方选项查看修正说明。</p>
-<label class="check"><input type="checkbox" id="tiles" checked>在线背景地图</label><button id="fit">查看全岛候选范围</button>
-<h2>起点准备</h2><label class="check"><input type="checkbox" id="pick">点击地图设置临时起点</label><p id="origin" class="small">未设置；本页暂存，不请求GPS，不计算路线。</p><button id="clear-origin" class="subtle">清除起点</button>
-<h2>匹配地点</h2><p id="list-count" class="small">读取中…</p><div id="list"></div><button id="more" hidden>再显示100条</button>
-</aside><section class="map-wrap"><div id="map"><div id="map-placeholder">正在读取核查后的全岛地点目录…</div></div><div id="progress" role="status" aria-live="polite">读取数据…</div></section>
-<aside class="right"><h2>地点、来源与核查证据</h2><div id="detail"><p class="muted">选择地点后可查看来源分组、坐标差异、官网核查、常规时段和接入点语义提示。</p></div><hr><h2>功能边界</h2><p class="small">本版只改变展示分组与证据层。不开启真实路径，不生成时长、不补造入口，也不把新版场馆名称放到旧坐标上。</p><p class="small">完整公园边界、设施和步道仍在右上角“全量原始图层”中，没有删除或地理裁剪。</p></aside></main>
-<footer>数据：STB / NParks / NHB / NEA，经data.gov.sg；原记录及许可保留。官网补充证据按字段记录日期。底图：© OpenStreetMap contributors。</footer></body></html>
+<header><div><span class="eyebrow">SINGAPORE PLAYMAP / STAGE 1C</span><h1>Reviewed place catalogue</h1></div><nav><a href="/map-1b" target="_blank" rel="noopener">All source layers ↗</a> <a href="/api/stage1c/status" target="_blank" rel="noopener">Snapshot report ↗</a></nav></header>
+<section class="metrics"><div><span>Candidate source records · all retained</span><strong id="records">—</strong></div><div><span>Display groups · not a fully deduplicated count</span><strong id="entities">—</strong></div><div><span>Reviewed same-place groups</span><strong id="groups">—</strong></div><div><span>Archived / status under review</span><strong id="holds">—</strong></div></section>
+<div class="notice">Place identity, source coordinates and actual entrances are separate. Records are grouped using explicit evidence, with selected published hours and outdated records flagged. This catalogue does not show live opening status or offer routing or AI.</div>
+<main><aside class="left"><h2>Explore Singapore</h2><label for="search">Name, address or category</label><input id="search" maxlength="160" placeholder="e.g. Gardens, Phoenix, nature, food">
+<label for="category">Category</label><select id="category"><option value="">All categories</option><option value="tourism">Attractions, shopping and entertainment</option><option value="nature">Parks and nature</option><option value="heritage">Heritage sites</option><option value="monument">Monuments</option><option value="food">Food</option></select>
+<label class="check"><input type="checkbox" id="include-holds">Include archived and review-pending records</label><p id="hold-note" class="small">Loading local source data…</p>
+<p class="small">Every source is retained within its group. Missing results do not prove absence. Include archived records to inspect former locations and corrections.</p>
+<label class="check"><input type="checkbox" id="tiles" checked>Online basemap</label><button id="fit">Fit all candidates</button>
+<h2>Prepare an origin</h2><label class="check"><input type="checkbox" id="pick">Click the map to set a temporary origin</label><p id="origin" class="small">Not set. Kept only on this page; no location request or route calculation.</p><button id="clear-origin" class="subtle">Clear origin</button>
+<h2>Matching places</h2><p id="list-count" class="small">Loading…</p><div id="list"></div><button id="more" hidden>Show 100 more</button>
+</aside><section class="map-wrap"><div id="map"><div id="map-placeholder">Loading the reviewed nationwide catalogue…</div></div><div id="progress" role="status" aria-live="polite">Loading data…</div></section>
+<aside class="right"><h2>Places, sources and review evidence</h2><div id="detail"><p class="muted">Select a place to inspect grouped sources, coordinate differences, published evidence, regular hours and possible access-point links.</p></div><hr><h2>Scope and limitations</h2><p class="small">This page displays grouped records and evidence. It does not calculate routes, invent durations or entrances, or move a current venue name onto old coordinates.</p><p class="small">Complete park boundaries, facilities and trails remain available in the source layers. No records were removed or geographically cropped.</p></aside></main>
+<footer>Data: STB / NParks / NHB / NEA via data.gov.sg. Original records and licences are retained. Published evidence has field-level review dates. Basemap: © OpenStreetMap contributors.</footer></body></html>

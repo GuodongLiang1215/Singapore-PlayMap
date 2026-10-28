@@ -73,7 +73,7 @@ def status():
         'max_visits_per_request':MAX_VISITS,'cache_ttl_seconds':cache.ttl_seconds,
         'cache_scope':'per-browser-session, RAM only','private_queries_saved_to_disk':False,
         'runtime_counters_since_server_start':counts,
-        'notice':'支持路线核验的附近推荐、约束替代、可解析营业时间检查和入口候选路由；入口候选未实地核验，复杂营业时间与实时交通仍需人工确认。'}
+        'notice':'Supports nearby recommendations checked against routes, constrained alternatives, parseable opening-hour checks and routing to entrance candidates. Entrances are not field-verified; complex schedules and live traffic still need checking.'}
 
 
 @router.post('/plan')
@@ -89,7 +89,7 @@ async def plan(body: PlanRequest, request: Request):
     except HTTPException:
         with _lock: _counts['plans_failed'] += 1
         raise HTTPException(409,detail={'code':'CATALOGUE_CHANGED_OR_UNAVAILABLE',
-            'message':'核查目录版本改变或不可读。请刷新页面；原始资料没有被改动。',
+            'message':'The reviewed catalogue has changed or cannot be read. Reload the page. Source data has not been changed.',
             'complete_plan_created':False}) from None
     with _lock: _counts['plans_completed'] += 1
     catalogue_build_id=plan_catalogue_build_id(body)
@@ -112,7 +112,7 @@ async def spatial_recommendations(body: SpatialRecommendationRequest, request: R
         raise
     except (KeyError,TypeError,ValueError) as exc:
         raise HTTPException(422,detail={'code':'INVALID_SPATIAL_RECOMMENDATION',
-            'message':'附近推荐参数或候选数据无法处理；没有修改行程。','itinerary_modified':False}) from exc
+            'message':'The nearby recommendation parameters or candidate data could not be processed. The itinerary was not changed.','itinerary_modified':False}) from exc
 
 
 @router.post('/alternatives')
@@ -121,7 +121,7 @@ async def alternatives(body: AlternativeRequest, request: Request):
     if body.plan_request.mode != 'walk' or body.plan_request.max_walk_minutes is None:
         raise HTTPException(422, detail={
             'code':'WALKING_CONSTRAINT_REQUIRED',
-            'message':'替代建议当前只处理已设置最大步行时间的步行方案。',
+            'message':'Alternative suggestions currently require a walking itinerary with a maximum walking time.',
             'itinerary_modified':False,
         })
 
@@ -129,7 +129,7 @@ async def alternatives(body: AlternativeRequest, request: Request):
     if not any(v.get('leg_id') == body.leg_id for v in violations):
         raise HTTPException(422, detail={
             'code':'LEG_NOT_REPORTED_AS_VIOLATION',
-            'message':'指定路段不在当前方案的步行超限结果中；未生成替代建议。',
+            'message':'The selected leg is not listed as exceeding the walking limit in the current plan. No alternatives were generated.',
             'itinerary_modified':False,
         })
 
@@ -160,7 +160,7 @@ async def alternatives(body: AlternativeRequest, request: Request):
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(422, detail={
             'code':'INVALID_ALTERNATIVE_CONTEXT',
-            'message':'当前方案与超限路段无法对应到可替换停留点；原行程未修改。',
+            'message':'The plan and over-limit leg could not be matched to a replaceable stop. The itinerary was not changed.',
             'itinerary_modified':False,
         }) from exc
 

@@ -23,9 +23,9 @@ async def local_client_guard(request:Request,call_next):
         if origin:
             parsed = urlsplit(origin)
             if parsed.scheme != request.url.scheme or parsed.netloc != request.url.netloc:
-                return JSONResponse({'detail':{'code':'ORIGIN_REJECTED','message':'只允许当前本地页面发起请求。'}},403)
+                return JSONResponse({'detail':{'code':'ORIGIN_REJECTED','message':'Requests are allowed only from the current local page.'}},403)
         if request.headers.get('x-playmap-client') != 'stage2a':
-            return JSONResponse({'detail':{'code':'CLIENT_HEADER_REQUIRED','message':'请从本项目页面调用；本地API需要X-PlayMap-Client: stage2a。'}},403)
+            return JSONResponse({'detail':{'code':'CLIENT_HEADER_REQUIRED','message':'Use the PlayMap page to make this request. The local API requires X-PlayMap-Client: stage2a.'}},403)
     response = await call_next(request)
     if request.url.path.startswith('/api/stage2a/'):
         response.headers['Cache-Control']='no-store'
@@ -45,7 +45,7 @@ async def invalid_input(request,exc):
     # Do not reflect the full request (labels, coordinates, accidentally pasted
     # secrets) into validation errors or reports.
     return JSONResponse({'detail':{'code':'INVALID_INPUT',
-        'message':'输入未通过检查，请确认已选择起终点、经纬度顺序和交通方式。',
+        'message':'The input failed validation. Check the selected start and end points, coordinate order and travel mode.',
         'fields':['.'.join(str(x) for x in e['loc']) for e in exc.errors()]}},422)
 
 for r in (source_router,enrichment_router,catalogue_router,router): app.include_router(r)

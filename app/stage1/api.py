@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
 from app.config import ROOT
+from app.english import english_view
 from app.stage1.build import read_json, safe_path
 from app.stage1.normalise import normal_name
 
@@ -60,7 +61,7 @@ def features(layer:str='places',q:str=Query('',max_length=160),category:str=Quer
         # Keep large narrative text in the detail endpoint, not every map page.
         props={k:d[k] for k in ('record_uid','source_key','role','category','name','display_title','address',
             'longitude','latitude','coordinate_kind','opening_verification','access_status','planning_ready','data_issues')}
-        output.append({'type':'Feature','id':d['record_uid'],'geometry':geometry,'properties':props})
+        output.append({'type':'Feature','id':d['record_uid'],'geometry':geometry,'properties':english_view(props)})
     next_offset=offset+len(output) if offset+len(output)<total else None
     return {'type':'FeatureCollection','features':output,'build_id':report['build_id'],
         'layer':layer,'matched_total':total,'returned_count':len(output),'next_offset':next_offset,
@@ -75,4 +76,4 @@ def record(uid:str=Query(...,min_length=1,max_length=512),build_id:str|None=None
     with connect(path) as db:
         row=db.execute('SELECT normalised_json,raw_feature_json FROM features WHERE record_uid=?',(uid,)).fetchone()
     if row is None: raise HTTPException(404,'Record not found')
-    return {'record':json.loads(row[0]),'raw_source_feature':json.loads(row[1]),'build_id':report['build_id']}
+    return english_view({'record':json.loads(row[0]),'raw_source_feature':json.loads(row[1]),'build_id':report['build_id']})

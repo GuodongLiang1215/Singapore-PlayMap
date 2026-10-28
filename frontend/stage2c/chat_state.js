@@ -48,16 +48,16 @@
  }
  function errorSummary(f){
   if(!f)return '';
-  const phases={preflight:'发送前检查',interpretation:'需求解析请求',selection:'候选选择请求',interpretation_request:'需求解析请求',selection_request:'候选选择请求',interpretation_validation:'模型操作格式检查',action_validation:'修改对象及依据检查',preference_merge:'偏好合并',retrieval:'地点检索',selection_validation:'候选选择检查',proposal_assembly:'草案组装',resolve_validation:'草案确认',time_merge_validation:'时间条件合并检查'};
-  const kinds={unknown_command_field:'此操作出现未定义参数，未忽略',mixed_envelope:'新旧操作格式混用',invalid_command_order:'操作顺序须为正整数',duplicate_command_order:'操作顺序重复',incomplete_command_order:'操作顺序不连续',missing:'缺少必填信息',unknown_field:'出现未定义字段',extra_forbidden:'出现不属于此操作的字段',irrelevant_field_value:'无关字段携带了实际值，未丢弃',invalid_operation:'操作类型不支持',invalid_target_type:'站点序号必须为整数',target_out_of_range:'站点序号超出现有清单',target_conflict:'序号与地点ID指向不同站点',int_type:'应为整数',int_parsing:'整数格式错误',literal_error:'取值不在允许范围',list_type:'应为列表',string_type:'应为文字',greater_than:'数值不满足下限',less_than_equal:'数值超过上限'};
-  const parts=[];if(phases[f.phase])parts.push('失败阶段：'+phases[f.phase]);
+  const phases={preflight:'Preflight check',interpretation:'Interpretation request',selection:'Candidate selection request',interpretation_request:'Interpretation request',selection_request:'Candidate selection request',interpretation_validation:'Model command format check',action_validation:'Edit target and evidence check',preference_merge:'Preference merge',retrieval:'Place retrieval',selection_validation:'Candidate selection check',proposal_assembly:'Draft assembly',resolve_validation:'Draft confirmation',time_merge_validation:'Time-condition merge check'};
+  const kinds={unknown_command_field:'Unknown command parameter; it was not ignored',mixed_envelope:'Old and new command formats were mixed',invalid_command_order:'Command order must be a positive integer',duplicate_command_order:'Duplicate command order',incomplete_command_order:'Command order is not consecutive',missing:'Required information is missing',unknown_field:'Unknown field',extra_forbidden:'Field does not belong to this command',irrelevant_field_value:'Irrelevant field contains a value; it was not discarded',invalid_operation:'Unsupported command type',invalid_target_type:'Stop index must be an integer',target_out_of_range:'Stop index is outside the current list',target_conflict:'Stop index and place ID refer to different stops',int_type:'Expected an integer',int_parsing:'Invalid integer format',literal_error:'Value is outside the allowed set',list_type:'Expected a list',string_type:'Expected text',greater_than:'Value is below the minimum',less_than_equal:'Value exceeds the maximum'};
+  const parts=[];if(phases[f.phase])parts.push('Failed stage: '+phases[f.phase]);
   for(const x of f.validation?.issues?.slice(0,3)||[]){
    let path='';for(const part of x.path)path+=typeof part==='number'?'['+part+']':(path?'.':'')+part;
-   parts.push('字段 '+(path||'<root>')+'：'+(kinds[x.type]||x.type));
+   parts.push('Field '+(path||'<root>')+': '+(kinds[x.type]||x.type));
   }
-  const reasons={conflicting_values:'同一字段存在不同的时间要求',contradictory_fields:'时间字段之间互相矛盾',ambiguous_mode_switch:'需明确替换还是保留原时间约束',missing_budget:'缺少明确预算',missing_departure:'缺少出发时刻',missing_finish:'缺少结束时刻',invalid_time:'日期、时区或起止顺序不合法'};
+  const reasons={conflicting_values:'Conflicting time values for the same field',contradictory_fields:'Time fields contradict each other',ambiguous_mode_switch:'Specify whether to replace or keep the previous time constraint',missing_budget:'An explicit budget is missing',missing_departure:'Departure time is missing',missing_finish:'Finish time is missing',invalid_time:'Invalid date, timezone or start/finish order'};
   if(reasons[f.time_update?.failure_reason])parts.push(reasons[f.time_update.failure_reason]);
-  return parts.join('；');
+  return parts.join('; ');
  }
  function recordFailure(metrics,detail){
   const count=integer(detail?.generation_attempts,0,2);
@@ -95,14 +95,14 @@
  }
  function readinessText(proposal,choices){
   const d=proposalDiagnostic(proposal,choices);if(!d)return '';
-  const labels={nature:'公园/自然',food:'餐饮',heritage:'历史地点',monument:'古迹',tourism:'景点/购物/娱乐'};
-  const name=s=>'第'+s.slot_number+'项（'+(s.categories.map(c=>labels[c]).join('/')||'地点')+'）';
+  const labels={nature:'Parks / nature',food:'Food and drink',heritage:'Historic places',monument:'Monuments',tourism:'Attractions / shopping / entertainment'};
+  const name=s=>'Item '+s.slot_number+' ('+(s.categories.map(c=>labels[c]).join('/')||'Place')+')';
   const empty=d.slots.filter(s=>s.option_count===0);
-  if(empty.length)return '暂不能采用：'+empty.map(name).join('、')+'没有可用候选。已找到的地点仍只是草案；不会删除未满足的项目来启用按钮。可继续说明具体地点，或明确调整该项要求。';
+  if(empty.length)return 'Cannot adopt yet. No candidates for '+empty.map(name).join(', ')+'. Places already found remain a draft; missing items will not be removed to enable confirmation. Give a specific place or explicitly revise that requirement.';
   const unresolved=d.slots.filter(s=>!s.selection_resolved);
-  if(unresolved.length)return '还需确认：'+unresolved.map(name).join('、')+'的具体位置。选好后即可提交整份草案检查。';
-  if(adoptionBlocked(proposal))return '暂不能采用：仍有冲突或执行信息缺失，请先处理下方提示。原行程和已采用要求未修改。';
-  return d.slot_count?'各项候选已选定，尚未应用；采用后再计算路线与参考时长。':'条件修改草案尚未应用，请核对后采用。';
+  if(unresolved.length)return 'Confirm a place for: '+unresolved.map(name).join(', ')+'. Once selected, the full draft can be checked.';
+  if(adoptionBlocked(proposal))return 'Cannot adopt yet: conflicts or missing execution details remain. Review the messages below. The original itinerary and adopted requirements are unchanged.';
+  return d.slot_count?'Candidates selected but not applied. Adopt the draft to calculate routes and estimated duration.':'Changes have not been applied. Review and adopt the draft to continue.';
  }
  function safeProposalDiagnostic(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.slots))return null;
@@ -147,10 +147,54 @@
   if(safe.itinerary)safe.itinerary={...safe.itinerary,llm:safe.confirmed_proposals>0};
   return safe;
  }
+ /* Reconcile only explicit editor changes with matching adopted parameters.
+    The backend remains responsible for enforcing every hard requirement. */
+ function reconcileManualPreferences(preferences,before,after){
+  const result=clone(preferences);
+  if(!before||!after)return result;
+  const globalFields={budget_minutes:d=>d.time?.budget_minutes,
+   departure_at:d=>d.time?.departure_at,finish_by:d=>d.time?.finish_by,
+   transport_mode:d=>d.mode,travel_mode:d=>d.mode,finish_policy:d=>d.finish_policy,
+   max_walk_minutes:d=>d.max_walk_minutes};
+  const labels={budget_minutes:'total time budget',departure_at:'departure time',finish_by:'finish time',
+   transport_mode:'transport mode',travel_mode:'transport mode',finish_policy:'finish policy',
+   max_walk_minutes:'per-leg walking limit',stay_minutes:'stay duration',takeaway:'takeaway profile'};
+  const same=(name,a,b)=>{
+   if(a==null||b==null)return a==null&&b==null;
+   if(name==='departure_at'||name==='finish_by'){
+    const x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)&&x===y;
+   }
+   return a===b;
+  };
+  result.active_constraints=(result.active_constraints||[]).flatMap(row=>{
+   let oldValue,newValue,managed=false;
+   const ordinal=/^visit:([1-9][0-9]*)$/.exec(row.scope);
+   const oldVisit=ordinal?before.visits?.[Number(ordinal[1])-1]
+    :row.scope?.startsWith('visit_id:')?before.visits?.find(v=>v.visit_id===row.scope.slice(9)):null;
+   if(oldVisit){
+    const newVisit=after.visits?.find(v=>v.visit_id===oldVisit.visit_id);
+    if(!newVisit)return []; // Removing a stop also removes requirements scoped to it.
+    if(ordinal)row.scope='visit_id:'+oldVisit.visit_id;
+    if(row.name==='stay_minutes'){
+     oldValue=oldVisit.stay_minutes;newValue=newVisit.stay_minutes;managed=true;
+    }else if(row.name==='takeaway'){
+     oldValue=oldVisit.stay_profile==='takeaway';newValue=newVisit.stay_profile==='takeaway';managed=true;
+    }
+   }else if(row.scope==='global'&&Object.hasOwn(globalFields,row.name)){
+    oldValue=globalFields[row.name](before);newValue=globalFields[row.name](after);managed=true;
+   }
+   if(!managed||same(row.name,oldValue,newValue))return [row];
+   if(newValue==null)return []; // The user explicitly cleared this editor parameter.
+   const unit=['budget_minutes','max_walk_minutes','stay_minutes'].includes(row.name)?' min':'';
+   return [{...row,value:newValue,status:'understood',source:'user_explicit',evidence_source:null,
+    quote:'Updated in itinerary editor: '+labels[row.name]+' = '+String(newValue)+unit+'.'}];
+  });
+  return result;
+ }
  /* In-page conversation log. Memory only: never written to storage, never sent
-    anywhere, gone on reload, and not shared with teammates. Viewing an older
-    thread is READ-ONLY and never restores or alters the itinerary that produced
-    it, because the thread holds words, not a verified plan. */
+    anywhere, gone on reload, and not shared with teammates. Opening an older
+    thread never restores the itinerary that produced it; resuming only appends
+    messages, because a thread holds words, not a verified plan. */
  class ConversationLog{
   constructor(limit=20,messageLimit=200){
    this.limit=Math.max(1,limit);this.messageLimit=Math.max(1,messageLimit);
@@ -179,10 +223,10 @@
      rather than only reading it. New lines append where they left off. */
   activate(id){const t=this.get(id);if(!t)return null;this.activeId=id;this.viewingId=id;return t;}
   resume(){this.viewingId=this.activeId;return this.active();}
-  list(){return this.threads.map(t=>({id:t.id,title:t.title||'（尚未发送）',
+  list(){return this.threads.map(t=>({id:t.id,title:t.title||' (not sent)',
    count:t.messages.length,active:t.id===this.activeId,viewing:t.id===this.viewingId}));}
   clear(){this.threads=[];this.seq=0;return this.start();}
  }
- const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,adoptionBlocked,readinessText,ConversationLog};root.PlayMapChatState=exports;
+ const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,adoptionBlocked,readinessText,ConversationLog,reconcileManualPreferences};root.PlayMapChatState=exports;
  if(typeof module!=='undefined'&&module.exports)module.exports=exports;
 })(typeof window==='undefined'?globalThis:window);

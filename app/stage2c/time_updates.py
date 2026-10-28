@@ -98,19 +98,19 @@ def merge_time_updates(old: TimeSettings, actions: Iterable[Any]) -> TimeUpdate:
                     if instant.utcoffset() is None:raise ValueError('Missing offset')
                     value=instant.astimezone(SGT).isoformat()
                 except (TypeError,ValueError):
-                    fail('invalid_time','请提供明确日期和时区的有效时间；不会擅自补日期。')
+                    fail('invalid_time','Provide a valid time with an explicit date and time zone. A date will not be assumed.')
             if field in patch and patch[field] != value:
-                fail('conflicting_values', '同一轮包含不同的时间设置。请确认最终预算或起止时间；原行程未修改。')
+                fail('conflicting_values', 'This message contains conflicting time settings. Confirm the budget or start and end times. Your itinerary is unchanged.')
             patch[field] = value
     if diagnostic['clear_departure_requested'] and 'departure_at' in patch:
-        fail('contradictory_fields', '这轮同时要求清除和设置出发时间，请确认保留哪一种。')
+        fail('contradictory_fields', 'This message both clears and sets the departure time. Please choose one.')
     has_budget, has_finish = 'budget_minutes' in patch, 'finish_by' in patch
     explicit = patch.get('mode')
     if has_budget and has_finish:
-        fail('contradictory_fields', '这轮同时设置总时长预算和结束时刻。当前时间模块只能选择一种约束；请确认使用哪一种，不会悄悄删除另一项。')
+        fail('contradictory_fields', 'This message sets both a total-time budget and an end time. The planner supports one time constraint at a time. Please choose which to use.')
     if ((explicit == 'estimate' and (has_budget or has_finish)) or
         (explicit == 'budget' and has_finish) or (explicit == 'window' and has_budget)):
-        fail('contradictory_fields', '时间模式与给出的预算或结束时刻矛盾，未自动覆盖有实际内容的要求。', 'INCONSISTENT_TIME')
+        fail('contradictory_fields', 'The time mode conflicts with the supplied budget or end time. Your existing requirements were not overwritten.', 'INCONSISTENT_TIME')
 
     mode = explicit or ('budget' if has_budget else 'window' if has_finish else old.mode)
     source = ('explicit_mode' if explicit else 'budget_value' if has_budget else
@@ -118,7 +118,7 @@ def merge_time_updates(old: TimeSettings, actions: Iterable[Any]) -> TimeUpdate:
     diagnostic.update(result_mode=mode, mode_source=source,
                       mode_derived=explicit is None and (has_budget or has_finish))
     if explicit is None and mode != old.mode and old.mode in {'budget', 'window'}:
-        fail('ambiguous_mode_switch', '已有一种明确时间约束。本轮新增了另一种，请确认是替换原约束还是同时保留；暂不自动删除原要求。')
+        fail('ambiguous_mode_switch', 'A time constraint is already active. Confirm whether the new one should replace it or whether you intend to keep both. The existing requirement has not been removed.')
     d['mode'] = mode
     if mode == 'estimate':
         d.update(budget_minutes=None, finish_by=None)
@@ -133,37 +133,37 @@ def merge_time_updates(old: TimeSettings, actions: Iterable[Any]) -> TimeUpdate:
     if diagnostic['clear_departure_requested']:
         d['departure_at'] = None
     if mode == 'budget' and d['budget_minutes'] is None:
-        fail('missing_budget', '要按总时长预算安排，还需要明确可用多少分钟或小时；不会使用默认预算。')
+        fail('missing_budget', 'Specify the available minutes or hours to set a total-time budget. No default budget will be assumed.')
     if mode == 'window' and d['departure_at'] is None:
-        fail('missing_departure', '已有结束时刻，还需要确认出发日期和时间；不会擅自按现在出发。')
+        fail('missing_departure', 'An end time is set. Confirm the departure date and time; departure will not be assumed to be now.')
     if mode == 'window' and d['finish_by'] is None:
-        fail('missing_finish', '要按起止时间安排，还需要确认结束日期和时间。')
+        fail('missing_finish', 'Confirm the end date and time to use a time window.')
     try:
         result = TimeSettings.model_validate(d)
     except ValidationError:
-        fail('invalid_time', '时间条件未通过检查：请确认有效日期、明确时区和正向的起止时间；跨午夜需明确下一天。')
+        fail('invalid_time', 'Check the dates and time zones, and make sure the end is later than the start. Trips crossing midnight must specify the next day.')
     diagnostic.update(final_validation_passed=True, budget_present_after=result.budget_minutes is not None,
                       departure_present_after=result.departure_at is not None,
                       finish_present_after=result.finish_by is not None)
     changes = []
     if commands:
         if result.model_dump() == old.model_dump():
-            changes.append('时间条件保持不变；未清除已有预算、出发时间或预留')
+            changes.append('Time settings are unchanged; the existing budget, departure time and buffer are retained.')
         else:
             if result.mode == 'budget':
-                changes.append(f'总时长预算 → {result.budget_minutes} 分钟（待采用，随后计算是否超时）')
+                changes.append(f'Total-time budget → {result.budget_minutes} minutes (pending confirmation and route calculation)')
             elif result.mode == 'window':
-                changes.append('时间窗口 → '+result.departure_at.strftime('%Y-%m-%d %H:%M')+' 至 '+
-                               result.finish_by.strftime('%Y-%m-%d %H:%M')+'（新加坡时间）')
+                changes.append('Time window → '+result.departure_at.strftime('%Y-%m-%d %H:%M')+' to '+
+                               result.finish_by.strftime('%Y-%m-%d %H:%M')+' (Singapore time)')
             else:
-                changes.append('时间模式 → 不限制总时长，按路线和停留计算建议时间')
+                changes.append('Time mode → no total-time limit; estimate duration from the route and stays')
             if old.mode != result.mode and old.mode == 'window':
-                changes.append('这份草案将替换原起止窗口，原结束时刻不再作为限制；请确认再采用')
+                changes.append('This proposal replaces the existing time window and removes its end-time limit. Confirm before applying.')
             elif old.mode != result.mode and old.mode == 'budget':
-                changes.append('这份草案将替换原总时长预算；请确认再采用')
+                changes.append('This proposal replaces the existing total-time budget. Confirm before applying.')
             if result.departure_at != old.departure_at and result.mode != 'window':
-                changes.append('出发时间 → '+(result.departure_at.strftime('%Y-%m-%d %H:%M')+'（新加坡时间）'
-                                             if result.departure_at else '未指定'))
+                changes.append('Departure time → '+(result.departure_at.strftime('%Y-%m-%d %H:%M')+' (Singapore time)'
+                                             if result.departure_at else 'not specified'))
             if result.buffer_minutes != old.buffer_minutes:
-                changes.append(f'额外预留 → {result.buffer_minutes} 分钟')
+                changes.append(f'Extra buffer → {result.buffer_minutes} minutes')
     return TimeUpdate(result, safe_time_diagnostic(diagnostic), changes)

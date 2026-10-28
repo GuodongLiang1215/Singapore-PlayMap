@@ -126,7 +126,7 @@ def normalise_feature(feature, index, source, manifest, crs, rid, id_basis, repe
     if id_basis == 'row_index_fallback': issues.append('row_based_id_not_stable_across_snapshots')
     name = first(p, 'PAGETITLE') if key == 'stb_attractions' else first(p, 'NAME')
     # PARK names describe the containing park, not an independently named track.
-    title = name or (f"步道片段 · {first(p, 'PARK')}" if key == 'nparks_tracks' and first(p, 'PARK') else f'未命名记录 · {rid}')
+    title = name or (f"Trail segment · {first(p, 'PARK')}" if key == 'nparks_tracks' and first(p, 'PARK') else f'Unnamed record · {rid}')
     if not name and role == 'candidate_places': issues.append('missing_name')
     ok, bounds, geometry_issues = geometry_check(feature.get('geometry'), crs)
     issues.extend(geometry_issues)

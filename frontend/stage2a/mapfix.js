@@ -6,9 +6,9 @@
   // Official OneMap TileJSON: native zoom 11..19, lon/lat bounds below.
   // Layer bounds limit tile requests, NEVER place records or selected coordinates.
   const BASEMAPS = Object.freeze({
-    onemap: {label:'OneMap 标准',url:'https://www.onemap.gov.sg/maps/tiles/Default_HD/{z}/{x}/{y}.png',
+    onemap: {label:'OneMap Standard',url:'https://www.onemap.gov.sg/maps/tiles/Default_HD/{z}/{x}/{y}.png',
       attribution,minNativeZoom:11,maxNativeZoom:19,bounds:[[1.16,103.502],[1.56073,104.11475]]},
-    'onemap-grey': {label:'OneMap 灰色',url:'https://www.onemap.gov.sg/maps/tiles/Grey_HD/{z}/{x}/{y}.png',
+    'onemap-grey': {label:'OneMap Grey',url:'https://www.onemap.gov.sg/maps/tiles/Grey_HD/{z}/{x}/{y}.png',
       attribution,minNativeZoom:11,maxNativeZoom:19,bounds:[[1.16,103.502],[1.56073,104.11475]]},
     // OSM covers the world, this project does not. Bounds mirror the backend
     // SG_REQUEST_ENVELOPE so the drawn map never extends past where a selected
@@ -83,7 +83,7 @@
     function set(provider=info.provider,enabled=info.enabled) {
       if(!BASEMAPS[provider])throw Error('Unsupported basemap');
       const id=++serial;detach();info={provider,enabled:!!enabled,paused:false,requested:0,loaded:0,failed:0};
-      if(!enabled){emit('off','在线底图已关闭；选点和路线保留。');return;}
+      if(!enabled){emit('off','Online basemap off. Selections and routes are retained.');return;}
       const cfg=BASEMAPS[provider];
       layer=L.tileLayer(cfg.url,{attribution:cfg.attribution,minZoom:10,maxZoom:20,
         minNativeZoom:cfg.minNativeZoom,maxNativeZoom:cfg.maxNativeZoom,bounds:cfg.bounds,
@@ -94,18 +94,18 @@
       layer.on('tileload',e=>{
         if(id!==serial||info.paused||e.tile?.dataset?.playmapFailed)return;
         info.loaded++;clearTimeout(timer);
-        emit(info.failed?'warning':'ok',cfg.label+' · 已载入 '+info.loaded+' 块底图'+(info.failed?'；部分失败，可切换底图或关闭。':''));
+        emit(info.failed?'warning':'ok',cfg.label+' · Loaded '+info.loaded+' map tiles'+(info.failed?'; some failed. Switch basemap or turn it off.':''));
       });
       layer.on('tileerror',e=>{
         if(id!==serial||info.paused)return;info.failed++;
         // Hide HTTP/image failures, but do not claim to detect error images sent as HTTP 200.
         if(e.tile){e.tile.style.visibility='hidden';if(e.tile.dataset)e.tile.dataset.playmapFailed='1';}
-        emit('warning',cfg.label+' · 底图请求失败；不影响已取得的路径。可切换底图或关闭。');
-        if(info.failed>=3)queueMicrotask(()=>pause(id,cfg.label+' · 多次加载失败，已暂停底图请求。请切换底图，或关闭后手动开启；没有删除路线。'));
+        emit('warning',cfg.label+' · Basemap request failed. Existing routes are unaffected. Switch basemap or turn it off.');
+        if(info.failed>=3)queueMicrotask(()=>pause(id,cfg.label+' · Repeated loading failures. Basemap requests paused. Switch basemap or turn it off and on to retry; routes are retained.'));
       });
-      emit('loading',cfg.label+' · 正在加载当前视野底图…');
+      emit('loading',cfg.label+' · Loading basemap for the current view…');
       layer.addTo(map);
-      timer=setTimeout(()=>{if(id===serial&&!info.loaded)pause(id,cfg.label+' · 底图加载超时或当前视野不在覆盖范围，已暂停；地点与路线仍保留。');},15000);
+      timer=setTimeout(()=>{if(id===serial&&!info.loaded)pause(id,cfg.label+' · Basemap timed out or the view is outside coverage. Requests paused; places and routes are retained.');},15000);
     }
     return {set,getState:()=>({...info}),destroy:()=>{serial++;detach();}};
   }

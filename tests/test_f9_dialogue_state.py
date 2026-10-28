@@ -188,8 +188,8 @@ def test_an_unrelated_question_does_not_verify_or_hide_an_accessibility_requirem
     outcome = response['preview']['requirement_outcomes'][0]
     assert outcome['status'] == 'unsupported'
     assert outcome['name'] == 'wheelchair_access'
-    assert any('无障碍' in value for value in response['preview']['warnings'])
-    assert '保证' not in response['acknowledgement']
+    assert any('accessibility' in value for value in response['preview']['warnings'])
+    assert 'guaranteed' not in response['acknowledgement']
 
 
 def test_new_message_turn_increases_without_adopting_a_new_revision():
