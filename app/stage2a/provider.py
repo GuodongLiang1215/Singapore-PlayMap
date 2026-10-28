@@ -138,13 +138,29 @@ class OneMapClient:
             token = self.tokens.get(self.transport, force_refresh=True)
             return self.transport.request(operation, token=token, params=params)
 
+    def _request_and_parse(self, operation, *, params, parser):
+        """Refresh once when either HTTP transport or a successful JSON payload rejects auth."""
+        try:
+            payload = self._request_with_token(operation, params=params)
+            return parser(payload)
+        except ProviderError as exc:
+            if exc.code != 'AUTH_REJECTED' or not self.tokens.can_refresh():
+                raise
+            # _request_with_token already handles transport-level AUTH_REJECTED.
+            # Reaching here normally means the parser classified an HTTP-200
+            # payload as an authentication rejection. Refresh exactly once.
+            self.tokens.invalidate_runtime()
+            token = self.tokens.get(self.transport, force_refresh=True)
+            payload = self.transport.request(operation, token=token, params=params)
+            return parser(payload)
+
     def search(self, query, page=1):
-        payload = self._request_with_token('search',
-            params={'searchVal':query,'returnGeom':'Y','getAddrDetails':'Y','pageNum':page})
-        return parse_search(payload,query,page)
+        params={'searchVal':query,'returnGeom':'Y','getAddrDetails':'Y','pageNum':page}
+        return self._request_and_parse('search', params=params,
+            parser=lambda payload: parse_search(payload,query,page))
 
     def route(self, request):
         def ll(point): return f'{point.latitude:.8f},{point.longitude:.8f}'
-        payload = self._request_with_token('route',
-            params={'start':ll(request.origin),'end':ll(request.destination),'routeType':request.mode})
-        return parse_route(payload,request)
+        params={'start':ll(request.origin),'end':ll(request.destination),'routeType':request.mode}
+        return self._request_and_parse('route', params=params,
+            parser=lambda payload: parse_route(payload,request))
