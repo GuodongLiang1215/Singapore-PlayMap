@@ -27,7 +27,7 @@ class ProviderError(Exception):
 
 def status_error(status, operation='route'):
     if status in (401, 403):
-        return ProviderError('AUTH_REJECTED', 'OneMap拒绝认证。请在本机重新运行 onemap_login.py；不要上传Token。', 503, status)
+        return ProviderError('AUTH_REJECTED', 'OneMap拒绝认证；自动刷新未能恢复访问。请检查本机 OneMap 凭据配置，不要上传Token或密码。', 503, status)
     if status == 429:
         return ProviderError('RATE_LIMITED', 'OneMap调用过于频繁。请稍后手动重试；本次没有自动循环请求。', 429, status)
     if operation == 'auth' and status == 404:

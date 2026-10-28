@@ -14,7 +14,7 @@ function button(text,handler,cls='quiet'){const b=node('button',text,cls);b.type
 function reportError(e){$('input-error').hidden=!e;$('input-error').textContent=e?e.message||String(e):'';}
 async function api(url,body,signal){const opt={cache:'no-store',signal};if(body!==undefined){opt.method='POST';opt.headers={'Content-Type':'application/json','X-PlayMap-Client':url.startsWith('/api/stage2b/')?'stage2b':'stage2a'};opt.body=JSON.stringify(body);}const r=await fetch(url,opt);let d;try{d=await r.json();}catch{throw Error('本地服务未返回JSON，请检查启动入口。');}if(!r.ok){const x=d.detail,e=Error(typeof x==='string'?x:(x?.message||'请求失败')+(x?.code?' ['+x.code+']':''));e.code=x?.code;throw e;}return d;}
 function tab(name){for(const x of ['local','search','map']){$(x==='local'?'local-pane':x+'-pane').hidden=x!==name;$('tab-'+x).classList.toggle('selected',x===name);}}
-async function refreshStatus(){try{const r=await api('/api/stage2b/status');$('credential-status').textContent=r.credentials.configured?'Token已配置 · 实际有效性以服务响应为准':'Token尚未配置：运行 scripts/onemap_login.py';$('catalogue-status').textContent=r.catalogue.ready?`全岛 ${r.catalogue.entity_count} 组 · 默认浏览 ${r.catalogue.default_exploration_count} 组 · 非已核验景点数`:'目录不可读；搜索与地图选点仍可使用。';}catch(e){$('credential-status').textContent=e.message;}}
+async function refreshStatus(){try{const r=await api('/api/stage2b/status');$('credential-status').textContent=r.credentials.configured?'Token已配置 · 实际有效性以服务响应为准':'Token尚未配置：请检查本机 .env 中的 OneMap 凭据';$('catalogue-status').textContent=r.catalogue.ready?`全岛 ${r.catalogue.entity_count} 组 · 默认浏览 ${r.catalogue.default_exploration_count} 组 · 非已核验景点数`:'目录不可读；搜索与地图选点仍可使用。';}catch(e){$('credential-status').textContent=e.message;}}
 function invalidate(){
  clearTimeout(autoTimer);if(planController){planController.abort();planController=null;}$('cancel-calculation').disabled=true;
  $('export-report').disabled=true;$('export-status').textContent='';$('undo').disabled=!trip.history.length;
@@ -85,8 +85,7 @@ function renderTrip(){
  });
  $('finish-policy').value=d.finish_policy;$('finish-panel').hidden=d.finish_policy!=='custom';$('finish-summary').textContent=d.finish?d.finish.label:'尚未选择结束位置';$('mode').value=d.mode;$('undo').disabled=!trip.history.length;
 }
-function clockInput(value){if(!value)return '';const local=value.slice(0,19);return local.endsWith(':00')?local.slice(0,16):local;}
-function timeInputs(){const t=trip.data.time;$('time-mode').value=t.mode;$('budget-minutes').value=t.budget_minutes??'';$('departure').value=clockInput(t.departure_at);$('finish-by').value=clockInput(t.finish_by);$('buffer-minutes').value=t.buffer_minutes;timeVisibility();}
+function timeInputs(){const t=trip.data.time;$('time-mode').value=t.mode;$('budget-minutes').value=t.budget_minutes??'';$('departure').value=t.departure_at?t.departure_at.slice(0,16):'';$('finish-by').value=t.finish_by?t.finish_by.slice(0,16):'';$('buffer-minutes').value=t.buffer_minutes;timeVisibility();}
 function timeVisibility(){const m=$('time-mode').value;$('budget-row').hidden=m!=='budget';$('deadline-row').hidden=m!=='window';}
 function readTime(){
  const mode=$('time-mode').value,t={mode,departure_at:T.singaporeISO($('departure').value),finish_by:mode==='window'?T.singaporeISO($('finish-by').value):null,budget_minutes:mode==='budget'?T.integer($('budget-minutes').value,'总时长预算',{min:1,max:10080}):null,buffer_minutes:T.integer($('buffer-minutes').value,'整体预留',{min:0,max:1440})};
@@ -96,14 +95,13 @@ function timeChanged(){timeVisibility();try{const t=readTime();formInvalid=false
 function cancelCalculation(){clearTimeout(autoTimer);trip.cancel();if(planController)planController.abort();planController=null;$('cancel-calculation').disabled=true;if(trip.lastSuccess){mapView.markStale();$('result-body').classList.add('is-stale');}$('plan-status').textContent='已取消等待；不再请求后续路段。已发出的一个服务商请求可能仍在结束处理。';$('plan-status').className='stale';$('export-report').disabled=true;}
 async function calculate(force){
  clearTimeout(autoTimer);let ticket;
- try{const t=readTime();for(const card of $('visits').querySelectorAll('.visit-card')){const v=trip.data.visits.find(v=>v.visit_id===card.dataset.visitId),n=T.integer(card.querySelector('input').value,'停留分钟',{min:0,max:1440,nullable:true}),p=card.querySelector('select').value;if(v&&(v.stay_minutes!==n||v.stay_profile!==p))trip.setStay(v.visit_id,n,p);}if(!T.sameTime(t,trip.data.time))trip.setTime(t);formInvalid=false;ticket=trip.begin(force);reportError(null);}catch(e){formInvalid=true;reportError(e);return;}
+ try{const t=readTime();for(const card of $('visits').querySelectorAll('.visit-card')){const v=trip.data.visits.find(v=>v.visit_id===card.dataset.visitId),n=T.integer(card.querySelector('input').value,'停留分钟',{min:0,max:1440,nullable:true}),p=card.querySelector('select').value;if(v&&(v.stay_minutes!==n||v.stay_profile!==p))trip.setStay(v.visit_id,n,p);}if(JSON.stringify(t)!==JSON.stringify(trip.data.time))trip.setTime(t);formInvalid=false;ticket=trip.begin(force);reportError(null);}catch(e){formInvalid=true;reportError(e);return;}
  if(planController)planController.abort();const controller=planController=new AbortController(),viewRevision=mapView.viewRevision;
  $('cancel-calculation').disabled=false;$('export-report').disabled=true;
  if(trip.lastSuccess){mapView.markStale();$('result-body').classList.add('is-stale');}
  const n=trip.data.visits.length+(trip.data.finish_policy==='last_stop'?0:1);$('plan-status').className='';$('plan-status').textContent=`正在按顺序请求或复用 ${n} 段路径。可以继续编辑；旧请求不会覆盖新条件。`;$('plan-version').textContent='计算中 · 版本 '+ticket.revision;
  try{const r=await api('/api/stage2b/plan',ticket.payload,controller.signal);if(!trip.accepts(ticket,r))return;
   mapView.setPlan(r,mapView.viewRevision===viewRevision);if(!trip.save(ticket,r))return;renderResult(r);$('export-report').disabled=false;
-  window.dispatchEvent(new CustomEvent('playmap:plan-complete',{detail:{plan:r,revision:trip.revision}}));
  }catch(e){if(e.name==='AbortError'||ticket.sequence!==trip.sequence)return;$('plan-status').textContent=e.message+(trip.lastSuccess?' 上一份路线与时间轴仅供对照，不是本次结果。':' 没有生成完整方案。');$('plan-status').className='error';$('plan-version').textContent='本次未完成';}
  finally{if(planController===controller){planController=null;$('cancel-calculation').disabled=true;}}
 }
@@ -114,14 +112,24 @@ function renderResult(r){
  const labels={no_budget:'未提供时间预算：以上是这套玩法所需时长的建议，不是在推断你的空闲时间。',all_estimates_exceed:'当前顺序与停留范围均超过时间预算。未自动删地点或缩短停留。',reference_exceeds:'参考安排超过预算，但较短停留假设可能适合。请自行修改，不自动压缩。',reference_fits_upper_exceeds:'参考安排在预算内，但较长停留假设会超时。',all_estimates_fit:'按照当前通行及停留估计，参考值和停留范围均未超预算。'};
  const check=r.budget_check;$('budget-check').textContent=labels[check.status]+(check.slack_s===null?'':` 参考${check.slack_s>=0?'剩余':'超出'} ${T.minutes(Math.abs(check.slack_s))}。`);$('budget-check').className=check.status==='no_budget'||check.status==='all_estimates_fit'?'budget-ok':'budget-warning';
  $('journey-summary').textContent=`${r.visits.length} 处停留 · ${r.legs.length} 段连接 · 服务商累计 ${(x.distance_m/1000).toFixed(2)} km · ${MODE[r.mode]} · ${r.route_calls.provider_calls} 次新路径请求 / ${r.route_calls.cache_hits} 段短时复用。`;
- $('clock-note').textContent=(r.time.departure_at?'以下为新加坡时间 UTC+8。':'未指定出发时刻：以下 +HH:MM 表示从出发开始的相对时间。')+' 出发时刻仅排时间轴；未预测未来交通，也未核验开放时间。';
+ $('clock-note').textContent=(r.time.departure_at?'以下为新加坡时间 UTC+8。':'未指定出发时刻：以下 +HH:MM 表示从出发开始的相对时间。')+' 出发时刻仅排时间轴；未预测未来交通。'+(r.opening_hours_checked?' 已对可明确解析的目录营业时间做静态检查；复杂时段、临时关闭及最后入场仍需核验。':' 未能完成可用的营业时间检查。');
  $('plan-version').textContent='当前方案版本 '+r.revision;
  const flagged=r.legs.some(l=>l.endpoint_review_required||l.diagnostics.large_detour_flag||l.diagnostics.geometry_summary_mismatch);
  const walkingCheck=r.walking_constraint_check;
  const walkingViolated=walkingCheck?.status==='violation';
- $('plan-status').className=(flagged||walkingViolated)?'warning':'';
+ const hoursProblems=r.visits.filter(v=>['closed_at_arrival','insufficient_time'].includes(v.opening_status));
+ $('plan-status').className=(flagged||walkingViolated||hoursProblems.length)?'warning':'';
 
-if(walkingViolated){
+if(hoursProblems.length){
+    const detail=hoursProblems.map(v=>{
+      const h=v.opening_hours_display||'营业时间未显示';
+      return v.opening_status==='closed_at_arrival'
+        ? `${v.point.label}：预计到达时不在开放时段内（${h}）`
+        : `${v.point.label}：到达时仍开放，但按当前停留时长会超过关门时间（${h}）`;
+    }).join('；');
+    $('plan-status').textContent='营业时间检查发现当前行程可能不可行。'+detail+'。';
+
+}else if(walkingViolated){
     const violations=walkingCheck.violations;
 
     const detail=violations.map(v =>
@@ -146,7 +154,19 @@ if(walkingViolated){
   const time=node('div',undefined,'time-label');time.append(node('span',T.axisLabel(row)),node('span','↓ '+T.axisLabel(row,true)));const content=node('div',undefined,'timeline-content');
   content.append(node('span',row.kind==='travel'?'通行 · '+MODE[r.mode]:row.kind==='visit'?'停留 '+(row.visit_index+1):'整体预留','timeline-type'),node('strong',row.title),node('p',T.minutes(row.duration_s),'small'));
   if(row.kind==='travel'){const leg=r.legs[row.leg_index];content.append(node('p',leg.kind==='same_selected_coordinate'?'相同选定坐标：未生成连接线，按0转移时间。':`${(leg.distance_m/1000).toFixed(2)} km · ${leg.reused_in_memory?'短时复用':'本次请求'} · 端点偏移 ${leg.endpoint_offsets_m.origin.toFixed(0)} / ${leg.endpoint_offsets_m.destination.toFixed(0)} m`,'small'));if(leg.endpoint_review_required||leg.diagnostics.large_detour_flag)content.append(node('p','请核对这一段：端点偏移或明显绕行；没有自动换方式。','leg-warning'));}
-  if(row.kind==='visit'){const v=r.visits[row.visit_index];content.append(node('p',(v.stay_basis==='user_specified'?'用户指定停留':'项目初始停留假设')+` · 范围 ${v.stay_range_minutes.join('—')} 分钟 · 开放条件未核验`,'small'));}
+  if(row.kind==='visit'){const v=r.visits[row.visit_index],h=v.opening_hours_display;
+   const hoursText=v.opening_status==='feasible'?'营业时间检查：当前安排可行':
+    v.opening_status==='closed_at_arrival'?'营业时间检查：预计到达时已关闭':
+    v.opening_status==='insufficient_time'?'营业时间检查：当前停留会超过关门时间':
+    h?'营业时间规则需人工核对':'无可用营业时间';
+   content.append(node('p',(v.stay_basis==='user_specified'?'用户指定停留':'项目初始停留假设')+` · 范围 ${v.stay_range_minutes.join('—')} 分钟 · ${hoursText}${h?' · '+h:''}`,'small'));
+   if(v.selected_entrance){
+    const why=v.entrance_selection_basis==='fastest_reachable_entrance_candidate'?'按当前出发方向的 OneMap 实际通行时间选择':'当前仅有一个可用入口候选';
+    content.append(node('p',`建议通行点：${v.selected_entrance.label} · ${why} · 入口候选，未实地核验；离开时沿用同一通行点，不假设园内可穿行到其他出口。`,'small'));
+   }else if(v.entrance_selection_basis==='representative_point_all_candidates_unreachable'){
+    content.append(node('p','现有入口候选均未取得可用路线，本次退回景点代表点；请人工核对实际入口。','leg-warning'));
+   }
+  }
   const focus=()=>{for(const e of panel.querySelectorAll('.is-focus'))e.classList.remove('is-focus');el.classList.add('is-focus');if(row.kind==='travel')mapView.focusLeg(row.leg_index);else if(row.kind==='visit')mapView.focusPoint(r.visits[row.visit_index].point);};el.onclick=focus;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus();}};el.append(time,content);panel.append(el);
  }
  $('plan-warnings').replaceChildren(...r.cautions.map(t=>node('p',t,'small')));
