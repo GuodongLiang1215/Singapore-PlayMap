@@ -141,6 +141,62 @@ def _nearby_rows(path, build_id):
         return _NEARBY_CACHE['rows']
 
 
+def match_search_point(label: str, latitude: float, longitude: float, max_distance_m: float = 80.0):
+    """Conservatively link a confirmed OneMap search point to one visible catalogue entity.
+
+    Ordinary entities require close proximity. Reviewed core attractions may match
+    farther away when the place name is uniquely strong; this covers large parks
+    whose representative point and named access/search point are hundreds of metres apart.
+    """
+    path, report = snapshot()
+    query=normal_name(label)
+    query_tokens={t for t in query.split() if len(t)>=3}
+    if not query_tokens:
+        return None
+
+    def name_score(entity):
+        name=normal_name(entity.get('display_title') or '')
+        if not name:
+            return 0.0
+        if name==query:
+            return 1.0
+        nt={t for t in name.split() if len(t)>=3}
+        if not nt:
+            return 0.0
+        coverage=len(nt & query_tokens)/len(nt)
+        query_coverage=len(nt & query_tokens)/len(query_tokens)
+        if coverage==1.0:
+            return 0.9+0.1*query_coverage
+        if coverage>=0.8 and query_coverage>=0.5:
+            return 0.8
+        return 0.0
+
+    close=[]
+    reviewed_large=[]
+    for r in _nearby_rows(path, report['build_id']):
+        d=_metres(latitude, longitude, r['latitude'], r['longitude'])
+        score=name_score(r)
+        if score>=0.9 and d<=max_distance_m:
+            close.append((score,-d,r))
+            continue
+        # Large reviewed destinations are allowed a wider identity radius only
+        # with very strong name evidence and actual entrance metadata.
+        if score>=0.94 and d<=5000 and (r.get('entrance_count') or 0)>0:
+            reviewed_large.append((score,-d,r))
+    candidates=close or reviewed_large
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x:(x[0],x[1]),reverse=True)
+    best=candidates[0]
+    if len(candidates)>1:
+        second=candidates[1]
+        if best[0]-second[0]<0.05 and abs(best[1]-second[1])<100:
+            return None
+    return {'entity_id':best[2]['entity_id'],'build_id':report['build_id'],
+            'distance_m':round(-best[1],2),'name_score':round(best[0],3),
+            'match_scope':'close' if -best[1]<=max_distance_m else 'reviewed_large_destination'}
+
+
 @router.get('/nearby')
 def nearby(lat: float = Query(..., ge=1.15, le=1.48), lon: float = Query(..., ge=103.55, le=104.1),
            radius_m: float = Query(1000, gt=0, le=5000), category: str = Query('', max_length=40),
