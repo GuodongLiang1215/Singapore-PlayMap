@@ -138,13 +138,13 @@ class TokenStore:
             else:
                 # Configured token exists but is expired/near expiry.
                 if exp is not None and exp <= time.time() + 15 and transport is None:
-                    raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期，请重新运行 scripts/onemap_login.py。', 503)
+                    raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期；请检查本机 OneMap 凭据配置，运行时会在可用时自动刷新。', 503)
         if transport is not None and self.can_refresh():
             return self._refresh(transport, force=force_refresh)
         if token:
             clean_token(token)
             if exp is not None and exp <= time.time() + 15:
-                raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期，请重新运行 scripts/onemap_login.py。', 503)
+                raise ProviderError('TOKEN_EXPIRED', '本地Token已过期或即将过期；请检查本机 OneMap 凭据配置，运行时会在可用时自动刷新。', 503)
         raise ProviderError('TOKEN_REQUIRED', '尚未配置OneMap Token。请在本机登录，或在共享服务器配置自动刷新凭据。', 503)
 
     def status(self):
