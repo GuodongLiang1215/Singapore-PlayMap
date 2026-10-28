@@ -22,7 +22,7 @@ def status():
                'default_exploration_count':report['default_exploration_entity_count'],
                'verified_entrances':report['verified_entrance_count']}
     except HTTPException:
-        cat = {'ready':False,'message':'未读取到Stage1C快照；可先检查旧目录，位置搜索与手选点不依赖目录。'}
+        cat = {'ready':False,'message':'The Stage1C snapshot is unavailable. Check the catalogue; location search and manual map selection remain available without it.'}
     try: credentials = client.tokens.status()
     except (ProviderError, OSError):
         credentials = {'configured':False,'state':'config_unreadable','token_value_exposed':False}
@@ -33,7 +33,7 @@ def status():
             'runtime_counters_since_server_start':counters,
             'live_routing_verified_for_this_process':counters['route_successes']>0,
             'private_queries_saved_to_disk':False,
-            'notice':'代码就绪不等于服务已接通；全岛范围不等于每个点都存在可用路径。'}
+            'notice':'Configured code does not establish a live service connection. Nationwide coverage does not guarantee a route to every point.'}
 
 def execute(kind, function):
     try:

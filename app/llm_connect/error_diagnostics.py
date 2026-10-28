@@ -7,14 +7,15 @@ An UNKNOWN classification remains unknown rather than blaming schema by default.
 from __future__ import annotations
 import json
 
-KINDS = {
-    'SCHEMA_COMPLEXITY': '服务商提示输出结构过于复杂；请保留本次诊断。',
-    'SCHEMA_FIELD': '服务商提示输出结构字段或引用不被接受；请保留本次诊断。',
-    'SCHEMA_VALIDATION': '服务商提示输出结构校验未通过；请保留本次诊断。',
-    'GENERATION_PARAMETER': '服务商提示生成参数不被接受；请保留本次诊断。',
-    'BILLING_OR_REGION': '服务商提示计费或地区前提未满足；仅凭这条分类不能判断具体原因。',
-    'UNKNOWN': '没有取得可安全识别的具体原因；请导出本地诊断，不要反复点击发送。',
-}
+KINDS = {'SCHEMA_COMPLEXITY': 'The provider reported that the output schema is too complex. Retain these '
+                      'diagnostics.',
+ 'SCHEMA_FIELD': 'The provider rejected an output-schema field or reference. Retain these diagnostics.',
+ 'SCHEMA_VALIDATION': 'The provider reported an output-schema validation failure. Retain these diagnostics.',
+ 'GENERATION_PARAMETER': 'The provider rejected a generation parameter. Retain these diagnostics.',
+ 'BILLING_OR_REGION': 'The provider reported an unmet billing or regional condition. This classification '
+                      'does not establish the exact cause.',
+ 'UNKNOWN': 'No safe, specific cause could be identified. Export the local diagnostics instead of repeatedly '
+            'sending the request.'}
 STATUSES = frozenset({'INVALID_ARGUMENT', 'FAILED_PRECONDITION', 'UNAUTHENTICATED',
                      'PERMISSION_DENIED', 'NOT_FOUND', 'RESOURCE_EXHAUSTED',
                      'INTERNAL', 'UNAVAILABLE', 'DEADLINE_EXCEEDED', 'UNKNOWN'})

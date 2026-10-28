@@ -23,9 +23,9 @@ async def local_guard(request: Request,call_next):
         if origin:
             parts = urlsplit(origin)
             if parts.scheme != request.url.scheme or parts.netloc != request.url.netloc:
-                return JSONResponse({'detail':{'code':'ORIGIN_REJECTED','message':'只允许当前本地页面请求。'}},403)
+                return JSONResponse({'detail':{'code':'ORIGIN_REJECTED','message':'Requests are allowed only from the current local page.'}},403)
         if request.headers.get('x-playmap-client') != prefix:
-            return JSONResponse({'detail':{'code':'CLIENT_HEADER_REQUIRED','message':'请使用本项目页面调用。'}},403)
+            return JSONResponse({'detail':{'code':'CLIENT_HEADER_REQUIRED','message':'Use the PlayMap page to make this request.'}},403)
     response = await call_next(request)
     response.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     response.headers['X-Content-Type-Options']='nosniff'
@@ -39,7 +39,7 @@ async def local_guard(request: Request,call_next):
 @app.exception_handler(RequestValidationError)
 async def bad_input(request,exc):
     return JSONResponse({'detail':{'code':'INVALID_ITINERARY_INPUT',
-        'message':'请检查选点、有效数字、结束方式和时间字段；跨午夜必须显式选下一天，未给时间不能暗含预算。',
+        'message':'Check the selected points, numbers, end policy and time fields. Choose the next date explicitly for an overnight trip. No budget is assumed unless you provide one.',
         'fields':['.'.join(str(x) for x in e['loc']) for e in exc.errors()]}},422)
 
 for r in (sources,enriched,catalogue,geographic,itinerary): app.include_router(r)

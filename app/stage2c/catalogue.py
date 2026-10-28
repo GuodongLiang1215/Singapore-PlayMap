@@ -5,6 +5,7 @@ from math import isfinite
 from types import SimpleNamespace
 from app.stage1c import api as catalogue
 from app.db import ro_connect
+from app.english import catalogue_search_row, english_text
 from app.stage2a.models import distance_m
 from app.stage2a.transport import ProviderError
 from .retrieval_rules import ALIAS_CATEGORY, canonical_place_type, canonical_spec
@@ -125,14 +126,14 @@ def resolve_spatial_requirement(requirements,anchor,cat,geo):
     valid_radii=[row.value for row in radius_rows if type(row.value) in (int,float)
                  and isfinite(row.value) and row.value>0]
     radii=set(valid_radii)
-    info={'status':'unresolved','message':'空间参照尚未确定。','distance_kind':'straight_line',
+    info={'status':'unresolved','message':'The reference location is not yet confirmed.','distance_kind':'straight_line',
           'radius_m':next(iter(radii)) if len(radii)==1 else None,'anchor_label':None,
           'anchor_source':'origin' if anchor else None}
     if len(valid_radii)!=len(radius_rows) or len(names)==0 and named_rows:
-        info['message']='空间参照或半径值无效，请提供具体中心和正数米数。'
+        info['message']='The reference location or radius is invalid. Specify a centre and a positive radius in metres.'
         return None,None,info
     if len(names)>1 or len(radii)>1:
-        info.update(status='conflicting',message='本次空间要求含有不同中心或半径，请明确选择。')
+        info.update(status='conflicting',message='The spatial requirements specify different centres or radii. Please choose one.')
         return None,None,info
     if names:
         name=next(iter(names.values())); info['anchor_label']=name
@@ -143,17 +144,17 @@ def resolve_spatial_requirement(requirements,anchor,cat,geo):
             try:
                 matches,paged=geocoded_anchor_matches(name,geo)
             except ProviderError as error:
-                info['message']='空间参照搜索未完成 ['+error.code+']，请确认具体中心地点。'
+                info['message']='The reference-location search did not complete ['+error.code+']. Please specify the centre location.'
                 return None,None,info
         if len(matches)!=1 or paged:
-            info['message']='空间参照未找到唯一精确匹配，请明确具体地点。'
+            info['message']='No unique exact match was found for the reference location. Please specify the place.'
             return None,None,info
         anchor=next(iter(matches.values()))
     if anchor is None:
-        info['message']='距离要求缺少中心地点，请先指定空间参照或出发点。'
+        info['message']='The distance requirement needs a centre. Specify a reference location or starting point.'
         return None,None,info
-    info.update(status='applied',anchor_label=getattr(anchor,'label','出发点'),
-                message='按直线半径筛选候选；不代表步行距离。' if radii else '按该参照点距离排序，未设定半径。')
+    info.update(status='applied',anchor_label=getattr(anchor,'label','Starting point'),
+                message='Candidates are filtered by straight-line radius, not walking distance.' if radii else 'Candidates are ranked by distance from the reference location. No radius is set.')
     return anchor,info['radius_m'],info
 
 class LocalCatalogue:
@@ -164,8 +165,8 @@ class LocalCatalogue:
             with ro_connect(path) as db:
                 rows=[json.loads(r[0]) for r in db.execute('SELECT data_json FROM entities ORDER BY title,entity_id')]
         else:self.build_id=build_id or 'test-only'
-        self.rows=rows
-        self.by_id={r['entity_id']:r for r in rows}
+        self.rows=[catalogue_search_row(row) for row in rows]
+        self.by_id={r['entity_id']:r for r in self.rows}
 
     def validate_point(self,point):
         if point is None or point.source!='catalogue_representative':return
@@ -203,12 +204,13 @@ class LocalCatalogue:
         }
         diagnostic.update(normalization or {})
         if explicit:
-            held=[r for r in self.rows if not r.get('default_exploration_visible') and norm(r['display_title'])==query]
+            held=[r for r in self.rows if not r.get('default_exploration_visible')
+                  and query in {norm(x) for x in [r['display_title'],*r.get('aliases',[])]}]
             # A hidden duplicate or old record only blocks the search when no visible place has this name.
             live=any(r.get('default_exploration_visible') and query in {norm(x) for x in [r['display_title'],*r.get('aliases',[])]} for r in self.rows) if held else False
             if held and not live:
                 diagnostic['held_name_match']=True
-                return [],['此名称匹配旧址或状态待核查记录。请确认当前场所，不按旧址自动规划。'],True,diagnostic
+                return [],['This name matches a former location or a record pending review. Confirm the current venue before planning.'],True,diagnostic
         rows=[]
         for e in self.rows:
             if not e.get('map_eligible',True) or not e.get('default_exploration_visible'):continue
@@ -231,7 +233,7 @@ class LocalCatalogue:
             if not all(text_has(text,w) for w in hard_keywords):continue
             if keywords and not any(text_has(text,w) for w in keywords):continue
             diagnostic['keyword_matches']+=1
-            exact=explicit and name==query
+            exact=explicit and query in {norm(x) for x in [e['display_title'],*e.get('aliases',[])]}
             score=1000 if exact else (100 if explicit and query in name else 0)
             for word in spec.keywords:
                 if text_has(text,word):score+=10
@@ -252,11 +254,11 @@ class LocalCatalogue:
         for _,e,d,exact in rows[:limit]:
             place_types,type_basis=entity_place_types(e)
             result.append({'identity':'catalogue:'+e['entity_id'],'label':e['display_title'],
-                'categories':e.get('categories',[e.get('category')]),'address':e.get('address') or '',
+                'categories':e.get('categories',[e.get('category')]),'address':english_text(e.get('address') or ''),
                 'place_types':place_types,'place_type_basis':type_basis,
-                'basis':('Overture第三方合并数据（非官方），坐标为来源点，入口和营业未核验' if e.get('data_source')=='overture' else '官方来源目录，坐标为来源代表点，入口和营业未核验'),
+                'basis':('Third-party Overture data. Coordinates are source points; entrances and opening hours are unverified.' if e.get('data_source')=='overture' else 'Official-source catalogue. Coordinates are representative points; entrances and opening hours are unverified.'),
                 'data_source':e.get('data_source'),'suggested_duration':e.get('suggested_duration'),
-                'opening_hours_display':e.get('opening_hours_display'),
+                'opening_hours_display':english_text(e.get('opening_hours_display')),
                 'opening_hours_source':e.get('opening_hours_source'),
                 'entrance_count':len(e.get('entrance_points') or []),
                 'distance_hint_m':round(d) if d is not None else None,'exact_name_match':exact,
@@ -266,15 +268,15 @@ class LocalCatalogue:
         diagnostic['returned_local_options']=len(result)
         notices=[]
         if unknown_types or unknown_categories:
-            notices.append('当前目录无法验证所需地点细类，没有将未知类型当作匹配。请调整细类要求。')
+            notices.append('The catalogue cannot verify the requested venue type. Unknown types are not treated as matches. Please revise the type requirement.')
         elif not result and (required_types or required_categories):
-            notices.append('没有找到具有所需细类来源证据的地点；名称或地址含相关词不能证明地点类型。')
+            notices.append('No candidate has source evidence for the requested venue type. A matching word in its name or address does not establish its type.')
         if diagnostic['generic_intent_terms_normalized']:
-            notices.append('通用游玩或用餐表达按目录类别检索，不再要求地点名称含有“吃饭”等泛化词；具体关键词仍保留。')
+            notices.append('General outing or dining requests use catalogue categories. Specific keywords are retained; generic intent words need not appear in place names.')
         if not result and spec.keywords and diagnostic['name_matches']:
-            notices.append('对应类别有目录记录，但本次具体关键词没有匹配。没有删除这些关键词来凑齐候选；可明确修改要求或手动选定地点。')
+            notices.append('The category has catalogue records, but none match the specific keywords. Revise your requirements or choose a place manually; the keywords were not removed.')
         if 'food' in spec.categories:
-            notices.append('餐饮候选来自熟食中心官方目录及Overture第三方数据（餐厅、咖啡馆、酒吧等），不保证覆盖全部；营业、菜品及饮食限制仍未核验。')
+            notices.append('Dining candidates come from the official hawker-centre catalogue and third-party Overture data, including restaurants, cafes and bars. Coverage is incomplete; opening hours, menus and dietary requirements remain unverified.')
         return result,notices,False,diagnostic
 
 def global_exclusions_for_slot(preferences, slot):
@@ -327,7 +329,7 @@ def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=()):
                     distance=distance_m(anchor.latitude,anchor.longitude,x['latitude'],x['longitude']) if anchor else None
                     if radius_m is not None and (distance is None or distance>radius_m):continue
                     o={'identity':'onemap:'+str(x['latitude'])+':'+str(x['longitude']), 'label':x['label'],
-                       'categories':[],'address':x.get('address',''),'basis':'OneMap地名候选；不是核验入口或景点资格证明',
+                       'categories':[],'address':x.get('address',''),'basis':'OneMap place-name candidate; this does not verify an entrance or attraction classification.',
                        'place_types':[],'place_type_basis':None,
                        'data_source':'onemap','suggested_duration':None,
                        'opening_hours_display':None,'opening_hours_source':None,'entrance_count':0,
@@ -336,9 +338,9 @@ def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=()):
                        'point':{'latitude':x['latitude'],'longitude':x['longitude'],'label':x['label'][:200],
                                 'source':'onemap_search','confirmed':True}}
                     if not any(y['identity']==o['identity'] for y in options):options.append(o)
-                if result.get('next_page'):notices.append('OneMap仅取第1页候选；可在原搜索区继续查找，不代表全部匹配结果。')
+                if result.get('next_page'):notices.append('Only the first page of OneMap candidates was retrieved. Continue in the search panel for more results.')
             except ProviderError as e:
-                notices.append('地名搜索未完成 ['+e.code+']；可在地图或原搜索区手动选点，不补造位置。')
+                notices.append('The place-name search did not complete ['+e.code+']. Choose a location on the map or in the search panel; no coordinates were invented.')
     options=options[:12]
     diagnostic['returned_options']=len(options)
     for j,o in enumerate(options):o['candidate_key']=f's{index}c{j}'

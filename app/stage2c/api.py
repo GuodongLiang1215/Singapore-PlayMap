@@ -58,7 +58,7 @@ def status():
         settings=load_settings(ROOT)
         return {'configured':True,'provider':'gemini','model':settings.model,'live_call_verified':False,
             'map_chat_integrated':True,'wire_version':WIRE_VERSION,'field_diagnostics':True,'target_position_supported':True,'command_contract':'operation_scoped_commands_v1','time_contract':'partial_time_patch_v1','max_model_calls_per_turn':2,'max_concurrent_chat_sessions':_gate.capacity,'min_call_interval_s':PACER.interval,'training':False,
-            'notes':'配置可读不证明额度或在线可用；仅点击发送才调用模型。'}
+            'notes':'Configuration does not verify quota or connectivity. The model is called only when you send a message.'}
     except LLMConnectionError as e:return {'configured':False,'error':e.public(),'map_chat_integrated':True}
 
 @router.post('/chat')
@@ -66,8 +66,8 @@ async def chat(body:ChatRequest,request:Request):
     session_lock,busy_scope=_gate.acquire(body.session_id)
     if session_lock is None:
         if busy_scope=='session':
-            raise HTTPException(409,detail=ChatError('CHAT_BUSY','这个浏览器会话仍有模型请求在处理，请稍候；没有增加新调用。',409).public())
-        raise HTTPException(429,detail=ChatError('CHAT_CAPACITY','共享测试服务正在处理其他请求，请稍候再发送；没有增加新调用。',429).public())
+            raise HTTPException(409,detail=ChatError('CHAT_BUSY','This session is still processing a model request. Please wait; no additional request was sent.',409).public())
+        raise HTTPException(429,detail=ChatError('CHAT_CAPACITY','The shared service is busy with other requests. Please try again shortly; no additional request was sent.',429).public())
     cancel=threading.Event()
     task=None
     try:
@@ -76,7 +76,7 @@ async def chat(body:ChatRequest,request:Request):
             if await request.is_disconnected():cancel.set()
             await asyncio.sleep(.1)
         record,response=await task
-        if cancel.is_set():raise ChatError('CANCELLED','请求已取消，未应用行程。',409)
+        if cancel.is_set():raise ChatError('CANCELLED','The request was cancelled. No itinerary changes were applied.',409)
         response['ticket']=STORE.put(record)
         return response
     except ChatError as e:raise HTTPException(e.status,detail=e.public()) from None
@@ -85,9 +85,9 @@ async def chat(body:ChatRequest,request:Request):
             'request_diagnostic':getattr(e,'chat_request_diagnostic',None)}) from None
     except HTTPException:raise
     except ValidationError:
-        raise HTTPException(422,detail=ChatError('INVALID_PROPOSAL','输出或候选资料未通过本地检查，原行程未更改。').public()) from None
+        raise HTTPException(422,detail=ChatError('INVALID_PROPOSAL','The response or candidate data failed validation. Your itinerary is unchanged.').public()) from None
     except Exception:
-        raise HTTPException(500,detail=ChatError('LOCAL_CHAT_ERROR','本地对话模块未完成本轮请求。请导出不含隐私的诊断；原行程未修改。',500).public()) from None
+        raise HTTPException(500,detail=ChatError('LOCAL_CHAT_ERROR','The chat service could not complete this request. Export the privacy-safe diagnostics for review. Your itinerary is unchanged.',500).public()) from None
     finally:
         cancel.set()
         # A thread may be in an already sent HTTPS request. Never start a concurrent
@@ -102,16 +102,16 @@ def resolve(body:ResolveRequest):
     try:
         record=STORE.get(body.ticket,body.session_id,body.revision)
         cat=LocalCatalogue()
-        if cat.build_id!=record['build_id']:raise ChatError('CATALOGUE_CHANGED','目录版本改变，请重新生成草案。',409)
+        if cat.build_id!=record['build_id']:raise ChatError('CATALOGUE_CHANGED','The catalogue has changed. Please generate a new proposal.',409)
         result=assemble(record,body.choices,strict=True,cat=cat)
         from .models import Draft
         d=Draft.model_validate(result['draft'])
         for pt in [d.origin,d.finish]+[v.point for v in d.visits]:cat.validate_point(pt)
         return {**result,'base_revision':body.revision,'generation_requests':0,'requires_client_apply':True,
-                'notice':'已检查草案结构；路线将在本页采用后另行计算。'}
+                'notice':'The proposal structure has been checked. Routes will be calculated after you confirm it.'}
     except ChatError as e:raise HTTPException(e.status,detail=e.public()) from None
     except (ValidationError,ValueError):
-        raise HTTPException(409,detail=ChatError('INVALID_RESOLUTION','选择或来源坐标已不一致，请刷新后重新选择。',409).public()) from None
+        raise HTTPException(409,detail=ChatError('INVALID_RESOLUTION','The selection or source coordinates have changed. Refresh the page and select again.',409).public()) from None
 
 @router.post('/forget')
 def forget(body:ForgetRequest):
@@ -119,7 +119,7 @@ def forget(body:ForgetRequest):
     MESSAGE_TURNS.clear(body.session_id)
     VERIFICATIONS.clear(body.session_id)
     return {'cleared_local_pending_proposals':True,'provider_data_deletion_requested':False,
-            'notice':'只清理本地内存草案；不是删除服务商已收到的内容。'}
+            'notice':'This clears proposals held in server memory. It does not delete data already received by the provider.'}
 
 
 @router.post('/verification')

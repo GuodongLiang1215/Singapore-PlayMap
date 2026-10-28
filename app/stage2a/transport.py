@@ -27,19 +27,19 @@ class ProviderError(Exception):
 
 def status_error(status, operation='route'):
     if status in (401, 403):
-        return ProviderError('AUTH_REJECTED', 'OneMap拒绝认证；自动刷新未能恢复访问。请检查本机 OneMap 凭据配置，不要上传Token或密码。', 503, status)
+        return ProviderError('AUTH_REJECTED', 'OneMap rejected authentication, and automatic refresh did not restore access. Check the OneMap credentials without uploading tokens or passwords.', 503, status)
     if status == 429:
-        return ProviderError('RATE_LIMITED', 'OneMap调用过于频繁。请稍后手动重试；本次没有自动循环请求。', 429, status)
+        return ProviderError('RATE_LIMITED', 'OneMap has rate-limited this request. Try again later; no automatic retry was made.', 429, status)
     if operation == 'auth' and status == 404:
-        return ProviderError('ACCOUNT_NOT_READY', 'OneMap账户未找到或尚未完成确认；请检查注册和邮箱确认。', 503, status)
+        return ProviderError('ACCOUNT_NOT_READY', 'The OneMap account was not found or is not confirmed. Check the registration and email confirmation.', 503, status)
     if status in (400, 404):
-        return ProviderError('UPSTREAM_REQUEST_REJECTED', 'OneMap没有接受本次请求；请检查输入或接口状态。不能据此断言现实中没有路线。', 502, status)
-    return ProviderError('UPSTREAM_HTTP_ERROR', 'OneMap返回服务错误；没有生成替代路线。', 502, status)
+        return ProviderError('UPSTREAM_REQUEST_REJECTED', 'OneMap rejected this request. Check the input or service status. This does not establish that no route exists.', 502, status)
+    return ProviderError('UPSTREAM_HTTP_ERROR', 'OneMap returned a service error. No substitute route was generated.', 502, status)
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         # Never forward Authorization or auth JSON to a redirected URL.
-        raise ProviderError('REDIRECT_REFUSED', 'OneMap接口发生重定向，已停止请求以保护凭据。', 502, code)
+        raise ProviderError('REDIRECT_REFUSED', 'The OneMap endpoint redirected the request. The request was stopped to protect credentials.', 502, code)
 
 class HTTPSJSON:
     def __init__(self, timeout=20, min_interval=0.35):
@@ -56,7 +56,7 @@ class HTTPSJSON:
         headers = {'Accept': 'application/json', 'User-Agent': 'SingaporePlayMap-Stage2A/1.0'}
         if token:
             if any(c.isspace() for c in token):
-                raise ProviderError('TOKEN_FORMAT', 'Token格式无效，请重新配置。', 503)
+                raise ProviderError('TOKEN_FORMAT', 'Invalid token format. Update the token configuration.', 503)
             headers['Authorization'] = token  # OneMap documented raw-token header, not URL parameter.
         data = None
         if body is not None:
@@ -71,22 +71,22 @@ class HTTPSJSON:
             with build_opener(NoRedirect()).open(req, timeout=self.timeout) as response:
                 content = response.read(MAX_RESPONSE + 1)
                 if len(content) > MAX_RESPONSE:
-                    raise ProviderError('RESPONSE_TOO_LARGE', 'OneMap返回体超出本项目安全上限，已停止处理。')
+                    raise ProviderError('RESPONSE_TOO_LARGE', 'The OneMap response exceeds the application size limit. Processing was stopped.')
         except ProviderError: raise
         except HTTPError as exc:
             code = exc.code
             exc.close()
             raise status_error(code, operation) from None
         except (TimeoutError, socket.timeout):
-            raise ProviderError('NETWORK_TIMEOUT', '连接OneMap超时。请检查网络后重试；未生成估算路线。', 504) from None
+            raise ProviderError('NETWORK_TIMEOUT', 'The connection to OneMap timed out. Check the network and try again. No estimated route was generated.', 504) from None
         except (URLError, OSError):
-            raise ProviderError('NETWORK_UNAVAILABLE', '无法连接OneMap，请检查网络、代理和域名解析。', 503) from None
+            raise ProviderError('NETWORK_UNAVAILABLE', 'Cannot connect to OneMap. Check the network, proxy and DNS settings.', 503) from None
         try:
             payload = json.loads(content.decode('utf-8-sig'), parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
         except (ValueError, UnicodeError):
-            raise ProviderError('INVALID_JSON', 'OneMap返回的不是有效JSON；没有用网页文本代替空间数据。') from None
+            raise ProviderError('INVALID_JSON', 'OneMap returned invalid JSON. The response was not used as spatial data.') from None
         if not isinstance(payload, dict):
-            raise ProviderError('UNEXPECTED_SCHEMA', 'OneMap响应结构与本版接口契约不符。')
+            raise ProviderError('UNEXPECTED_SCHEMA', 'The OneMap response does not match the expected format.')
         return payload
 
 
@@ -96,4 +96,4 @@ def check_payload_error(payload):
         text = str(payload.get('error', payload.get('Error', payload.get('errors', '')))).lower()
         if any(w in text for w in ('token', 'auth', 'expire', 'credential', 'unauthor')):
             raise status_error(401)
-        raise ProviderError('UPSTREAM_ERROR', 'OneMap返回错误信息，未生成路线或搜索结果。')
+        raise ProviderError('UPSTREAM_ERROR', 'OneMap returned an error. No route or search results were generated.')

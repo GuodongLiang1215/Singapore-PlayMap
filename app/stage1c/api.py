@@ -9,6 +9,7 @@ from app.stage1.build import read_json, safe_path
 from app.stage1.normalise import normal_name
 from app.db import ro_connect
 from app.stage1c.review import _hours_view, local_date
+from app.english import UNOFFICIAL, catalogue_search_row, english_view
 
 router = APIRouter(prefix='/api/stage1c', tags=['Stage1C reviewed entity catalogue'])
 
@@ -50,14 +51,16 @@ def features(q: str = Query('', max_length=160), category: str = Query('', max_l
     where = ['map_eligible=1']; args = []
     if view == 'explore': where.append('visible=1')
     if view == 'holds': where.append('visible=0')
-    for term in normal_name(q).split():
-        where.append('instr(search_text,?)>0'); args.append(term)
+    terms = normal_name(q).split()
     with ro_connect(path) as db:
         sql = ' FROM entities WHERE ' + ' AND '.join(where)
-        if category:
-            # Category arrays are filtered in Python, without the SQLite JSON extension.
+        if category or terms:
+            # Match original aliases and added English display names. The frozen
+            # source index remains unchanged; browse-only pagination stays in SQL.
             rows = db.execute('SELECT data_json' + sql + ' ORDER BY title,entity_id', args).fetchall()
-            matched = [e for e in (json.loads(r[0]) for r in rows) if category in e['categories']]
+            matched = [e for e in (catalogue_search_row(json.loads(r[0])) for r in rows)
+                       if (not category or category in e['categories'])
+                       and all(term in normal_name(e.get('search_text', '')) for term in terms)]
             total = len(matched); selected = matched[offset:offset+limit]
         else:
             # Page in SQL so large catalogues (e.g. with Overture places) are not re-parsed per page.
@@ -70,7 +73,8 @@ def features(q: str = Query('', max_length=160), category: str = Query('', max_l
             'longitude','latitude','address','coordinate_kind','coordinate_is_entrance','visit_status','default_exploration_visible',
             'suggested_duration','opening_hours_display')
     for e in selected:
-        props = {k:e.get(k) for k in keys}
+        display = catalogue_search_row(e)
+        props = english_view({k:display.get(k) for k in keys})
         props['regular_hours_evidence_count'] = len(e['regular_hours_evidence'])
         props['legacy_review_count'] = len(e['legacy_reviews'])
         items.append({'type':'Feature','id':e['entity_id'],'properties':props,
@@ -82,7 +86,6 @@ def features(q: str = Query('', max_length=160), category: str = Query('', max_l
             'note':'Grouped source identities, not verified operational destinations.'}
 
 
-@router.get('/entity')
 def entity(entity_id: str = Query(..., min_length=1, max_length=512), build_id: str | None = None):
     path, report = snapshot(build_id)
     with ro_connect(path) as db:
@@ -94,6 +97,12 @@ def entity(entity_id: str = Query(..., min_length=1, max_length=512), build_id: 
     e['regular_hours_evidence'] = [_hours_view(h, local_date()) for h in e['regular_hours_evidence']]
     return {'entity':e,'source_records':members,'build_id':report['build_id'],
             'served_on':local_date().isoformat(), 'raw_records_deleted':False}
+
+
+@router.get('/entity')
+def entity_view(entity_id: str = Query(..., min_length=1, max_length=512), build_id: str | None = None):
+    # Internal planners still call entity() for untouched source schedules.
+    return english_view(entity(entity_id, build_id))
 
 
 @router.get('/resolve')
@@ -135,7 +144,13 @@ def _nearby_rows(path, build_id):
                     if isinstance(e.get('latitude'), (int, float)) and isinstance(e.get('longitude'), (int, float)):
                         item = {k: e.get(k) for k in NEARBY_KEYS}
                         item['entrance_count'] = len(e.get('entrance_points') or [])
-                        item['search_text'] = e.get('search_text') or ''
+                        display = catalogue_search_row(e)
+                        item['search_text'] = display.get('search_text') or ''
+                        # Identity aliases are names, never category/search-text
+                        # keywords. Translations retain their unofficial status.
+                        item['name_aliases'] = list(dict.fromkeys(name for name in
+                            [e.get('display_title'), display.get('display_title'), *display.get('aliases', [])]
+                            if isinstance(name, str) and name.strip()))
                         rows.append(item)
             _NEARBY_CACHE.update(build_id=build_id, rows=rows)
         return _NEARBY_CACHE['rows']
@@ -149,19 +164,25 @@ def match_search_point(label: str, latitude: float, longitude: float, max_distan
     whose representative point and named access/search point are hundreds of metres apart.
     """
     path, report = snapshot()
-    query=normal_name(label)
+    def identity_name(name):
+        text=(name or '').strip()
+        if text.casefold().endswith(UNOFFICIAL.casefold()):
+            text=text[:-len(UNOFFICIAL)]
+        return normal_name(text)
+
+    query=identity_name(label)
     query_tokens={t for t in query.split() if len(t)>=3}
-    if not query_tokens:
+    if not query:
         return None
 
-    def name_score(entity):
-        name=normal_name(entity.get('display_title') or '')
+    def label_score(label):
+        name=identity_name(label)
         if not name:
             return 0.0
         if name==query:
             return 1.0
         nt={t for t in name.split() if len(t)>=3}
-        if not nt:
+        if not nt or not query_tokens:
             return 0.0
         coverage=len(nt & query_tokens)/len(nt)
         query_coverage=len(nt & query_tokens)/len(query_tokens)
@@ -170,6 +191,10 @@ def match_search_point(label: str, latitude: float, longitude: float, max_distan
         if coverage>=0.8 and query_coverage>=0.5:
             return 0.8
         return 0.0
+
+    def name_score(entity):
+        names=[entity.get('display_title'), *entity.get('name_aliases', []), *entity.get('aliases', [])]
+        return max((label_score(name) for name in names), default=0.0)
 
     close=[]
     reviewed_large=[]
@@ -222,8 +247,8 @@ def nearby(lat: float = Query(..., ge=1.15, le=1.48), lon: float = Query(..., ge
         if d <= radius_m:
             found.append((d, r))
     found.sort(key=lambda x: (x[0], x[1]['entity_id']))
-    items = [{**{k: v for k, v in r.items() if k != 'search_text'}, 'distance_m': round(d)} for d, r in found[:limit]]
-    return {'build_id': report['build_id'], 'center': {'latitude': lat, 'longitude': lon}, 'radius_m': radius_m,
+    items = [{**{k: v for k, v in r.items() if k not in {'search_text', 'name_aliases'}}, 'distance_m': round(d)} for d, r in found[:limit]]
+    return english_view({'build_id': report['build_id'], 'center': {'latitude': lat, 'longitude': lon}, 'radius_m': radius_m,
             'matched_total': len(found), 'returned_count': len(items), 'places': items,
             'distance_kind': 'straight_line_not_walking_route',
-            'note': 'Visible catalogue places only; hidden old or duplicate records are excluded.'}
+            'note': 'Visible catalogue places only; hidden old or duplicate records are excluded.'})

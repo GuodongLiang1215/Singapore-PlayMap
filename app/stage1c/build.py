@@ -75,51 +75,51 @@ def load_stage1b(root: Path) -> dict:
 def audit_markdown(report: dict, outcome: dict) -> str:
     s = outcome['stats']
     lines = [
-        '# Singapore PlayMap · Stage1C核查与更新结果', '',
-        f"生成时间：{report['generated_at']}",
-        f"输入验证方式：`{report['source_validation']}`", '',
-        '## 数据范围', '',
-        '范围为全新加坡。没有地理裁剪；这是来源记录的整理，不是完整的全岛景点普查。',
-        f"输入候选源记录 **{s['input_candidate_source_records']}** 条；展示地点 **{s['entity_display_count']}** 组。",
-        f"经明确审核归组 **{s['reviewed_group_count']}** 组；删除原记录 **0**。",
-        f"默认浏览显示 **{s['default_exploration_entity_count']}** 组，**不等于当前营业或可规划地点数量**。", '',
-        '## 重复候选逐对处理', '',
-        '| 配对 | 决策 | 原因 |', '|---|---|---|',
+        '# Singapore PlayMap · Stage 1C review and update results', '',
+        f"Generated at: {report['generated_at']}",
+        f"Input validation: `{report['source_validation']}`", '',
+        '## Data scope', '',
+        'Coverage is nationwide, with no geographic cropping. This organises source records; it is not a complete inventory of Singapore attractions.',
+        f"Input: **{s['input_candidate_source_records']}** candidate source records; display: **{s['entity_display_count']}** place groups.",
+        f"Explicitly reviewed groups: **{s['reviewed_group_count']}**; source records deleted: **0**.",
+        f"The default view shows **{s['default_exploration_entity_count']}** groups. **This is not a count of places currently open or ready for planning.**", '',
+        '## Review of potential duplicate pairs', '',
+        '| Pair | Decision | Reason |', '|---|---|---|',
     ]
-    labels = {'same_place': '同一地点：保留多个来源', 'keep_separate': '保留分开', 'related_not_same': '相关但访问粒度不同'}
+    labels = {'same_place': 'Same place: retain all sources', 'keep_separate': 'Keep separate', 'related_not_same': 'Related, but represent different visit units'}
     for d in outcome['identity_reviews']:
         names = ' / '.join(str(g['name']).replace('|', '\\|') for g in d['expected_records'])
-        decision = labels[d['action']] if d['applied'] else '未应用：输入记录或日期不符'
+        decision = labels[d['action']] if d['applied'] else 'Not applied: input record or date mismatch'
         lines.append(f"| {names} | {decision} | {d['reason_zh']} |")
-    lines += ['', '只处理配置中列出的候选配对。名称不同的其他重复记录仍可能存在；不宣称已全部去重。', '',
-              '## 接入点语义复核', '',
-              f"保留输入的全部 **{s['access_boundary_links_retained']}** 条空间关联，不扩大半径、不重新指定最近公园。", '',
-              '| 标签复核结果 | 关联数 |', '|---|---:|']
-    access_labels = {'name_supports_target': '名称支持该候选目标', 'explicit_target_differs': '名称指向另一目标，禁止自动传播',
-                     'broader_area_context': '只支持更大范围上下文', 'broad_target_label': '地名过宽，无法唯一确认',
-                     'unspecified_or_unresolved': '未明确目标或无法判断'}
+    lines += ['', 'Only candidate pairs listed in the configuration were reviewed. Other duplicates with different names may remain; deduplication is not complete.', '',
+              '## Access-point label review', '',
+              f"All **{s['access_boundary_links_retained']}** input spatial links are retained. The radius is unchanged, and links are not reassigned to the nearest park.", '',
+              '| Label review result | Link count |', '|---|---:|']
+    access_labels = {'name_supports_target': 'Name supports the candidate target', 'explicit_target_differs': 'Name identifies another target; no automatic reassignment',
+                     'broader_area_context': 'Supports broader area context only', 'broad_target_label': 'Place name is too broad to identify one target',
+                     'unspecified_or_unresolved': 'Target unspecified or unresolved'}
     for k, v in s['access_semantic_status_counts'].items():
         lines.append(f'| {access_labels[k]} | {v} |')
-    lines += ['', '这些是源名称与边界名称的比较，不是实地验证；全部 `entrance_verified=false`。',
-              f"原报告中没有空间匹配的{report['source_spatial_association'].get('access_points_without_boundary_candidates', '未知数量')}条接入点仍保留在Stage1B原始图层；不能说它们不存在或无用。", '',
-              '## 本轮官网核查', '']
+    lines += ['', 'These compare source names with boundary names; they are not field verification. Every link retains `entrance_verified=false`.',
+              f"Access points without a spatial match in the original report: {report['source_spatial_association'].get('access_points_without_boundary_candidates', 'unknown count')}. All remain in the original Stage 1B layer; they are not absent or necessarily unusable.", '',
+              '## Official website checks in this review', '']
     for e in outcome['entities']:
         for x in e['legacy_reviews']:
             lines += [f"### {e['display_title']}", x['note_zh'],
-                      f"核查日期：{x['checked_on']}；来源：{x['publisher']}。", x['evidence_summary_zh']]
+                      f"Checked on: {x['checked_on']}; publisher: {x['publisher']}.", x['evidence_summary_zh']]
             lines.extend(f'- {url}' for url in x['web_sources'])
-            lines += ['保留旧记录，默认浏览暂缓；新地址不自动继承旧坐标，新地点暂未定位。', '']
+            lines += ['The old record is retained but excluded from the default view. The new address does not inherit the old coordinates; the new location has not been geocoded.', '']
         for x in e['regular_hours_evidence']:
             intervals = x['weekly_minutes']['0']
             display = ', '.join(f'{a//60:02d}:{a%60:02d}—{b//60:02d}:{b%60:02d}' for a,b in intervals)
-            lines += [f"### {e['display_title']} · 常规时段", f'每周七天：{display}。', x['note_zh'],
-                      f"核查日期：{x['checked_on']}；建议复核日期：{x['recheck_on']}（30天为项目策略）。"]
+            lines += [f"### {e['display_title']} · Regular opening hours", f'Every day: {display}.', x['note_zh'],
+                      f"Checked on: {x['checked_on']}; suggested recheck: {x['recheck_on']} (the project uses a 30-day review policy)."]
             lines.extend(f'- {url}' for url in x['web_sources'])
-            lines += ['不确认特定日期临时关闭、活动、场内商户或实时营业。', '']
-    lines += ['## 仍未完成', '',
-              f"{s['historical_source_status_hold_entities']}个来源状态暂缓地点仍待确认；原报告中的{len(report.get('source_spatial_issues_preserved', []))}条几何问题仍保留，没有偷偷修复。",
-              '没有获取新坐标，没有真实路线调用，没有LLM接入，没有填入游玩时长或免费标记。',
-              '网上核查仅覆盖上面明确列出的字段。完整行程规划仍需路径服务、时间检查和后续数据补充。', '']
+            lines += ['Temporary closures, special events, individual businesses and live opening status are unverified.', '']
+    lines += ['## Outstanding work', '',
+              f"{s['historical_source_status_hold_entities']} places held for source-status review still require verification. The {len(report.get('source_spatial_issues_preserved', []))} geometry issues from the original report remain unchanged.",
+              'This build obtains no new coordinates, makes no live routing or LLM calls, and adds no visit durations or free-entry labels.',
+              'Website checks cover only the fields explicitly listed above. Full itinerary planning still requires routing, time checks and further data.', '']
     return '\n'.join(lines)
 
 

@@ -323,14 +323,14 @@ def requirement_outcomes(preferences):
         elif capability in {'unverified_attribute', 'spatial'}:
             status = 'unresolved'
         message = {
-            'unsupported': '当前没有可用核验能力；此项要求仍被保留。',
-            'unverified_attribute': '地点属性尚无足够证据，不能保证满足。',
-            'spatial': '空间要求已记录，距离和参照尚待核查。',
-            'route': '数值已保存，须按本次路线逐段核查。',
-            'budget': '预算已保存，须按本次路线与停留估计核查。',
-        }.get(capability, '已记录；不代表现实条件已核验。')
+            'unsupported': 'This requirement is retained, but the app cannot currently verify it.',
+            'unverified_attribute': 'There is not enough evidence to verify this place attribute.',
+            'spatial': 'The spatial requirement is recorded. Its distance and reference location still need checking.',
+            'route': 'The limit is saved and must be checked against each leg of the current route.',
+            'budget': 'The budget is saved and must be checked against the current route and stay estimates.',
+        }.get(capability, 'Recorded; real-world conditions have not been verified.')
         if row.name == 'wheelchair_access':
-            message = '无障碍／无台阶要求尚无可靠数据或路线核验能力，不能保证满足。'
+            message = 'Reliable accessibility data and step-free route checks are unavailable, so this requirement cannot be guaranteed.'
         outcomes.append({'name': row.name, 'kind': row.kind, 'scope': row.scope,
             'hardness': row.hardness, 'status': status, 'capability': capability,
             'message': message})

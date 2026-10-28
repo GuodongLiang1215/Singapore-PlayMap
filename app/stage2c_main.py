@@ -37,15 +37,15 @@ async def security_and_cache(request: Request, call_next):
     path = request.url.path
     if ACCESS.enabled and _protected_path(path) and not ACCESS.request_authorized(request):
         if path.startswith('/api/') or path in ('/openapi.json',):
-            return JSONResponse({'detail': {'code': 'TEAM_ACCESS_REQUIRED', 'message': '请输入小组访问码后再使用共享测试服务。'}}, 401)
+            return JSONResponse({'detail': {'code': 'TEAM_ACCESS_REQUIRED', 'message': 'Enter the team access code to use the shared test service.'}}, 401)
         return RedirectResponse('/team-login', status_code=303)
 
     prefix = next((p for p in ('stage2a', 'stage2b', 'stage2c') if path.startswith('/api/' + p + '/')), None)
     if prefix and request.method == 'POST':
         if not same_host_origin(request):
-            return JSONResponse({'detail': {'code': 'ORIGIN_REJECTED', 'message': '只允许当前PlayMap页面发起请求。'}}, 403)
+            return JSONResponse({'detail': {'code': 'ORIGIN_REJECTED', 'message': 'Requests are allowed only from the current PlayMap page.'}}, 403)
         if request.headers.get('x-playmap-client') != prefix:
-            return JSONResponse({'detail': {'code': 'CLIENT_HEADER_REQUIRED', 'message': '请使用本项目页面调用。'}}, 403)
+            return JSONResponse({'detail': {'code': 'CLIENT_HEADER_REQUIRED', 'message': 'Use the PlayMap page to make this request.'}}, 403)
 
     response = await call_next(request)
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
@@ -62,7 +62,7 @@ async def security_and_cache(request: Request, call_next):
 @app.exception_handler(RequestValidationError)
 async def bad_input(request, exc):
     return JSONResponse({'detail': {'code': 'INVALID_ITINERARY_INPUT',
-        'message': '请检查选点、有效数字、结束方式和时间字段；跨午夜必须显式选下一天，未给时间不能暗含预算。',
+        'message': 'Check the selected points, numbers, end policy and time fields. Choose the next date explicitly for an overnight trip. No budget is assumed unless you provide one.',
         'fields': ['.'.join(str(x) for x in e['loc']) for e in exc.errors()]}}, 422)
 
 
@@ -88,7 +88,7 @@ def access_login(body: AccessRequest):
     if not ACCESS.enabled:
         return {'authorized': True, 'access_gate_enabled': False}
     if not ACCESS.verify_code(body.code):
-        return JSONResponse({'detail': {'code': 'ACCESS_DENIED', 'message': '访问码不正确。'}}, 401)
+        return JSONResponse({'detail': {'code': 'ACCESS_DENIED', 'message': 'Incorrect access code.'}}, 401)
     response = JSONResponse({'authorized': True, 'access_gate_enabled': True})
     secure = deployment_mode() != 'local' or os.environ.get('PLAYMAP_SECURE_COOKIE') == '1'
     response.set_cookie(COOKIE_NAME, ACCESS.issue_cookie(), max_age=COOKIE_TTL_SECONDS,

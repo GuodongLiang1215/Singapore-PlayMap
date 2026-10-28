@@ -1,5 +1,9 @@
-# 前端阶段安排
-当前 `stage0_dashboard.html` 是由FastAPI提供的本机数据状态页，不是最终地图产品。
-阶段0不要求安装Node，不提供未测试的React构建文件。
-阶段1再接入React + TypeScript + Leaflet，沿用现有 `/api/*` 及统一对象结构。
-不加载外部底图、不调用LLM、不输出虚构景点或路线。
+# Frontend stages
+
+`stage0_dashboard.html` is the FastAPI local data-status dashboard.
+The source-inspection pages are in `stage1`, `stage1b` and `stage1c`.
+`stage2a` provides two-point routes, `stage2b` the manual itinerary editor,
+and `stage2c` the conversational map served by the shared deployment.
+These pages use plain JavaScript and Leaflet; no Node build step is required.
+Application interface text is English. Source names remain searchable through
+their original aliases, and translated place names are marked as unofficial.

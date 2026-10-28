@@ -48,17 +48,17 @@ class Element {
 function proposal(overrides = {}) {
   return {
     base_revision: 1, ticket: 'ticket-1', model: 'fake-model',
-    acknowledgement: '找到咖啡馆了，请确认候选。', questions: [],
+    acknowledgement: 'Cafe candidates found. Review your choice.', questions: [],
     interpretation: {actions: [{op: 'add_visit'}]},
     slots: [{
       slot_id: 'slot-1', target_visit_id: 'v-cafe', operation: 'add_visit', categories: ['food'], query: '',
       selected_key: 'cafe-a', notices: [],
       options: ['cafe-a', 'cafe-b'].map(key => ({
-        candidate_key: key, label: key, point: point(key), basis: '目录细类 cafe',
+        candidate_key: key, label: key, point: point(key), basis: 'Catalogue category: cafe',
         address: 'Singapore', distance_hint_m: null
       }))
     }],
-    preview: {can_apply: true, changes: ['新增一处咖啡馆停留'], warnings: [], preferences: emptyPreferences()},
+    preview: {can_apply: true, changes: ['Add a cafe stop'], warnings: [], preferences: emptyPreferences()},
     usage: {generation_requests: 1, calls: []}, ...overrides
   };
 }
@@ -99,7 +99,7 @@ function createChat() {
       const result = await (typeof next === 'function' ? next(body) : next);
       return {ok: result.ok !== false, json: async () => copy(result.body ?? result)};
     },
-    PlayMapTrip: {duration: seconds => `${seconds / 60} 分钟`},
+    PlayMapTrip: {duration: seconds => `${seconds / 60} min`},
     PlayMapChatBridge: {
       snapshot: () => ({session_id: 'session-1', revision, draft: copy(draft)}),
       currentRevision: () => revision,
@@ -188,10 +188,10 @@ test('known conflicts block confirmation even when every candidate is selected',
   const chat = createChat();
   const candidate = proposal();
   candidate.preview.can_apply = false;
-  candidate.preview.warnings = ['现有站点违反全局排除要求，请先确认范围。'];
+  candidate.preview.warnings = ['An existing stop conflicts with the global exclusion. Confirm the scope.'];
   await chat.send('全局排除购物', candidate);
   assert.equal(chat.element('chat-apply').disabled, true);
-  assert.match(chat.element('chat-readiness').textContent, /不能采用/);
+  assert.match(chat.element('chat-readiness').textContent, /Cannot adopt yet/);
   await chat.element('chat-apply').onclick();
   assert.equal(chat.requests.filter(request => request.route === 'resolve').length, 0);
   assert.equal(chat.applied.length, 0);
@@ -207,7 +207,7 @@ test('cancelling a ready pending proposal preserves adopted state and clears its
   const originalDraft = chat.draft;
   await chat.send('再找一家咖啡馆');
   assert.equal(chat.element('chat-cancel').disabled, false);
-  assert.match(chat.element('chat-cancel').textContent, /取消草案/);
+  assert.match(chat.element('chat-cancel').textContent, /Cancel draft/);
   chat.element('chat-cancel').click();
   assert.equal(chat.element('chat-proposal').hidden, true);
   assert.deepEqual(chat.draft, originalDraft);
@@ -230,7 +230,7 @@ test('local selection can complete a pending slot when the server reports no oth
   const select = chat.element('chat-slots').querySelectorAll('select')[0];
   select.value = 'cafe-b'; select.onchange();
   assert.equal(chat.element('chat-apply').disabled, false);
-  assert.match(chat.element('chat-readiness').textContent, /尚未应用/);
+  assert.match(chat.element('chat-readiness').textContent, /not applied/);
   chat.resolve();
   await chat.element('chat-apply').click();
   assert.equal(chat.applied.length, 1);
@@ -252,7 +252,7 @@ test('expired tickets discard pending context without changing the adopted itine
   const chat = createChat();
   await chat.send('找一家咖啡馆');
   const originalDraft = chat.draft;
-  chat.responses.resolve.push({ok: false, body: {detail: {code: 'PROPOSAL_EXPIRED', message: '草案已过期'}}});
+  chat.responses.resolve.push({ok: false, body: {detail: {code: 'PROPOSAL_EXPIRED', message: 'Draft expired'}}});
   await chat.element('chat-apply').click();
   assert.equal(chat.applied.length, 0);
   assert.deepEqual(chat.draft, originalDraft);
@@ -275,30 +275,30 @@ test('adopted and proposed ledgers show requirement kind, scope, hardness and ve
   candidate.preview.draft = {...chat.draft, visits: [{visit_id: 'v-cafe', point: point('cafe-a')}]};
   await chat.send('请找咖啡馆，喜欢喝咖啡，以后别加购物，总共三小时', candidate);
   const pendingText = chat.element('chat-proposed-prefs').textContent;
-  assert.match(pendingText, /待采用要求/);
-  assert.match(pendingText, /地点类型.*咖啡馆/);
-  assert.match(pendingText, /要求.*必须.*cafe-a.*未核验/);
-  assert.match(pendingText, /偏好.*尽量.*cafe-a.*未核验/);
-  assert.match(pendingText, /仅后续新增/);
-  assert.match(pendingText, /当前无法核验/);
-  assert.match(pendingText, /按参考数据通过/);
-  assert.doesNotMatch(chat.element('chat-preferences').textContent, /咖啡馆/);
+  assert.match(pendingText, /Proposed requirements/);
+  assert.match(pendingText, /Place type.*Cafe/);
+  assert.match(pendingText, /Requirement.*Required.*cafe-a.*not verified/);
+  assert.match(pendingText, /Preference.*Preferred.*cafe-a.*not verified/);
+  assert.match(pendingText, /Future additions only/);
+  assert.match(pendingText, /Cannot currently verify/);
+  assert.match(pendingText, /Passed using reference data/);
+  assert.doesNotMatch(chat.element('chat-preferences').textContent, /Cafe/);
   const select = chat.element('chat-slots').querySelectorAll('select')[0];
   select.value = 'cafe-b'; select.onchange();
-  assert.match(chat.element('chat-proposed-prefs').textContent, /停留 cafe-b/);
-  assert.doesNotMatch(chat.element('chat-proposed-prefs').textContent, /停留 cafe-a/);
+  assert.match(chat.element('chat-proposed-prefs').textContent, /Stop cafe-b/);
+  assert.doesNotMatch(chat.element('chat-proposed-prefs').textContent, /Stop cafe-a/);
   select.value = 'cafe-a'; select.onchange();
   chat.resolve(adoptedPreferences);
   await chat.element('chat-apply').click();
   const adoptedText = chat.element('chat-preferences').textContent;
-  assert.match(adoptedText, /已采用需求/);
-  assert.match(adoptedText, /地点类型.*咖啡馆/);
-  assert.match(adoptedText, /偏好.*尽量/);
+  assert.match(adoptedText, /Adopted requirements/);
+  assert.match(adoptedText, /Place type.*Cafe/);
+  assert.match(adoptedText, /Preference.*Preferred/);
   const next = proposal({base_revision: chat.revision});
   next.preview.preferences.active_constraints = [{kind: 'preference', name: 'environment', value: 'indoor',
     scope: 'global', hardness: 'soft', status: 'understood', source: 'user_explicit', quote: '喜欢室内', turn_index: 2}];
   await chat.send('喜欢室内', next);
-  assert.match(chat.element('chat-proposed-prefs').textContent, /室内/);
+  assert.match(chat.element('chat-proposed-prefs').textContent, /Indoors/);
   assert.equal(chat.element('chat-preferences').textContent, adoptedText);
   chat.element('chat-cancel').click();
   assert.equal(chat.element('chat-preferences').textContent, adoptedText);
@@ -311,8 +311,8 @@ for (const failure of ['resolve', 'apply']) {
     const proposedPreferences = {...emptyPreferences(), preferred: ['nature']};
     const candidate = proposal(); candidate.preview.preferences = proposedPreferences;
     await chat.send('喜欢自然，再加咖啡馆', candidate);
-    if (failure === 'resolve') chat.responses.resolve.push({ok: false, body: {detail: {code: 'REJECTED', message: '暂不能保存'}}});
-    else { chat.resolve(proposedPreferences); chat.failApply(new Error('左侧输入未完成')); }
+    if (failure === 'resolve') chat.responses.resolve.push({ok: false, body: {detail: {code: 'REJECTED', message: 'Cannot save yet'}}});
+    else { chat.resolve(proposedPreferences); chat.failApply(new Error('Time inputs are incomplete')); }
     await chat.element('chat-apply').click();
     assert.deepEqual(chat.draft, originalDraft);
     assert.equal(chat.revision, 1);
@@ -367,7 +367,7 @@ test('an empty candidate slot cannot be bypassed by a partial selection', async 
   candidate.preview.adoption_blockers = [];
   await chat.send('找咖啡馆和公园', candidate);
   assert.equal(chat.element('chat-apply').disabled, true);
-  assert.match(chat.element('chat-readiness').textContent, /第2项.*没有可用候选/);
+  assert.match(chat.element('chat-readiness').textContent, /No candidates for Item 2/);
   await chat.element('chat-apply').onclick();
   assert.equal(chat.requests.filter(request => request.route === 'resolve').length, 0);
 });
@@ -380,11 +380,11 @@ test('requirements without itinerary edits can be saved while unverified', async
     preview: {can_apply: true, adoption_blockers: [], changes: [], warnings: [], preferences}});
   await chat.send('轻松点', candidate);
   assert.equal(chat.element('chat-apply').disabled, false);
-  assert.match(chat.element('chat-proposed-prefs').textContent, /未核验.*轻松/);
+  assert.match(chat.element('chat-proposed-prefs').textContent, /not verified.*Relaxed/);
   chat.resolve(preferences);
   await chat.element('chat-apply').click();
   assert.equal(chat.applied.length, 1);
-  assert.match(chat.element('chat-preferences').textContent, /未核验.*轻松/);
+  assert.match(chat.element('chat-preferences').textContent, /not verified.*Relaxed/);
 });
 
 test('a no-change response leaves the confirmation button disabled', async () => {
@@ -392,7 +392,7 @@ test('a no-change response leaves the confirmation button disabled', async () =>
   await chat.send('再说一遍', proposal({slots: [], interpretation: {actions: []},
     preview: {can_apply: true, adoption_blockers: [], changes: [], warnings: [], preferences: emptyPreferences()}}));
   assert.equal(chat.element('chat-apply').disabled, true);
-  assert.match(chat.element('chat-readiness').textContent, /没有待采用的修改/);
+  assert.match(chat.element('chat-readiness').textContent, /No changes to adopt/);
   await chat.element('chat-apply').onclick();
   assert.equal(chat.requests.filter(request => request.route === 'resolve').length, 0);
 });
@@ -407,9 +407,9 @@ test('offset times display as Singapore time without inventing a date for a floa
     source: 'user_explicit', quote: '测试时间', turn_index: 1}));
   await chat.send('测试时间', candidate);
   const lines = chat.element('chat-proposed-prefs').textContent.split('\n');
-  assert.match(lines.find(line => line.includes('出发时间')), /2026.*10.*27.*18:00.*新加坡时间/);
-  assert.match(lines.find(line => line.includes('结束时间')), /21:00/);
-  assert.doesNotMatch(lines.find(line => line.includes('结束时间')), /2026/);
+  assert.match(lines.find(line => line.includes('Departure time')), /27\/10\/2026.*18:00.*Singapore time/);
+  assert.match(lines.find(line => line.includes('Finish time')), /21:00/);
+  assert.doesNotMatch(lines.find(line => line.includes('Finish time')), /2026/);
 });
 
 test('route verification refreshes requirements without reapplying the draft or advancing its revision', async () => {
@@ -434,7 +434,7 @@ test('route verification refreshes requirements without reapplying the draft or 
   assert.equal(chat.requests.filter(request => request.route === 'verification').length, 1);
   assert.equal(chat.applied.length, 1);
   assert.equal(chat.revision, 2);
-  assert.match(chat.element('chat-preferences').textContent, /按参考数据通过/);
+  assert.match(chat.element('chat-preferences').textContent, /Passed using reference data/);
   await chat.send('继续');
   const next = chat.requests.filter(request => request.route === 'chat').at(-1).body;
   assert.equal(next.verification_ref, 'proof-1');
@@ -458,10 +458,10 @@ test('editing the adopted itinerary invalidates displayed proof and omits its re
   await chat.send('每段最多十分钟');
   chat.resolve(emptyPreferences(), true);
   await chat.element('chat-apply').click();
-  assert.match(chat.element('chat-preferences').textContent, /按参考数据通过/);
+  assert.match(chat.element('chat-preferences').textContent, /Passed using reference data/);
   chat.manualEdit();
-  assert.doesNotMatch(chat.element('chat-preferences').textContent, /按参考数据通过/);
-  assert.match(chat.element('chat-preferences').textContent, /未核验/);
+  assert.doesNotMatch(chat.element('chat-preferences').textContent, /Passed using reference data/);
+  assert.match(chat.element('chat-preferences').textContent, /not verified/);
   await chat.send('继续');
   const next = chat.requests.filter(request => request.route === 'chat').at(-1).body;
   assert.equal(next.verification_ref, undefined);
@@ -479,7 +479,7 @@ test('clearing the conversation preserves the adopted draft and requirements but
   chat.responses.forget.push({forgotten: true});
   await chat.element('chat-reset').click();
   assert.deepEqual(chat.draft, originalDraft);
-  assert.match(chat.element('chat-preferences').textContent, /自然/);
+  assert.match(chat.element('chat-preferences').textContent, /Nature/);
   assert.equal(chat.element('chat-proposal').hidden, true);
   assert.equal(chat.element('chat-log').textContent, '');
   await chat.send('重新开始');
@@ -508,7 +508,7 @@ test('clearing the conversation rejects an outstanding proof response even when 
   finishVerification({preferences: verified,
     verification: {status: 'matched', reason: 'matched', checked_requirements: 1}, generation_requests: 0});
   await adopting;
-  assert.doesNotMatch(chat.element('chat-preferences').textContent, /按参考数据通过/);
+  assert.doesNotMatch(chat.element('chat-preferences').textContent, /Passed using reference data/);
   assert.equal(chat.element('chat-log').textContent, '');
   await chat.send('继续');
   assert.equal(chat.requests.filter(request => request.route === 'chat').at(-1).body.verification_ref, undefined);
@@ -521,7 +521,7 @@ test('an explicit clearing-only proposal can remove a legacy walking limit after
   await chat.element('chat-apply').click();
   assert.equal(chat.draft.max_walk_minutes, 10);
   const candidate = proposal({base_revision: chat.revision, slots: [], interpretation: {actions: [], max_walk_minutes: null},
-    preview: {can_apply: true, adoption_blockers: [], changes: ['撤回每段步行上限'], warnings: [], preferences: emptyPreferences()}});
+    preview: {can_apply: true, adoption_blockers: [], changes: ['Remove the per-leg walking limit'], warnings: [], preferences: emptyPreferences()}});
   await chat.send('取消步行时间上限', candidate);
   assert.equal(chat.element('chat-apply').disabled, false);
   assert.equal(chat.draft.max_walk_minutes, 10);
@@ -536,15 +536,15 @@ test('a verification request failure leaves a saved reference route unverified a
   const preferences = {...emptyPreferences(), active_constraints: [{kind: 'constraint', name: 'max_walk_minutes', value: 10,
     scope: 'global', hardness: 'hard', status: 'understood', source: 'user_explicit', quote: '每段最多十分钟', turn_index: 1}]};
   chat.setPlan({verification_ref: 'proof-unavailable'});
-  chat.responses.verification.push({ok: false, body: {detail: {code: 'UNAVAILABLE', message: '核验服务暂时不可用'}}});
+  chat.responses.verification.push({ok: false, body: {detail: {code: 'UNAVAILABLE', message: 'Verification service unavailable'}}});
   await chat.send('每段最多十分钟');
   chat.resolve(preferences, true);
   await chat.element('chat-apply').click();
   assert.equal(chat.applied.length, 1);
   assert.equal(chat.revision, 2);
   assert.equal(chat.calculations, 1);
-  assert.match(chat.element('chat-preferences').textContent, /未核验/);
-  assert.match(chat.element('chat-status').textContent, /要求核验暂未完成/);
+  assert.match(chat.element('chat-preferences').textContent, /not verified/);
+  assert.match(chat.element('chat-status').textContent, /requirement verification is incomplete/);
   await chat.send('继续修改');
   const next = chat.requests.filter(request => request.route === 'chat').at(-1).body;
   assert.equal(next.verification_ref, undefined);

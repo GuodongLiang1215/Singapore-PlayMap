@@ -58,9 +58,9 @@ class CallPacer:
     def wait(self,cancelled):
         with self.lock:
             while (remaining:=self.interval-(time.monotonic()-self.last))>0:
-                if cancelled():raise ChatError('CANCELLED','已取消本次等待；已发出的请求可能仍计入服务商用量。',409)
+                if cancelled():raise ChatError('CANCELLED','Waiting was cancelled. Requests already sent may still count toward provider usage.',409)
                 time.sleep(min(.1,remaining))
-            if cancelled():raise ChatError('CANCELLED','已取消本次请求。',409)
+            if cancelled():raise ChatError('CANCELLED','This request was cancelled.',409)
             self.last=time.monotonic()
 PACER=CallPacer()
 
@@ -85,10 +85,10 @@ class ProposalStore:
         with self.lock:
             item=self.values.get(token)
             if item is None or item[0]+self.ttl<=self.clock():
-                self.values.pop(token,None);raise ChatError('PROPOSAL_EXPIRED','草案已过期或服务器已重启，请重新发送需求。',409)
+                self.values.pop(token,None);raise ChatError('PROPOSAL_EXPIRED','The proposal has expired or the server has restarted. Please send your request again.',409)
             rec=item[1]
             if rec['body'].session_id!=session or rec['body'].revision!=revision:
-                raise ChatError('PROPOSAL_STALE','行程或会话已改变；旧草案不能覆盖新操作，请重新发送。',409)
+                raise ChatError('PROPOSAL_STALE','The itinerary or session has changed. Please send a new request; this proposal cannot overwrite newer changes.',409)
             return copy.deepcopy(rec)
     def clear(self,session):
         with self.lock:self.values={k:v for k,v in self.values.items() if v[1]['body'].session_id!=session}
@@ -128,7 +128,7 @@ def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()
         active = bind_constraint_scopes(active, draft)
         segments = bind_constraint_scopes(segments, draft, new_visit_ids=new_visit_ids)
         if any(row.type in {'constraint','preference'} and row.effect!='none' and row.scope.startswith('visit:') for row in segments):
-            raise ChatError('AMBIGUOUS_REQUIREMENT_SCOPE','要求没有唯一对应的有效站点。多个新增地点请分别说明；原行程保留。')
+            raise ChatError('AMBIGUOUS_REQUIREMENT_SCOPE','The requirement does not identify a unique valid stop. Specify each new stop separately. Your itinerary is unchanged.')
     merged = merge_active_constraints(active, segments, turn_index=turn_index)
     removed_scopes = {'visit_id:' + a.target_id for a in parsed.actions if a.op == 'remove_visit'}
     if draft is not None and any(a.op == 'clear_visits' for a in parsed.actions):
@@ -149,8 +149,8 @@ def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()
     if any(row.name == 'takeaway' and row.hardness == 'hard' and
            (row.effect == 'clear' or row.value is False) for row in segments):
         d['notes'] = [note for note in d['notes'] if not TAKEAWAY_WORDS.search(note)]
-    if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','同一偏好同时被要求和排除，请明确以哪一条为准。')
-    if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','偏好说明过长，请拆分需求。')
+    if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','The same preference is both requested and excluded. Please choose which requirement to keep.')
+    if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','The preference note is too long. Please split it into shorter requests.')
     return Preferences.model_validate(d)
 
 def model_context(body,cat=None):
@@ -160,8 +160,8 @@ def model_context(body,cat=None):
         # A device origin is named as such so the model stops asking for a start
         # point, yet is never presented as a place the user identified.
         if p.source in ('catalogue_representative','onemap_search'):label=p.label
-        elif p.source=='device_location':label='用户设备定位的当前位置（未命名地点）'
-        else:label='已在地图确认的位置'
+        elif p.source=='device_location':label='Current device location (unnamed)'
+        else:label='Location confirmed on the map'
         return {'label':label,'source':p.source,'has_confirmed_coordinates':True,'entrance_verified':False}
     def categories(v):
         e=cat.by_id.get(v.point.entity_id) if cat is not None and v.point.source=='catalogue_representative' else None
@@ -207,22 +207,22 @@ def distance_band(metres):
 def validate_actions(body,parsed):
     quotes=[body.message]+([body.pending.user_message] if body.pending else [])
     if any(not any(segment.quote in text for text in quotes) for segment in parsed.semantic_segments):
-        raise ChatError('UNSUPPORTED_EDIT_EVIDENCE','语义约束没有对应原话，未应用。请用更明确的短句重试。')
+        raise ChatError('UNSUPPORTED_EDIT_EVIDENCE','A requirement has no supporting text in your request. Nothing was applied. Please clarify it and try again.')
     ids={v.visit_id for v in body.draft.visits}; removed=set(); mutated=set()
     place_count=0
     for a in parsed.actions:
-        if not any(a.quote in t for t in quotes):raise ChatError('UNSUPPORTED_EDIT_EVIDENCE','模型提出的修改没有对应原话，未应用。请用更明确的短句重试。')
+        if not any(a.quote in t for t in quotes):raise ChatError('UNSUPPORTED_EDIT_EVIDENCE','A proposed edit has no supporting text in your request. Nothing was applied. Please clarify it and try again.')
         target=getattr(a,'target_id',None)
-        if target and target not in ids:raise ChatError('UNKNOWN_VISIT','模型引用了不存在的停留点，未修改任何行程。')
+        if target and target not in ids:raise ChatError('UNKNOWN_VISIT','The model referred to a stop that does not exist. Your itinerary is unchanged.')
         if target:
-            if target in removed or (a.op=='remove_visit' and target in mutated):raise ChatError('CONFLICTING_EDITS','同一站点同时被删除和修改，请分两步表达。')
+            if target in removed or (a.op=='remove_visit' and target in mutated):raise ChatError('CONFLICTING_EDITS','The same stop is both removed and edited. Please make these changes in separate steps.')
             mutated.add(target)
             if a.op=='remove_visit':removed.add(target)
         if isinstance(a,LocationAction):place_count+=1
         if a.op=='set_mode' and a.value=='public_transport':
-            raise ChatError('MODE_NOT_CONNECTED','公交和地铁尚未接入。这次没有改成步行；请在需求中明确选步行、骑行或驾车。')
-    if place_count>8:raise ChatError('TOO_MANY_LOOKUPS','单轮最多处理8个地点查询；可以分轮添加，不限制全岛范围。')
-    if sum(a.op=='set_origin' for a in parsed.actions)>1:raise ChatError('AMBIGUOUS_ORIGIN','出现多个起点设置，请明确一个。')
+            raise ChatError('MODE_NOT_CONNECTED','Bus and MRT routing are not available. Choose walking, cycling or driving; your transport mode has not been changed.')
+    if place_count>8:raise ChatError('TOO_MANY_LOOKUPS','A message can include up to eight place searches. Add more in another message; searches cover all of Singapore.')
+    if sum(a.op=='set_origin' for a in parsed.actions)>1:raise ChatError('AMBIGUOUS_ORIGIN','More than one starting point was specified. Please choose one.')
 
 
 def resolved_time_update(old, actions):
@@ -276,82 +276,82 @@ def assemble(record,choices,*,strict=False,cat=None):
         c.evidence_source != 'route' and c.source != 'route' for c in prefs.active_constraints) or any(
         s.type=='conflict' for s in parsed.semantic_segments)
     if strict and semantic_conflict:
-        raise ChatError('SEMANTIC_CONFLICT','明确约束仍有冲突，请先澄清后再采用；原行程保留。')
+        raise ChatError('SEMANTIC_CONFLICT','Some requirements conflict. Resolve them before confirming the proposal. Your itinerary is unchanged.')
     expected={s['slot_id'] for s in record['slots']}
-    if not set(choices).issubset(expected):raise ChatError('UNKNOWN_CHOICE','选择项不属于这份草案。')
+    if not set(choices).issubset(expected):raise ChatError('UNKNOWN_CHOICE','The selection does not belong to this proposal.')
     def find(uid):
         found=next((v for v in d.visits if v.visit_id==uid),None)
-        if found is None:raise ChatError('CONFLICTING_EDITS','修改步骤引用了已经删除的停留点。')
+        if found is None:raise ChatError('CONFLICTING_EDITS','An edit refers to a stop that has already been removed.')
         return found
     for i,a in enumerate(parsed.actions):
         if isinstance(a,LocationAction):
             s=slots[i];key=choices.get(s['slot_id'],s.get('selected_key'))
             option=next((o for o in s['options'] if o['candidate_key']==key),None)
             if option is None:
-                if key:raise ChatError('UNTRUSTED_PLACE','地点选择不在本次真实检索结果中。')
+                if key:raise ChatError('UNTRUSTED_PLACE','The selected place is not among the retrieved candidates for this proposal.')
                 missing.append(s['slot_id']);continue
             p=PlacePoint.model_validate(option['point'])
             takeaway = a.stay_profile == 'takeaway'
-            if a.op=='set_origin':d.origin=p;changes.append('起点 → '+p.label)
-            elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('结束位置 → '+p.label)
+            if a.op=='set_origin':d.origin=p;changes.append('Starting point → '+p.label)
+            elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('End point → '+p.label)
             elif a.op=='replace_visit':
                 visit=find(a.target_id)
                 visit.point=p
                 if takeaway:
                     visit.stay_profile='takeaway'
                     visit.stay_minutes=None
-                    changes.append('替换停留地点 → '+p.label+'（外带／顺路购买，按短时间计）')
+                    changes.append('Replace stop → '+p.label+' (takeaway or quick purchase; using a short stop estimate)')
                 elif a.stay_profile == 'regular':
                     visit.stay_profile='regular'
                     visit.stay_minutes=None
-                    changes.append('替换停留地点 → '+p.label+'（取消外带，停留按一般估计）')
+                    changes.append('Replace stop → '+p.label+' (takeaway cancelled; using the regular stop estimate)')
                 else:
-                    changes.append('替换停留地点 → '+p.label+'（原停留时间保留）')
+                    changes.append('Replace stop → '+p.label+' (existing stay duration retained)')
             else:
                 # Generic recommendations cannot silently duplicate a current visit.
                 if not s['explicit_location_confirmation'] and any((v.point.entity_id and v.point.entity_id==p.entity_id) or
                     (v.point.latitude==p.latitude and v.point.longitude==p.longitude) for v in d.visits):
-                    raise ChatError('DUPLICATE_SUGGESTION','候选与已有停留重复，请在草案中选择另一处。')
+                    raise ChatError('DUPLICATE_SUGGESTION','This candidate duplicates an existing stop. Please select another place.')
                 d.visits.append(Visit(visit_id=record['new_ids'][i],point=p,stay_profile='takeaway' if takeaway else 'regular'))
-                changes.append('新增停留 → '+p.label+('（外带／顺路购买，停留按短时间计）' if takeaway else '（停留先用可改初值）'))
-        elif a.op=='remove_visit':d.visits=[v for v in d.visits if v.visit_id!=a.target_id];changes.append('删除指定停留点')
+                changes.append('Add stop → '+p.label+(' (takeaway or quick purchase; using a short stop estimate)' if takeaway else ' (using an editable initial stay estimate)'))
+        elif a.op=='remove_visit':d.visits=[v for v in d.visits if v.visit_id!=a.target_id];changes.append('Remove the selected stop')
         elif a.op=='move_visit':
             v=find(a.target_id)
-            if a.position>len(d.visits):raise ChatError('INVALID_POSITION','新顺序超出当前停留数量。')
-            d.visits.remove(v);d.visits.insert(a.position-1,v);changes.append('调整指定地点到第'+str(a.position)+'站')
+            if a.position>len(d.visits):raise ChatError('INVALID_POSITION','The new position is outside the current list of stops.')
+            d.visits.remove(v);d.visits.insert(a.position-1,v);changes.append('Move the selected stop to position '+str(a.position))
         elif a.op=='set_stay':
             visit=find(a.target_id)
             if a.stay_profile is not None:
                 visit.stay_profile=a.stay_profile
             visit.stay_minutes=None if a.stay_profile=='takeaway' else a.minutes
-            changes.append('调整指定站停留 → '+('外带初值' if a.stay_profile=='takeaway' else
-                '类别初始估计' if a.minutes is None else str(a.minutes)+'分钟'))
-        elif a.op=='set_finish_policy':d.finish_policy=a.value;d.finish=None;changes.append('结束方式 → '+('返回出发点' if a.value=='return_to_start' else '最后一站结束'))
-        elif a.op=='set_mode':d.mode=a.value;changes.append('交通方式 → '+a.value)
+            changes.append('Stay duration → '+('initial takeaway estimate' if a.stay_profile=='takeaway' else
+                'initial category estimate' if a.minutes is None else str(a.minutes)+' minutes'))
+        elif a.op=='set_finish_policy':d.finish_policy=a.value;d.finish=None;changes.append('Finish policy → '+('return to the starting point' if a.value=='return_to_start' else 'finish at the last stop'))
+        elif a.op=='set_mode':d.mode=a.value;changes.append('Transport mode → '+a.value)
         elif a.op=='set_time':
             if not time_changes_added:
                 changes.extend(time_update.changes);time_changes_added=True
-        elif a.op=='clear_visits':d.visits=[];changes.append('清空停留清单（起点、模式和时间要求不变）')
-    if len(d.visits)>20:raise ChatError('TOO_MANY_VISITS','当前单条行程最多20个停留点，请减少或分段。')
+        elif a.op=='clear_visits':d.visits=[];changes.append('Clear all stops (starting point, transport mode and time requirements unchanged)')
+    if len(d.visits)>20:raise ChatError('TOO_MANY_VISITS','An itinerary can contain up to 20 stops. Remove some stops or split the trip.')
     d=Draft.model_validate(d.model_dump())
     if d.model_dump()!=body.draft.model_dump():
         prefs=unverified_preferences(prefs)
     if d.model_dump()!=body.draft.model_dump() and not changes:
-        changes.append('更新行程条件（待确认）')
+        changes.append('Update itinerary settings (pending confirmation)')
     if prefs.model_dump()!=body.preferences.model_dump():
-        changes.append('更新已记录的要求和偏好（待确认）')
-    if strict and missing:raise ChatError('CONFIRM_PLACE','请先为每个有歧义或尚未确定的地点选择真实候选。')
+        changes.append('Update recorded requirements and preferences (pending confirmation)')
+    if strict and missing:raise ChatError('CONFIRM_PLACE','Choose a retrieved candidate for every unresolved or ambiguous place first.')
     warnings=list(record.get('warnings',[]))
-    if semantic_conflict:warnings.append('明确约束有冲突；澄清前不能采用或计算这份草案。')
-    if not d.origin:warnings.append('尚无已确认起点：可以先采用停留草案，然后在地图选起点，或继续说出起点名称。')
-    if d.finish_policy=='custom' and not d.finish:warnings.append('还需要明确最后结束位置。')
-    if prefs.notes:warnings.append('以下要求仅记录、尚无完整校验能力：'+'；'.join(prefs.notes))
+    if semantic_conflict:warnings.append('Some requirements conflict. Resolve them before confirming or calculating this proposal.')
+    if not d.origin:warnings.append('No starting point is confirmed. You can confirm the stops first, then choose a starting point on the map or name it in chat.')
+    if d.finish_policy=='custom' and not d.finish:warnings.append('Please specify the final destination.')
+    if prefs.notes:warnings.append('These requirements are recorded but cannot yet be fully verified: '+'; '.join(prefs.notes))
     future_only = {row.value for row in prefs.active_constraints if row.name == 'excluded_topic' and row.scope == 'future_visits'}
     global_excluded = [topic for topic in prefs.excluded if topic not in future_only or any(
         row.name == 'excluded_topic' and row.value == topic and row.scope == 'global' for row in prefs.active_constraints)]
     conflicts=excluded_visits(d.visits,global_excluded,cat)
-    if conflicts:warnings.append('清单存在可能违反排除要求的地点，请替换或修改偏好：'+'、'.join(conflicts))
-    if strict and conflicts:raise ChatError('EXCLUDED_VISIT_REMAINS','清单中仍有被排除类别的可识别地点，请先修改草案或明确允许。')
+    if conflicts:warnings.append('Some stops may conflict with your exclusions. Replace them or update your preferences: '+', '.join(conflicts))
+    if strict and conflicts:raise ChatError('EXCLUDED_VISIT_REMAINS','The itinerary still contains identifiable places from an excluded category. Edit the proposal or explicitly allow them.')
     outcomes = requirement_outcomes(prefs)
     warnings.extend(row['message'] for row in outcomes if row['hardness'] == 'hard' and row['status'] in {'unresolved', 'unsupported'})
     missing_parameters = [row for row in outcomes if row['hardness']=='hard' and row['status']=='unresolved' and row['capability']=='parameter']
@@ -359,13 +359,13 @@ def assemble(record,choices,*,strict=False,cat=None):
     blockers = (['semantic_conflict'] if semantic_conflict else []) + (['excluded_visit_conflict'] if conflicts else [])
     if missing_parameters or unresolved_targets:
         blockers.append('requirement_mismatch')
-        warnings.append('还有动作所需的日期、时间或目标未明确，请先补充后再采用。')
-        if strict:raise ChatError('REQUIREMENT_NEEDS_CLARIFICATION','请先补充动作必需的日期、时间或有效站点；原行程保留。')
+        warnings.append('Some edits still need a date, time or target stop. Provide these details before confirming.')
+        if strict:raise ChatError('REQUIREMENT_NEEDS_CLARIFICATION','Provide the date, time or valid stop required for this edit. Your itinerary is unchanged.')
     mismatches=parameter_mismatches(prefs,d)
     if mismatches:
         blockers.append('requirement_mismatch')
-        warnings.append('待采用参数与仍有效的明确要求不一致，请先明确替换或撤回要求：'+', '.join(mismatches))
-        if strict:raise ChatError('HARD_REQUIREMENT_CONFLICT','待采用参数不能覆盖仍有效的明确要求；请先澄清或撤回。')
+        warnings.append('The proposed settings conflict with active requirements. Explicitly replace or withdraw these requirements first: '+', '.join(mismatches))
+        if strict:raise ChatError('HARD_REQUIREMENT_CONFLICT','The proposed settings cannot override active requirements. Clarify or withdraw those requirements first.')
     return {'draft':d.model_dump(mode='json'),'preferences':prefs.model_dump(),'changes':changes,
         'requirement_outcomes':outcomes,'adoption_blockers':blockers,
         'unresolved_slots':missing,'warnings':list(dict.fromkeys(warnings)),
@@ -377,7 +377,7 @@ def assemble(record,choices,*,strict=False,cat=None):
 
 
 def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_trace):
-    if not body.consent:raise ChatError('CONSENT_REQUIRED','先阅读并勾选发送说明。开发测试请只使用公开地点和虚构需求。',403)
+    if not body.consent:raise ChatError('CONSENT_REQUIRED','Read and accept the data-sharing notice before sending. For development tests, use public places and fictional requests.',403)
     cat=cat or LocalCatalogue()
     clean_preferences,_=restore_verified_preferences(VERIFICATIONS,body.verification_ref,
         body.session_id,body.revision,body.draft,body.preferences,
@@ -389,17 +389,17 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     source_text=body.message+(' '+body.pending.user_message if body.pending else '')
     secret=settings.key if settings else ''
     if (secret and secret in source_text) or re.search(r'(?:AIza[\w-]{20,}|sk-[\w-]{20,}|eyJ[A-Za-z0-9_-]{15,}\.)',source_text):
-        raise ChatError('POSSIBLE_SECRET','输入疑似包含密钥，未发送。请移除敏感内容。')
+        raise ChatError('POSSIBLE_SECRET','Your message appears to contain a secret and was not sent. Remove sensitive information first.')
     for point in [body.draft.origin,body.draft.finish]+[v.point for v in body.draft.visits]:
         try:cat.validate_point(point)
-        except ValueError:raise ChatError('CATALOGUE_CHANGED','当前行程引用的目录已改变或存在暂缓地点，请刷新并重新选点。',409) from None
+        except ValueError:raise ChatError('CATALOGUE_CHANGED','The itinerary refers to an updated catalogue or a place pending review. Refresh the page and select the places again.',409) from None
     pace=pace or PACER;call_metadata=[];generation_attempts=0
     def generate(instruction,payload,schema):
         nonlocal generation_attempts
         _trace['phase']='interpretation_request' if instruction==INTERPRET else 'selection_request'
         _trace['schema']=schema_stats(schema)
         pace.wait(cancelled)
-        if cancelled():raise ChatError('CANCELLED','已取消等待。',409)
+        if cancelled():raise ChatError('CANCELLED','Waiting was cancelled.',409)
         generation_attempts+=1
         _trace['generation_attempts']=generation_attempts
         try:
@@ -415,7 +415,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
             raise
         call_metadata.append(result['metadata'])
         _trace['completed_generation_responses']=len(call_metadata)
-        if cancelled():raise ChatError('CANCELLED','已取消等待；已发送的调用可能仍计入额度。',409)
+        if cancelled():raise ChatError('CANCELLED','Waiting was cancelled. Calls already sent may still count toward your quota.',409)
         return result['data']
     payload={'user_message':body.message,'current_draft':model_context(body,cat=cat),
              'preferences':body.preferences.model_dump(),'pending_request':({'user_message':body.pending.user_message,
@@ -425,18 +425,18 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     raw=generate(INTERPRET,payload,interpretation_schema())
     _trace['phase']='interpretation_validation'
     if not isinstance(raw, dict) or not {'acknowledgement', 'semantic_segments', 'commands'} <= raw.keys():
-        raise ChatError('MODEL_SCHEMA','模型缺少语义分段或操作字段；原行程保留。',502)
+        raise ChatError('MODEL_SCHEMA','The model response is missing required meaning or command fields. Your itinerary is unchanged.',502)
     try:parsed,adaptation=parse_provider_interpretation(raw,body.draft,turn_index=turn_index)
     except OperationFormatError as error:
         _trace['validation']=error.validation
         _trace['normalization']=error.normalization
-        raise ChatError('MODEL_SCHEMA','模型操作格式未通过本地检查；原行程保留。请导出字段诊断，无需为此简化正常需求。',502) from None
+        raise ChatError('MODEL_SCHEMA','The model response failed command validation. Your itinerary is unchanged. Export the field diagnostics for review.',502) from None
     _trace['normalization']=adaptation
     _trace['phase']='semantic_validation'
     try:
         validate_segment_command_consistency(parsed.semantic_segments, parsed, draft=body.draft)
     except SemanticConsistencyError:
-        raise ChatError('SEMANTIC_COMMAND_MISMATCH','用户的明确约束没有对应的安全操作或澄清问题；原行程保留。',422) from None
+        raise ChatError('SEMANTIC_COMMAND_MISMATCH','An explicit requirement has no matching supported action or clarification. Your itinerary is unchanged.',422) from None
     _trace['phase']='action_validation'
     validate_actions(body,parsed)
     _trace['phase']='time_merge_validation'
@@ -451,18 +451,20 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     anchor=None if any(a.op=='set_origin' for a in parsed.actions) else body.draft.origin
     existing={v.point.entity_id for v in body.draft.visits if v.point.entity_id}
     slots=[];warnings=[]
-    if anchor is None:warnings.append('起点尚未确定：当前通用候选来自全岛发现，不是已确认的附近推荐。可以先确认起点，再让系统按该起点推荐。')
+    if anchor is None:warnings.append('No starting point is confirmed. These candidates come from across Singapore. Confirm a starting point to get nearby suggestions.')
     for i,a in enumerate(parsed.actions):
         if not isinstance(a,LocationAction):continue
-        if cancelled():raise ChatError('CANCELLED','已取消后续检索。',409)
-        ledger_rows=[SemanticSegment(type=row.kind,effect='set',**row.model_dump(exclude={'kind'})) for row in prefs.active_constraints]
+        if cancelled():raise ChatError('CANCELLED','Further searches were cancelled.',409)
+        # Retrieval consumes intent fields; checker provenance remains on the ledger.
+        ledger_rows=[SemanticSegment(type=row.kind,effect='set',
+            **row.model_dump(exclude={'kind','evidence_source'})) for row in prefs.active_constraints]
         requirements=requirements_for_action(ledger_rows,a,body.draft,parsed)
         if a.op=='add_visit':
             requirements.extend(row for row in ledger_rows if row.scope=='visit_id:'+new_ids[i])
         slot=retrieve_slot(i,a,cat,prefs,anchor,existing,geo,requirements=requirements)
         slot['target_visit_id']=new_ids.get(i) if a.op=='add_visit' else a.target_id
         slots.append(slot);warnings.extend(slot['notices'])
-        if not slot['options']:warnings.append('尚未补齐：'+slot_label(slot)+'候选。可能是具体条件无匹配或目录覆盖不足；不是已确认现实中没有。未补齐前不省略此项采用。')
+        if not slot['options']:warnings.append('Still missing: '+slot_label(slot)+' candidates. Your conditions may have no catalogue match, or coverage may be incomplete. This does not prove that no such place exists. This item will not be omitted from the proposal.')
     generic=[s for s in slots if not s['explicit_location_confirmation'] and s['options']]
     if generic:
         # No selected coordinates, raw source descriptions, or private route geometries leave
@@ -480,14 +482,14 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         try:selected=Selection.model_validate(raw_selection)
         except ValidationError as error:
             _trace['validation']=validation_from_exception(error)
-            raise ChatError('SELECTION_SCHEMA','候选选择输出不符合格式，请保留字段诊断；本轮没有改变行程。',502) from None
+            raise ChatError('SELECTION_SCHEMA','The candidate selection response failed validation. Keep the field diagnostics for review. Your itinerary is unchanged.',502) from None
         ids=[x.slot_id for x in selected.picks]
-        if len(ids)!=len(set(ids)) or set(ids)!={s['slot_id'] for s in generic}:raise ChatError('INVALID_SELECTION','模型没有为每项真实候选给出唯一选择，未自动补选。',502)
+        if len(ids)!=len(set(ids)) or set(ids)!={s['slot_id'] for s in generic}:raise ChatError('INVALID_SELECTION','The model did not select exactly one candidate for each slot. No selections were filled in automatically.',502)
         used=set()
         for pick in selected.picks:
             s=next(s for s in generic if s['slot_id']==pick.slot_id)
             o=next((o for o in s['options'] if o['candidate_key']==pick.candidate_key),None)
-            if o is None or o['identity'] in used:raise ChatError('INVALID_SELECTION','模型选择了不存在或重复的候选，未编造替代地点。',502)
+            if o is None or o['identity'] in used:raise ChatError('INVALID_SELECTION','The model selected an unknown or duplicate candidate. No replacement place was invented.',502)
             used.add(o['identity']);s.update(recommended_key=pick.candidate_key,selected_key=pick.candidate_key,reason=pick.reason,selection_basis='llm_suggestion_from_retrieved_candidates')
     rec={'body':body,'parsed':parsed,'preferences':prefs,'slots':slots,'warnings':warnings,
          'new_ids':new_ids,
@@ -504,7 +506,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
                    'named_search_queries_sent_to_onemap':True,'credentials_exposed':False,
                    'exact_candidate_distances_sent_to_llm':False,
                    'candidate_distance_bands_sent_to_llm':True},
-        'notice':'草案未应用。建议候选不代表入口、营业或时间预算已经满足；采用后由现有程序计算。'}
+        'notice':'The proposal has not been applied. Candidates do not confirm entrances, opening hours or time feasibility. The itinerary is calculated after confirmation.'}
 
 
 def _safe_trace(trace):
@@ -543,15 +545,15 @@ def prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False):
     except OperationFormatError as error:
         trace['validation']=error.validation
         trace['normalization']=error.normalization
-        wrapped=ChatError('MODEL_SCHEMA','待采用操作的结构与当前行程不一致，未调用后续计算；请导出字段诊断。',502)
+        wrapped=ChatError('MODEL_SCHEMA','The proposed commands do not match the current itinerary structure. No calculation was started. Export the field diagnostics for review.',502)
         wrapped.request_diagnostic=_safe_trace(trace)
         raise wrapped from None
     except ValidationError as error:
         trace['validation']=validation_from_exception(error)
-        wrapped=ChatError('INVALID_PROPOSAL','本地草案检查未通过，请导出字段诊断；原行程未更改。')
+        wrapped=ChatError('INVALID_PROPOSAL','The proposal failed validation. Export the field diagnostics for review. Your itinerary is unchanged.')
         wrapped.request_diagnostic=_safe_trace(trace)
         raise wrapped from None
     except Exception:
-        wrapped=ChatError('LOCAL_CHAT_ERROR','本地对话模块未完成本轮请求，请导出诊断；原行程未修改。',500)
+        wrapped=ChatError('LOCAL_CHAT_ERROR','The chat service could not complete this request. Export the diagnostics for review. Your itinerary is unchanged.',500)
         wrapped.request_diagnostic=_safe_trace(trace)
         raise wrapped from None

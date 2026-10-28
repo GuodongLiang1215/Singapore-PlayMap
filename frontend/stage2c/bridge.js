@@ -1,20 +1,20 @@
 /* Additive bridge: the tested Stage2B state, map and calculator remain unchanged. */
 (function(){'use strict';
  const clone=x=>JSON.parse(JSON.stringify(x));
- function notify(kind,previous){window.dispatchEvent(new CustomEvent('playmap:edit',{detail:{kind,previous,revision:trip.revision}}));}
+ function notify(kind,previous,previousData){window.dispatchEvent(new CustomEvent('playmap:edit',{detail:{kind,previous,previousData,revision:trip.revision}}));}
  const change=trip.change.bind(trip),undo=trip.undo.bind(trip),clear=trip.clear.bind(trip);
- trip.change=function(fn){const prev=trip.revision;change(fn);notify('change',prev);};
- trip.undo=function(){const prev=trip.revision,result=undo();if(result)notify('undo',prev);return result;};
- trip.clear=function(){const prev=trip.revision;clear();notify('clear',prev);};
+ trip.change=function(fn){const prev=trip.revision,before=clone(trip.data);change(fn);notify('change',prev,before);};
+ trip.undo=function(){const prev=trip.revision,before=clone(trip.data),result=undo();if(result)notify('undo',prev,before);return result;};
+ trip.clear=function(){const prev=trip.revision,before=clone(trip.data);clear();notify('clear',prev,before);};
  window.PlayMapChatBridge={
   snapshot(){
-   // Blur/change events usually sync the UI first; explicitly reject invalid time forms.
-   const time=readTime();if(formInvalid)throw Error('请先修正左侧尚未完成的时间输入，再发送聊天。');
-   if(!PlayMapTrip.sameTime(time,trip.data.time)){trip.setTime(time);renderTrip();invalidate();}
+   // Blur events usually sync first; validate the complete editor regardless.
+   if(syncEditor()){renderTrip();invalidate();}
    const d=clone(trip.data);if(d.finish_policy!=='custom')d.finish=null;
    return {session_id:trip.sessionId,revision:trip.revision,draft:d};
   },
   currentRevision:()=>trip.revision,
+  currentSequence:()=>trip.sequence,
   currentSession:()=>trip.sessionId,
   hasOrigin:()=>!!trip.data.origin,
   // Resolves only after the user answers the device-location card; true means an
@@ -22,9 +22,10 @@
   proposeDeviceOrigin:()=>proposeDeviceOrigin(),
   currentData:()=>clone(trip.data),
   apply(draft,expected){
-   if(formInvalid)throw Error('左侧时间输入尚未完成，请先修正后再采用草案。');
-   readTime();
-   if(trip.revision!==expected)throw Error('你已经手动修改行程；旧聊天草案不能覆盖新输入，请重新发送。');
+   // Do not sync here: applying a pending manual edit would change its ledger
+   // inside the chat-adoption transaction. Require a fresh proposal instead.
+   if(editorChanged(readEditor()))throw Error('The editor has unsaved changes. Apply those edits before adopting a new chat draft.');
+   if(trip.revision!==expected)throw Error('The itinerary was edited manually. Send a new message; the older chat draft cannot overwrite it.');
    cancelCalculation();
    trip.change(d=>{for(const key of Object.keys(d))delete d[key];Object.assign(d,clone(draft));});
    formInvalid=false;cancelReplacement();timeInputs();renderTrip();invalidate();

@@ -148,23 +148,23 @@ def review_access_link(link: dict) -> dict:
     target = None
     if not match:
         status = 'unspecified_or_unresolved'
-        explanation = '源名称未明确写出目标园区；空间靠近只能作为待核验线索。'
+        explanation = 'The source name does not identify a target park. Proximity is only a clue requiring verification.'
     else:
         raw_target = match.group(1)
         target = _normal_target(raw_target.split(',')[0])
         contextual_ccnr = bool(re.search(r'\bccnr\b', raw_target, re.I))
         if target == boundary:
             status = 'name_supports_target'
-            explanation = '源名称与该边界名称相符；仅加强候选关系，不确认入口开放或可达。'
+            explanation = 'The source name matches this boundary name. This supports the candidate link but does not verify that the entrance is open or reachable.'
         elif target in ('labrador', 'macritchie'):
             status = 'broad_target_label'
-            explanation = '源名称使用较宽泛地名，无法唯一确认具体公园/保护区；保留候选但不自动选择。'
+            explanation = 'The source uses a broad place name that does not uniquely identify a park or reserve. Retain the candidate without selecting it automatically.'
         elif contextual_ccnr and boundary == 'central catchment nature reserve':
             status = 'broader_area_context'
-            explanation = '名称提到CCNR范围，但未证明这是该保护区任意位置的通用入口。'
+            explanation = 'The name mentions CCNR, but does not establish that this entrance provides access to every part of the reserve.'
         else:
             status = 'explicit_target_differs'
-            explanation = '源名称指向的地方与邻近边界名称不同；不能因相邻就自动当作此园区入口。可能是连接点，需核验。'
+            explanation = 'The source names a different place from the nearby boundary. Proximity alone cannot make it an entrance to this park. It may be a connecting point and requires verification.'
     out['semantic_review'] = {
         'status': status, 'explicit_target_normalised': target,
         'boundary_name_normalised': boundary, 'explanation_zh': explanation,

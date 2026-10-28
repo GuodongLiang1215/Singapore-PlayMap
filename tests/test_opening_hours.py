@@ -1,3 +1,5 @@
+import pytest
+
 from app.stage2b.opening_hours import parse_simple_hours, evaluate_visit_hours
 
 
@@ -160,8 +162,87 @@ def test_onemap_matched_metadata_closes_artscience_after_1800():
     plan=planning.assemble(req,prepared,[leg])
     visit=plan["visits"][0]
     assert visit["category"]=="tourism"
-    assert visit["opening_hours_display"]=="每日 9:00–18:00"
+    assert prepared['visits'][0]['opening_hours_display']=="每日 9:00–18:00"
+    assert visit["opening_hours_display"]=="Daily 09:00–18:00"
     assert visit["arrival_at"].startswith("2026-10-25T20:33")
     assert visit["opening_status"]=="closed_at_arrival"
     assert plan["opening_hours_checked"] is True
     assert plan["itinerary_feasible"] is False
+
+
+@pytest.mark.parametrize(('hours', 'arrival', 'departure', 'status'), [
+    # Real raw catalogue styles: Newton Food Centre and Thus Coffee.
+    ('Mo-Su 00:00-02:00,12:00-24:00（OSM 参考）', '2026-11-01T12:30+08:00', '2026-11-01T13:00+08:00', 'feasible'),
+    ('Mo-Su 00:00-02:00,12:00-24:00（OSM 参考）', '2026-11-01T03:00+08:00', '2026-11-01T03:30+08:00', 'closed_at_arrival'),
+    ('Mo-Su 00:00-02:00,12:00-24:00（OSM 参考）', '2026-11-01T01:00+08:00', '2026-11-01T12:30+08:00', 'insufficient_time'),
+    ('Mo-Su 00:00-02:00,12:00-24:00（OSM 参考）', '2026-11-01T23:00+08:00', '2026-11-02T01:30+08:00', 'feasible'),
+    ('Mo-Fr 09:00-20:00', '2026-11-01T12:00+08:00', '2026-11-01T12:30+08:00', 'closed_at_arrival'),
+    ('Mo-Fr 09:00-20:00; Sa-Su 08:00-20:00（OSM 参考）', '2026-10-30T08:30+08:00', '2026-10-30T09:00+08:00', 'closed_at_arrival'),
+    ('Mo-Fr 09:00-20:00; Sa-Su 08:00-20:00（OSM 参考）', '2026-10-31T08:30+08:00', '2026-10-31T09:00+08:00', 'feasible'),
+    ('Mo,We,Fr 09:00-18:00; Tu,Th 10:00-19:00; Sa-Su off', '2026-10-31T12:00+08:00', '2026-10-31T12:30+08:00', 'closed_at_arrival'),
+    ('Fr-Mo 09:00-18:00', '2026-11-01T12:00+08:00', '2026-11-01T12:30+08:00', 'feasible'),
+    ('Fr-Mo 09:00-18:00', '2026-11-03T12:00+08:00', '2026-11-03T12:30+08:00', 'closed_at_arrival'),
+    ('Mo-Fr 18:00-02:00', '2026-10-31T01:00+08:00', '2026-10-31T02:00+08:00', 'feasible'),
+    ('Mo-Fr 18:00-02:00', '2026-11-01T01:00+08:00', '2026-11-01T01:30+08:00', 'closed_at_arrival'),
+    ('每日 18:00–次日 02:00', '2026-10-30T23:00+08:00', '2026-11-01T01:00+08:00', 'insufficient_time'),
+    ('Mo-Su 00:00-24:00', '2026-10-30T23:00+08:00', '2026-11-02T01:00+08:00', 'feasible'),
+    ('24/7（OSM 参考）', '2026-10-30T23:00+08:00', '2026-11-02T01:00+08:00', 'feasible'),
+    ('09:00-12:00,13:00-18:00', '2026-10-30T11:30+08:00', '2026-10-30T13:30+08:00', 'insufficient_time'),
+    ('09:00-12:00,12:00-18:00', '2026-10-30T11:30+08:00', '2026-10-30T13:30+08:00', 'feasible'),
+    ('每日 09:00–18:00', '2026-10-30T17:30+08:00', '2026-10-30T18:00:01+08:00', 'insufficient_time'),
+    ('每日 09:00–18:00', '2026-10-30T17:30+08:00', '2026-10-30T18:00:00+08:00', 'feasible'),
+    ('每日 09:00–18:00', '2026-10-30T18:00+08:00', '2026-10-30T18:30+08:00', 'closed_at_arrival'),
+    ('Mo-Fr 09:00-20:00; Sa-Su 08:00-20:00', '2026-10-31T00:30Z', '2026-10-31T01:00Z', 'feasible'),
+    ('Fr 18:00-02:00', '2026-10-30T17:00Z', '2026-10-30T17:30Z', 'feasible'),
+    ('Sa 16:00-03:00; Su 16:00-23:00', '2026-11-01T01:00+08:00', '2026-11-01T01:30+08:00', 'unknown'),
+])
+def test_bounded_weekly_and_split_schedule_evaluation(hours, arrival, departure, status):
+    result = evaluate_visit_hours(arrival_at=arrival, departure_at=departure,
+                                  opening_hours_display=hours)
+    assert result['status'] == status
+    assert result['opening_hours_display'] == hours
+
+
+@pytest.mark.parametrize('hours', [
+    'Mo-Su 10:00-20:00; PH closed', 'Mo-Su,PH 10:00-20:00',
+    'SH 10:00-20:00', 'Jan-Mar 09:00-18:00', '2026 Oct 30 09:00-18:00',
+    'Mo-Fr 09:00-18:00; Fr 10:00-12:00',  # Semicolon override not supported.
+    'Mo-Fr 09:00-18:00, Sa 10:00-12:00', 'Mo-Su 09:00-18:00; nonsense',
+    '09:00-18:00 appointments only', '24/7; PH off',
+    '24 小时；周五维护', '每日 10:00–19:00；周五至 21:00',
+    '09:00-09:00', '24:00-02:00', '10:00-24:01', '10:00-26:00',
+    '09:60-18:00', '09:00-18:00,', '每日 09:00–次日 10:00',
+    'Sa 16:00-03:00; Su 16:00-23:00',  # Next-day normal clause overrides spill.
+    'Mo-Fr 18:00-02:00; Sa-Su off',
+])
+def test_unsupported_or_invalid_schedule_is_unknown_without_partial_match(hours):
+    result = evaluate_visit_hours(arrival_at='2026-10-30T12:00+08:00',
+                                  departure_at='2026-10-30T12:30+08:00',
+                                  opening_hours_display=hours)
+    assert result['status'] == 'unknown'
+
+
+@pytest.mark.parametrize(('arrival', 'departure'), [
+    ('not-a-time', '2026-10-30T13:00+08:00'),
+    ('2026-10-30T12:00', '2026-10-30T13:00'),
+    ('2026-10-30T12:00+08:00', '2026-10-30T13:00'),
+    ('2026-10-30T13:00+08:00', '2026-10-30T12:00+08:00'),
+])
+@pytest.mark.parametrize('hours', ['24 小时', 'Mo-Su 00:00-24:00'])
+def test_invalid_visit_times_never_claim_feasible_even_for_always_open(hours, arrival, departure):
+    result = evaluate_visit_hours(arrival_at=arrival, departure_at=departure,
+                                  opening_hours_display=hours)
+    assert result['status'] == 'unknown'
+    assert result['reason'] == 'invalid_itinerary_time'
+
+
+@pytest.mark.parametrize(('hours', 'instant', 'status'), [
+    ('24 小时', '2026-10-30T13:00+08:00', 'feasible'),
+    ('09:00-18:00', '2026-10-30T13:00+08:00', 'feasible'),
+    ('09:00-18:00', '2026-10-30T18:00+08:00', 'closed_at_arrival'),
+    ('Mo-Fr 09:00-18:00', '2026-11-01T13:00+08:00', 'closed_at_arrival'),
+])
+def test_zero_duration_stop_checks_the_arrival_instant(hours, instant, status):
+    result = evaluate_visit_hours(arrival_at=instant, departure_at=instant,
+                                  opening_hours_display=hours)
+    assert result['status'] == status
