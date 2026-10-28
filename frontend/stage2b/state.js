@@ -19,6 +19,15 @@
   if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(value))throw Error('请输入完整的新加坡日期与时刻。');
   const iso=value+'+08:00';if(!Number.isFinite(Date.parse(iso)))throw Error('日期或时刻无效。');return iso;
  }
+ function sameInstant(left,right){
+  if(left==null||right==null)return left==null&&right==null;
+  const a=Date.parse(left),b=Date.parse(right);return Number.isFinite(a)&&Number.isFinite(b)&&a===b;
+ }
+ function sameTime(left,right){
+  return !!left&&!!right&&left.mode===right.mode&&left.budget_minutes===right.budget_minutes&&
+   left.buffer_minutes===right.buffer_minutes&&sameInstant(left.departure_at,right.departure_at)&&
+   sameInstant(left.finish_by,right.finish_by);
+ }
  function integer(value,label,{min=0,max=10080,nullable=false}={}){
   if(value===''||value===null||value===undefined){if(nullable)return null;throw Error(label+'不能为空。');}
   if(!/^\d+$/.test(String(value)))throw Error(label+'必须为整数。');
@@ -73,6 +82,6 @@
    entrances_verified:false,opening_hours_checked:false,order_optimisation:false,llm:false,
    exact_coordinates_included:false,labels_included:false,clock_times_included:false,credentials_included:false,uploaded_automatically:false};
  }
- const out={ItineraryState,MAX_VISITS,makeId,singaporeISO,integer,minutes,duration,axisLabel,diagnostic};
+ const out={ItineraryState,MAX_VISITS,makeId,singaporeISO,sameTime,integer,minutes,duration,axisLabel,diagnostic};
  root.PlayMapTrip=out;if(typeof module!=='undefined'&&module.exports)module.exports=out;
 })(typeof window==='undefined'?globalThis:window);

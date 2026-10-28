@@ -9,6 +9,7 @@ Raw model output/input/validation exception messages are never diagnostic output
 """
 from __future__ import annotations
 import copy
+import re
 from pydantic import ValidationError
 from .models import (Interpretation, LocationAction, RemoveAction, MoveAction,
                      StayAction, FinishAction, ModeAction, TimeAction, ClearAction,
@@ -26,7 +27,7 @@ KNOWN_FIELDS = frozenset(
     {k for cls in ACTION_MODELS.values() for k in cls.model_fields} | {'target_position'})
 PATH_PARTS = frozenset(KNOWN_FIELDS | set(Interpretation.model_fields) |
     {'commands', 'order', 'transport_mode', 'finish_policy', 'time_mode', *ACTION_MODELS, 'query', 'categories', 'keywords', 'picks', 'slot_id', 'candidate_key', 'reason',
-     'type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'turn_index',
+     'type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'turn_index', 'effect',
      '<unknown>', '<root>'})
 ERROR_TYPES = frozenset({
     'missing', 'extra_forbidden', 'int_type', 'int_parsing', 'string_type',
@@ -193,3 +194,77 @@ def parse_interpretation(raw, draft, *, turn_index=0):
     except ValidationError as error:
         raise OperationFormatError(validation_from_exception(error), norm) from None
     return parsed, norm
+
+
+def parse_provider_interpretation(raw, draft, *, turn_index=0):
+    """Keep current model permissions narrower than saved-state permissions.
+
+    Saved local state can contain checker evidence. A live model cannot reuse
+    those permissions. Historical replay deliberately uses parse_interpretation.
+    """
+    if not isinstance(raw, dict):
+        _fail(('<root>',), 'invalid_structure')
+    required = {'type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'effect'}
+    rows = raw.get('semantic_segments')
+    if not isinstance(rows, list):
+        _fail(('semantic_segments',), 'list_type')
+    for index, row in enumerate(rows):
+        prefix = ('semantic_segments', index)
+        if not isinstance(row, dict):
+            _fail(prefix, 'invalid_structure')
+        for field in sorted(required - row.keys()):
+            _fail(prefix + (field,), 'missing')
+        try:
+            SemanticSegment.model_validate(row)
+        except ValidationError as error:
+            raise OperationFormatError(validation_from_exception(error,prefix=prefix)) from None
+        if row['status'] not in {'understood', 'unresolved', 'conflicting', 'unsupported'}:
+            _fail(prefix + ('status',), 'literal_error')
+        if row['source'] not in {'user_explicit', 'inferred'}:
+            _fail(prefix + ('source',), 'literal_error')
+        if row['effect'] not in {'set', 'clear', 'none'}:
+            _fail(prefix + ('effect',), 'literal_error')
+        if not isinstance(row['quote'], str) or not row['quote'].strip():
+            _fail(prefix + ('quote',), 'string_too_short')
+        if not isinstance(row['scope'], str) or not re.fullmatch(
+            r'global|origin|finish|future_visits|visit:(?:[1-9]\d?|new(?::[1-9]\d?)?)|time_window:[1-9]\d?', row['scope']
+        ):
+            _fail(prefix + ('scope',), 'value_error')
+        if row['type'] in {'operation', 'preserve', 'conflict'} and row['effect'] != 'none':
+            _fail(prefix + ('effect',), 'irrelevant_field_value')
+        if row['effect'] == 'set' and row['value'] is None:
+            _fail(prefix + ('value',), 'value_error')
+    from .requirement_fields import FIELDS, canonical_requirement_name
+    data = copy.deepcopy(raw)
+    for index, row in enumerate(data['semantic_segments']):
+        row['name'] = canonical_requirement_name(row['name'])
+        name = row['name']
+        field = FIELDS.get(name)
+        if name == 'excluded_topic' and row['scope'] not in {'global', 'future_visits'}:
+            _fail(('semantic_segments', index, 'scope'), 'value_error')
+        if name == 'takeaway' and not (row['scope'].startswith('visit:') or row['scope'].startswith('visit:new')):
+            _fail(('semantic_segments', index, 'scope'), 'value_error')
+        if row['effect'] == 'clear':
+            if field and field.cardinality == 'set':
+                if row['value'] is not None and not isinstance(row['value'], str):
+                    _fail(('semantic_segments', index, 'value'), 'string_type')
+            elif row['value'] is not None:
+                _fail(('semantic_segments', index, 'value'), 'irrelevant_field_value')
+        if row['effect'] == 'set':
+            if row['value'] is None:
+                _fail(('semantic_segments', index, 'value'), 'value_error')
+            if field and field.cardinality == 'set' and not isinstance(row['value'], str):
+                _fail(('semantic_segments', index, 'value'), 'string_type')
+        if row['name'] in {'max_walk_minutes', 'budget_minutes', 'departure_at', 'finish_by', 'transport_mode', 'finish_policy'} and row['scope'] != 'global':
+            _fail(('semantic_segments', index, 'scope'), 'value_error')
+        if row['effect'] != 'set':
+            continue
+        name, value = row['name'], row['value']
+        if name in {'max_walk_minutes', 'budget_minutes', 'stay_minutes', 'radius_m'}:
+            if type(value) is not int or value < (0 if name == 'stay_minutes' else 1):
+                _fail(('semantic_segments', index, 'value'), 'int_type')
+        if name == 'takeaway' and row['effect'] == 'set' and type(value) is not bool:
+            _fail(('semantic_segments', index, 'value'), 'bool_type')
+    parsed, normalization = parse_interpretation(data, draft, turn_index=turn_index)
+    from .semantic import compile_takeaway_actions
+    return compile_takeaway_actions(parsed, draft), normalization

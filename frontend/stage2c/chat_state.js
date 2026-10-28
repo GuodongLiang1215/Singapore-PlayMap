@@ -1,13 +1,13 @@
 /* Revision gate and value-free failure diagnostics. No raw model response export. */
 (function(root){'use strict';
  const clone=x=>JSON.parse(JSON.stringify(x));
- const PATCH='2C1-F8';
+ const PATCH='2C1-F9.1';
  const KINDS=new Set(['SCHEMA_COMPLEXITY','SCHEMA_FIELD','SCHEMA_VALIDATION','GENERATION_PARAMETER','BILLING_OR_REGION','UNKNOWN']);
  const STATUSES=new Set(['INVALID_ARGUMENT','FAILED_PRECONDITION','UNAUTHENTICATED','PERMISSION_DENIED','NOT_FOUND','RESOURCE_EXHAUSTED','INTERNAL','UNAVAILABLE','DEADLINE_EXCEEDED','UNKNOWN']);
  const FIELDS=new Set(['generationConfig.responseJsonSchema','generationConfig.responseSchema','generationConfig.responseFormat','generationConfig.responseMimeType','generationConfig.maxOutputTokens','generationConfig.candidateCount','generationConfig.thinkingConfig','generationConfig.temperature','systemInstruction','contents','$defs','$ref','anyOf','oneOf','const','exclusiveMinimum','maxLength','minLength']);
  const PHASES=new Set(['preflight','interpretation','selection','interpretation_request','selection_request','interpretation_validation','semantic_validation','action_validation','preference_merge','retrieval','selection_validation','proposal_assembly','resolve_validation','time_merge_validation']);
  const OPS=new Set(['set_origin','set_finish','add_visit','replace_visit','remove_visit','move_visit','set_stay','set_finish_policy','set_mode','set_time','clear_visits']);
- const PATHS=new Set(['op','quote','place','target_id','target_position','position','minutes','value','mode','budget_minutes','departure_at','finish_by','clear_departure','buffer_minutes','commands','order','transport_mode','finish_policy','time_mode','semantic_segments','active_constraints','type','name','scope','hardness','status','source','turn_index',...OPS,'acknowledgement','preferred_add','preferred_remove','excluded_add','excluded_remove','notes_add','notes_remove','questions','actions','query','categories','keywords','picks','slot_id','candidate_key','reason','<unknown>','<root>']);
+ const PATHS=new Set(['op','quote','place','target_id','target_position','position','minutes','value','mode','budget_minutes','departure_at','finish_by','clear_departure','buffer_minutes','commands','order','transport_mode','finish_policy','time_mode','semantic_segments','active_constraints','type','name','kind','effect','scope','hardness','status','source','turn_index',...OPS,'acknowledgement','preferred_add','preferred_remove','excluded_add','excluded_remove','notes_add','notes_remove','questions','actions','query','categories','keywords','picks','slot_id','candidate_key','reason','<unknown>','<root>']);
  const TYPES=new Set(['missing','extra_forbidden','int_type','int_parsing','string_type','string_too_long','string_too_short','bool_type','bool_parsing','list_type','dict_type','model_type','literal_error','too_long','too_short','value_error','greater_than','greater_than_equal','less_than','less_than_equal','finite_number','invalid_operation','irrelevant_field_value','unknown_field','target_out_of_range','target_conflict','invalid_target_type','invalid_structure','validation_error','unknown_command_field','mixed_envelope','invalid_command_order','duplicate_command_order','incomplete_command_order']);
  const integer=(v,min=0,max=10000000)=>Number.isInteger(v)&&v>=min&&v<=max?v:null;
  function safeValidation(v){
@@ -40,7 +40,7 @@
    kind:KINDS.has(p.kind)?p.kind:null,
    field_hints:Array.isArray(p.field_hints)?p.field_hints.filter(x=>FIELDS.has(x)).slice(0,10):[],
    phase:PHASES.has(r.phase)?r.phase:null,
-   wire_version:['2C1-F1','2C1-F2','2C1-F3','2C1-F4','2C1-F5','2C1-F6','2C1-F7',PATCH].includes(r.wire_version)?r.wire_version:null,
+   wire_version:['2C1-F1','2C1-F2','2C1-F3','2C1-F4','2C1-F5','2C1-F6','2C1-F7','2C1-F8',PATCH].includes(r.wire_version)?r.wire_version:null,
    generation_attempts:integer(r.generation_attempts,0,2),
    completed_generation_responses:integer(r.completed_generation_responses,0,2),schema,
    validation:safeValidation(r.validation),normalization:safeNormalization(r.normalization),time_update:safeTimeUpdate(r.time_update),
@@ -89,6 +89,10 @@
    time_update:safeTimeUpdate(proposal.time_update||proposal.preview?.time_update),
    raw_query_included:false,keywords_included:false,place_names_included:false,coordinates_included:false};
  }
+ function adoptionBlocked(proposal){
+  const preview=proposal?.preview;
+  return Array.isArray(preview?.adoption_blockers)?preview.adoption_blockers.length>0:preview?.can_apply!==true;
+ }
  function readinessText(proposal,choices){
   const d=proposalDiagnostic(proposal,choices);if(!d)return '';
   const labels={nature:'公园/自然',food:'餐饮',heritage:'历史地点',monument:'古迹',tourism:'景点/购物/娱乐'};
@@ -97,6 +101,7 @@
   if(empty.length)return '暂不能采用：'+empty.map(name).join('、')+'没有可用候选。已找到的地点仍只是草案；不会删除未满足的项目来启用按钮。可继续说明具体地点，或明确调整该项要求。';
   const unresolved=d.slots.filter(s=>!s.selection_resolved);
   if(unresolved.length)return '还需确认：'+unresolved.map(name).join('、')+'的具体位置。选好后即可提交整份草案检查。';
+  if(adoptionBlocked(proposal))return '暂不能采用：仍有冲突或执行信息缺失，请先处理下方提示。原行程和已采用要求未修改。';
   return d.slot_count?'各项候选已选定，尚未应用；采用后再计算路线与参考时长。':'条件修改草案尚未应用，请核对后采用。';
  }
  function safeProposalDiagnostic(d){
@@ -178,6 +183,6 @@
    count:t.messages.length,active:t.id===this.activeId,viewing:t.id===this.viewingId}));}
   clear(){this.threads=[];this.seq=0;return this.start();}
  }
- const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,readinessText,ConversationLog};root.PlayMapChatState=exports;
+ const exports={PATCH,Gate,diagnose,safeErrorDetail,safeValidation,safeTimeUpdate,errorSummary,recordFailure,safeRetrieval,proposalDiagnostic,adoptionBlocked,readinessText,ConversationLog};root.PlayMapChatState=exports;
  if(typeof module!=='undefined'&&module.exports)module.exports=exports;
 })(typeof window==='undefined'?globalThis:window);

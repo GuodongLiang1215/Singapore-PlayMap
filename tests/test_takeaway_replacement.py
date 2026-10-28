@@ -1,10 +1,11 @@
 import pytest
 from app.stage2c.engine import assemble
 from app.stage2c.models import ChatRequest, Draft, Interpretation, LocationAction, PlaceSpec, Preferences, SemanticSegment
+from app.stage2c.semantic import compile_takeaway_actions
 
 
 @pytest.mark.parametrize('message,action_quote,segment_value,expected_profile', [
-    ('第二站换成咖啡馆，顺路买杯带走', '第二站换成咖啡馆，顺路买杯带走', None, 'takeaway'),
+    ('第二站换成咖啡馆，顺路买杯带走', '第二站换成咖啡馆，顺路买杯带走', True, 'takeaway'),
     ('第二站换成咖啡馆，顺路买杯带走', '第二站换成咖啡馆', True, 'takeaway'),
     ('第二站换成咖啡馆，不要外带', '第二站换成咖啡馆，不要外带', False, 'regular'),
 ])
@@ -24,9 +25,9 @@ def test_replacing_a_stop_respects_the_scoped_takeaway_intent(message, action_qu
     )
     parsed = Interpretation(
         acknowledgement='替换第二站',
-        semantic_segments=[] if segment_value is None else [SemanticSegment(
+        semantic_segments=[SemanticSegment(
             type='constraint', name='takeaway', value=segment_value, scope='visit:2',
-            hardness='hard', quote=message,
+            hardness='hard', quote=message, effect='set',
         )],
         actions=[LocationAction(
             op='replace_visit', target_id='visit-2',
@@ -34,6 +35,7 @@ def test_replacing_a_stop_respects_the_scoped_takeaway_intent(message, action_qu
             quote=action_quote,
         )],
     )
+    parsed = compile_takeaway_actions(parsed, body.draft)
     option_point = {'label': 'Cafe C', 'latitude': 1.32, 'longitude': 103.82,
                     'source': 'user_map', 'confirmed': True}
     record = {

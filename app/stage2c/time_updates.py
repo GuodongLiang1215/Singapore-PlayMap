@@ -7,9 +7,10 @@ selects places, invents times, calls a model or mutates the adopted itinerary.
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Iterable
 from pydantic import ValidationError
-from app.stage2b.models import TimeSettings
+from app.stage2b.models import TimeSettings, SGT
 from .models import TimeAction
 
 TIME_CONTRACT = 'partial_time_patch_v1'
@@ -91,6 +92,13 @@ def merge_time_updates(old: TimeSettings, actions: Iterable[Any]) -> TimeUpdate:
             value = getattr(a, field)
             if value is None:  # null is not a request to clear an existing value
                 continue
+            if field in {'departure_at','finish_by'}:
+                try:
+                    instant=datetime.fromisoformat(value)
+                    if instant.utcoffset() is None:raise ValueError('Missing offset')
+                    value=instant.astimezone(SGT).isoformat()
+                except (TypeError,ValueError):
+                    fail('invalid_time','请提供明确日期和时区的有效时间；不会擅自补日期。')
             if field in patch and patch[field] != value:
                 fail('conflicting_values', '同一轮包含不同的时间设置。请确认最终预算或起止时间；原行程未修改。')
             patch[field] = value

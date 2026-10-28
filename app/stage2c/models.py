@@ -26,6 +26,7 @@ class SemanticSegment(Strict):
     status: ConstraintStatus = 'understood'
     source: ConstraintSource = 'user_explicit'
     quote: str = Field(min_length=1, max_length=240)
+    effect: Literal['set','clear','none'] | None = None
     # The adapter assigns this locally; the provider does not get to invent it.
     turn_index: int = Field(default=0, ge=0, le=2**31 - 1, strict=True)
 
@@ -39,11 +40,13 @@ class SemanticSegment(Strict):
 class ActiveConstraint(Strict):
     """A constraint that remains active across turns until replaced or cleared."""
     name: str = Field(min_length=1, max_length=64)
+    kind: Literal['constraint','preference'] = 'constraint'
     value: ConstraintValue = None
     scope: str = Field(default='global', max_length=128)
     hardness: ConstraintHardness = 'unknown'
     status: ConstraintStatus = 'understood'
     source: ConstraintSource = 'user_explicit'
+    evidence_source: Literal['catalogue','route'] | None = None
     quote: str = Field(min_length=1, max_length=240)
     turn_index: int = Field(ge=0, le=2**31 - 1, strict=True)
 
@@ -82,10 +85,12 @@ class LocationAction(ActionBase):
     op: Literal['set_origin','set_finish','add_visit','replace_visit']
     place: PlaceSpec
     target_id: str | None = Field(default=None,max_length=80)
+    stay_profile: Literal['regular','takeaway'] | None = None
     @model_validator(mode='after')
     def required_target(self):
         if self.op=='replace_visit' and not self.target_id: raise ValueError('Replacement target required')
         if self.op!='replace_visit' and self.target_id is not None: raise ValueError('Unexpected target')
+        if self.op not in ('add_visit','replace_visit') and self.stay_profile is not None: raise ValueError('Unexpected stay profile')
         if self.op in ('set_origin','set_finish') and not self.place.query.strip(): raise ValueError('An explicit endpoint name is required')
         return self
 
@@ -100,6 +105,7 @@ class StayAction(ActionBase):
     op: Literal['set_stay']
     target_id: str = Field(min_length=1,max_length=80)
     minutes: int | None = Field(ge=0,le=1440,strict=True)
+    stay_profile: Literal['regular','takeaway'] | None = None
 class FinishAction(ActionBase):
     op: Literal['set_finish_policy']
     value: Literal['last_stop','return_to_start']
@@ -143,6 +149,7 @@ class ChatRequest(Strict):
     preferences: Preferences = Field(default_factory=Preferences)
     pending: Pending | None = None
     consent: bool
+    verification_ref: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     @field_validator('message')
     @classmethod
     def text(cls,v):
@@ -163,3 +170,11 @@ class ResolveRequest(Strict):
     choices: dict[str,str] = Field(default_factory=dict,max_length=8)
 class ForgetRequest(Strict):
     session_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+
+
+class VerificationRequest(Strict):
+    session_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    revision: int = Field(ge=0,le=2**31-1,strict=True)
+    verification_ref: str = Field(pattern=r'^[a-f0-9]{32}$')
+    draft: Draft
+    preferences: Preferences

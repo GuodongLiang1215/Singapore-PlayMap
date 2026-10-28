@@ -1,0 +1,2735 @@
+{
+  "schema": "ge5226-person-b-f9-review-import-v1",
+  "dry_run": false,
+  "baseline_code_head": "e516f3359f5e734b48394e1cb56887ab5b0a18c7",
+  "fixtures_sha256": "1eef5f436972351e3cae714f295875d201e281aa9faeafe6b7c39893ae91599b",
+  "predictions_sha256": "8abe1dc6a722e4a122e79b2cc6727026fba76e201556f8029817875846e7fc91",
+  "review_json_sha256": "39bb9ccd3aa6cce6e6c07c55a3ea888a29bd7c30e50e54893b1dd56f820e34a3",
+  "review_csv_sha256": "fbf9bd93ba818386a63bb3f1ffe1417ce97c606f61d3a2df7505db5ad625ff78",
+  "expected_turns": 71,
+  "confirmed_review_turns": 25,
+  "unconfirmed_turns": 46,
+  "automatic_gold_promotion": false,
+  "evidence_scope": "seen_development_review",
+  "candidates": [
+    {
+      "case_id": "s01",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 1,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:07:14.710Z",
+      "model_revealed_at": "2026-10-27T12:03:22.808Z",
+      "rationale": "本轮第一个新站点，基本等价于本轮新站点。另外，操作如果没有hardness的话，倒是问题不大。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆"
+          },
+          {
+            "type": "constraint",
+            "name": "radius_m",
+            "value": 1000,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "附近1公里"
+          },
+          {
+            "type": "constraint",
+            "name": "must_be_open",
+            "value": "14:00",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "14:00必须营业"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "咖啡馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [
+          "目前不能保证半径和营业条件，是否先查看未核验候选？"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "radius_m",
+            "value": 1000,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "附近1公里",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "opening_hours",
+            "value": "14:00",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "14:00必须营业",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "spatial_anchor",
+            "value": "Bugis MRT",
+            "quote": "Bugis MRT",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "咖啡馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [
+          "目前不能保证半径和营业条件，是否先查看未核验候选？"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s02",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 1,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:15:02.793Z",
+      "model_revealed_at": "2026-10-27T12:07:52.493Z",
+      "rationale": "操作没必要用hardness，另外，说了要加一个餐厅，那么操作的关键词里面应该要有餐厅。因为餐厅和food这个类型还是有一定区别，说要加餐厅，暗指了这个地方必须能够被称为“餐厅”，而food这个就太宽泛了。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "加一家餐厅"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "restaurant",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "餐厅"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加一家餐厅",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "restaurant",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "餐厅",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加一家餐厅",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s03",
+      "turn_index": 1,
+      "decision": "revise",
+      "language": "zh",
+      "scale": 1,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:17:18.838Z",
+      "model_revealed_at": "2026-10-27T12:12:07.014Z",
+      "rationale": "标注操作的关键词需要修改",
+      "correction_notes": "最好不要用nature这个大类来找公园，因为park和nature还是有不同。模型这轮答得不错，用了公园的细分类别。",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "找一个公园"
+          },
+          {
+            "type": "constraint",
+            "name": "category",
+            "value": "nature",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "公园"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "找一个公园",
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "park",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "公园",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "找一个公园",
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": [
+                  "park"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s04",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 1,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:27:09.543Z",
+      "model_revealed_at": "2026-10-27T12:19:09.234Z",
+      "rationale": "有一个问题需要讨论啊，这个输入是“找一个”，而非新增，在这种情况下，是否应该只是在前端显示出候选，而非直接新增一个点位？另外，operation里面的add_visit和command里面的add_visit有什么区别？preferred_add和node_add又有什么区别？",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "博物馆"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "museum",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "博物馆"
+          },
+          {
+            "type": "constraint",
+            "name": "must_be_open",
+            "value": "17:00",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "17:00必须还没关门"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [
+          "营业时间尚未核验，是否先查看候选？"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "museum",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "博物馆",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "opening_hours",
+            "value": "17:00",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "17:00必须还没关门",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [
+          "营业时间尚未核验，是否先查看候选？"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s09",
+      "turn_index": 1,
+      "decision": "revise",
+      "language": "mixed",
+      "scale": 1,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:34:06.710Z",
+      "model_revealed_at": "2026-10-27T12:24:54.548Z",
+      "rationale": "原话有“想喝咖啡”，表达一种用户此刻的想法，因此不仅要有操作、约束，最好还要有偏好。",
+      "correction_notes": "应增加偏好咖啡",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "加一家 cafe"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "cafe"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加一家 cafe",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "cafe",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "drink",
+            "value": "coffee",
+            "quote": "想喝咖啡",
+            "scope": "visit:new",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加一家 cafe",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s11",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:40:26.137Z",
+      "model_revealed_at": "2026-10-27T12:34:39.903Z",
+      "rationale": "对的。既有操作，又有约束。另外，只说了保留第一站，那么保留要求就只给第一站（相当于一种特别要求），第三站即使不给特别的保留要求，也是默认被保留的。模型这次就缺了一个约束且多了一个保留要求。另外，非常危险的是非空的用户原话模型将其留空，应在prompt里面强调，如果无法找出用户原话，就不要输出quote为空的语义单元",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第二站换成咖啡馆"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站保留"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换成咖啡馆",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆",
+            "effect": "set"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站保留",
+            "effect": "none"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换成咖啡馆",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s12",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:41:14.493Z",
+      "model_revealed_at": "2026-10-27T12:38:30.737Z",
+      "rationale": "非常好，没有管第二站是对的。模型也做得很好。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "remove_visit",
+            "value": null,
+            "scope": "visit:3",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "删除第三站"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站不动"
+          }
+        ],
+        "commands": {
+          "remove_visit": [
+            {
+              "order": 1,
+              "quote": "删除第三站",
+              "target_position": 3
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站不动",
+            "effect": "none"
+          }
+        ],
+        "commands": {
+          "remove_visit": [
+            {
+              "order": 1,
+              "quote": "删除第三站",
+              "target_position": 3
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s13",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:44:00.682Z",
+      "model_revealed_at": "2026-10-27T12:41:46.835Z",
+      "rationale": "非常好，既有换地点的操作、约束，又有外带意图。模型回答得也很对。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第二站换成咖啡馆，只买杯带走"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆"
+          },
+          {
+            "type": "constraint",
+            "name": "takeaway",
+            "value": true,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "只买杯带走"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换成咖啡馆，只买杯带走",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "takeaway",
+            "value": true,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "只买杯带走",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换成咖啡馆，只买杯带走",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s14",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:48:02.436Z",
+      "model_revealed_at": "2026-10-27T12:44:14.500Z",
+      "rationale": "这个也不错。不过有一点我想讨论一下。模型这里生成了两个强度不明确的语义单元，这是否是合理的？在这个例子中，确实无法从用户的输入中看出用户的强度意图（而且有可能后面有别的修改可能覆盖该决策），那么默认hard是否是ok的？我直觉觉得可以，因为都hard的话，就可以产生矛盾，使得用户知晓并进行修改。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "set_stay",
+            "value": null,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第二站停留改为0分钟"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站不动"
+          }
+        ],
+        "commands": {
+          "set_stay": [
+            {
+              "order": 1,
+              "quote": "第二站停留改为0分钟",
+              "target_position": 2,
+              "minutes": 0
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站不动",
+            "effect": "none"
+          },
+          {
+            "type": "constraint",
+            "name": "stay_minutes",
+            "value": 0,
+            "quote": "停留改为0分钟",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "set_stay": [
+            {
+              "order": 1,
+              "quote": "第二站停留改为0分钟",
+              "target_position": 2,
+              "minutes": 0
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s19",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "mixed",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:49:52.826Z",
+      "model_revealed_at": "2026-10-27T12:48:24.647Z",
+      "rationale": "还不错。模型输出的这个notes_add我觉得也不错，很有灵性。其他很多例子的模型输出的add，虽然我不太清楚这些的作用，不过如果用来给模型提供上下文的话，倒是非常好。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第二站换 cafe，只要 takeaway"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "cafe"
+          },
+          {
+            "type": "constraint",
+            "name": "takeaway",
+            "value": true,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "只要 takeaway"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换 cafe，只要 takeaway",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "cafe",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "takeaway",
+            "value": true,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "只要 takeaway",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换 cafe，只要 takeaway",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s20",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 2,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:52:51.669Z",
+      "model_revealed_at": "2026-10-27T12:50:04.618Z",
+      "rationale": "我不确定这种情况应该不给任何操作的语义单元，还是出一个修改第九站的语义单元，然后标注当前不支持？这个当前不支持的字段，是能够允许模型自己生成/标注的吗？如果不行，那么这个原标注ok，而模型这个输出就越界了；如果可以，那么模型这个输出倒也问题不大，因为模型提出的问题也是ok的。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [],
+        "commands": {},
+        "questions": [
+          "当前只有三站，要删除哪一站？"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "remove_visit",
+            "value": null,
+            "quote": "第九站删除",
+            "scope": "visit:9",
+            "hardness": "unknown",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "effect": "none"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "当前只有三站，要删除哪一站？"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s21",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:56:10.660Z",
+      "model_revealed_at": "2026-10-27T12:53:37.052Z",
+      "rationale": "虽然原标注从各方面看起来都非常的正确，但还是那个问题：操作，是否一定必须既在语义单元中出现，又在command里面出现？还是说，可以在语义单元里只做约束，在command里面实现这个约束？",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "咖啡馆"
+          },
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "博物馆"
+          },
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "餐厅"
+          },
+          {
+            "type": "operation",
+            "name": "set_time",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "最多四小时"
+          },
+          {
+            "type": "constraint",
+            "name": "budget_minutes",
+            "value": 240,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "最多四小时"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "咖啡馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            },
+            {
+              "order": 2,
+              "quote": "博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            },
+            {
+              "order": 3,
+              "quote": "餐厅",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ],
+          "set_time": [
+            {
+              "order": 4,
+              "quote": "最多四小时",
+              "time_mode": "budget",
+              "budget_minutes": 240
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "budget_minutes",
+            "value": 240,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "最多四小时",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "quote": "咖啡馆",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "museum",
+            "quote": "博物馆",
+            "scope": "visit:new:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "restaurant",
+            "quote": "餐厅",
+            "scope": "visit:new:3",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "咖啡馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            },
+            {
+              "order": 2,
+              "quote": "博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            },
+            {
+              "order": 3,
+              "quote": "餐厅",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ],
+          "set_time": [
+            {
+              "order": 4,
+              "quote": "最多四小时",
+              "time_mode": "budget",
+              "budget_minutes": 240
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s22",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T12:56:42.764Z",
+      "model_revealed_at": "2026-10-27T12:56:23.120Z",
+      "rationale": "正确",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": 10,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "每段步行不要超过10分钟"
+          }
+        ],
+        "commands": {},
+        "questions": [],
+        "max_walk_minutes": 10
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": 10,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "每段步行不要超过10分钟",
+            "effect": "set"
+          }
+        ],
+        "commands": {},
+        "questions": [],
+        "max_walk_minutes": 10
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s23",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:00:52.299Z",
+      "model_revealed_at": "2026-10-27T12:56:57.121Z",
+      "rationale": "这里我需要讨论“已理解，未证明满足”和“待验证”的区别。首先，这个nature不等于公园，我觉得最好放在细分类别里面的park；其次，原标注和模型输出引出了一个更大的问题，那就是模型是否能输出确实存在于数据库中的地点大类或细类、有没有这个必要？如果待验证的意思是模型还会用某种办法去数据库查询是否有nature这个名字的细类，那我觉得这个“待验证”没有问题，但是nature和park的区别依旧不能忽视。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第二站换一个公园"
+          },
+          {
+            "type": "constraint",
+            "name": "category",
+            "value": "nature",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "公园"
+          },
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": 5,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "每段步行最多5分钟"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换一个公园",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": [],
+        "max_walk_minutes": 5
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "park",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "公园",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": 5,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "每段步行最多5分钟",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换一个公园",
+              "target_position": 2,
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": [
+                  "park"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [],
+        "max_walk_minutes": 5
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s24",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:08:59.548Z",
+      "model_revealed_at": "2026-10-27T13:01:13.558Z",
+      "rationale": "这个问题需要明确一下：不要博物馆，这个我觉得是一个很broad的语义，既意味着现有的所有博物馆都应该去掉（which可能需要用户确认哪几个地点要被去掉），又意味着接下来不要加入博物馆（对整个会话生效直到用户去掉这一偏好或覆盖。一种约束？还是一种偏好？）。所以，在我们当前这个框架下面，应该怎样使得上述的操作得以推进、引导用户，并且这一约束/偏好得以显现？这个需要深入讨论一下。另外，声称已满足（模型不能自证），这次模型出现这个情况，我想知道原因是什么、这个字段谁来修改、是否在一轮对话中多次进入模型等；而且，既然这个字段会经过模型，是否就意味着模型具有修改权利？怎样才可证明模型是有依据来修改的？",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "excluded_topic",
+            "value": "museum",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "不要博物馆"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visits",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "已有站点先别删除"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "先保留已有站点；如果存在博物馆，是否另行替换？"
+        ],
+        "excluded_add": [
+          "museum"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "excluded_topic",
+            "value": "museum",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "不要博物馆",
+            "effect": "set"
+          },
+          {
+            "type": "preserve",
+            "name": "preserve_visits",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "已有站点先别删除",
+            "effect": "none"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "先保留已有站点；如果存在博物馆，是否另行替换？"
+        ],
+        "excluded_add": [
+          "museum"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s31",
+      "turn_index": 1,
+      "decision": "revise",
+      "language": "zh",
+      "scale": 4,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:18:53.820Z",
+      "model_revealed_at": "2026-10-27T13:16:54.470Z",
+      "rationale": "我觉得这个原标注不好，相对的，模型输出得很好啊",
+      "correction_notes": "我觉得就按模型这个输出改就好了啊",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "Bugis喝咖啡"
+          },
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "Bayfront游玩"
+          },
+          {
+            "type": "constraint",
+            "name": "area",
+            "value": "Bugis",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "在Bugis"
+          },
+          {
+            "type": "constraint",
+            "name": "time_window",
+            "value": "09:00-11:00",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "9点到11点"
+          },
+          {
+            "type": "constraint",
+            "name": "area",
+            "value": "Bayfront",
+            "scope": "visit:new:2",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "在Bayfront"
+          },
+          {
+            "type": "constraint",
+            "name": "time_window",
+            "value": "14:00-16:00",
+            "scope": "visit:new:2",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "14点到16点"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "Bugis喝咖啡",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            },
+            {
+              "order": 2,
+              "quote": "Bayfront游玩",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": [
+          "当前不能执行逐站时间窗口，是否先确定地点并人工核对？"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "area",
+            "value": "Bugis",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "在Bugis",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "time_window",
+            "value": "09:00-11:00",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "9点到11点",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "area",
+            "value": "Bayfront",
+            "scope": "visit:new:2",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "在Bayfront",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "time_window",
+            "value": "14:00-16:00",
+            "scope": "visit:new:2",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "14点到16点",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "quote": "喝咖啡",
+            "scope": "visit:new:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "drink",
+            "value": "coffee",
+            "quote": "喝咖啡",
+            "scope": "visit:new:1",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "Bugis喝咖啡",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            },
+            {
+              "order": 2,
+              "quote": "Bayfront游玩",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": [
+          "当前不能执行逐站时间窗口，是否先确定地点并人工核对？"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s32",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 4,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:15:59.178Z",
+      "model_revealed_at": "2026-10-27T13:14:44.384Z",
+      "rationale": "诶，这个标注又用了世界标准时。这个是新加坡playmap，所以我在想要不就用东八区普通时间格式吧？",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "set_time",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "2026年10月28日9点出发，18点结束"
+          }
+        ],
+        "commands": {
+          "set_time": [
+            {
+              "order": 1,
+              "quote": "2026年10月28日9点出发，18点结束",
+              "time_mode": "window",
+              "departure_at": "2026-10-28T09:00:00+08:00",
+              "finish_by": "2026-10-28T18:00:00+08:00"
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "departure_at",
+            "value": "2026-10-28T09:00:00+08:00",
+            "quote": "2026年10月28日9点出发",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "finish_by",
+            "value": "2026-10-28T18:00:00+08:00",
+            "quote": "18点结束",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "set_time": [
+            {
+              "order": 1,
+              "quote": "2026年10月28日9点出发，18点结束",
+              "time_mode": "window",
+              "departure_at": "2026-10-28T09:00:00+08:00",
+              "finish_by": "2026-10-28T18:00:00+08:00"
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s33",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 4,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:14:20.772Z",
+      "model_revealed_at": "2026-10-27T13:09:45.780Z",
+      "rationale": "不错。但是看到这些案例里面，模型有时候输出普通时间格式，有时候输出世界时间格式，有必要统一成普通时间格式。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "finish_by",
+            "value": "18:00",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "必须在18点前结束"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "哪一天几点出发？"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "finish_by",
+            "value": "18:00",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "unresolved",
+            "source": "user_explicit",
+            "quote": "必须在18点前结束",
+            "effect": "set"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "哪一天几点出发？"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s41",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 5,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:26:51.703Z",
+      "model_revealed_at": "2026-10-27T13:25:25.953Z",
+      "rationale": "我觉得这个原标注就很好，既有偏好又有约束。模型答得不是很好。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "本地吃的"
+          },
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "历史"
+          },
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "自然"
+          },
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "local_food",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "本地吃的"
+          },
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "history",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "历史"
+          },
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "nature",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "自然"
+          },
+          {
+            "type": "constraint",
+            "name": "duration",
+            "value": "one_day",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "安排一天"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "本地吃的",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": []
+              }
+            },
+            {
+              "order": 2,
+              "quote": "历史",
+              "place": {
+                "query": "",
+                "categories": [
+                  "heritage"
+                ],
+                "keywords": []
+              }
+            },
+            {
+              "order": 3,
+              "quote": "自然",
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "local_food",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "本地吃的",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "history",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "历史",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "nature",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "自然",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "duration",
+            "value": "one_day",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "安排一天",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "本地吃的",
+              "place": {
+                "query": "",
+                "categories": [
+                  "food"
+                ],
+                "keywords": []
+              }
+            },
+            {
+              "order": 2,
+              "quote": "历史",
+              "place": {
+                "query": "",
+                "categories": [
+                  "heritage"
+                ],
+                "keywords": []
+              }
+            },
+            {
+              "order": 3,
+              "quote": "自然",
+              "place": {
+                "query": "",
+                "categories": [
+                  "nature"
+                ],
+                "keywords": []
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s42",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 5,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:25:04.235Z",
+      "model_revealed_at": "2026-10-27T13:22:45.957Z",
+      "rationale": "这个我也觉得模型输出的还要好一些。不过约束 每段步行上限 明确取消 / 空值 这个部分我没看懂。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "add_visit",
+            "value": null,
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "加个博物馆"
+          },
+          {
+            "type": "preference",
+            "name": "comfort",
+            "value": "indoor",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "最好室内"
+          },
+          {
+            "type": "preference",
+            "name": "walking_effort",
+            "value": "low",
+            "scope": "global",
+            "hardness": "unknown",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "少走路"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加个博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": [],
+        "notes_add": [
+          "最好室内",
+          "少走路"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preference",
+            "name": "environment",
+            "value": "indoor",
+            "scope": "visit:new",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "最好室内",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "walking_effort",
+            "value": "low",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "少走路",
+            "effect": "set"
+          },
+          {
+            "type": "preference",
+            "name": "pace",
+            "value": "relaxed",
+            "quote": "轻松一点",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "museum",
+            "quote": "博物馆",
+            "scope": "visit:new",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "add_visit": [
+            {
+              "order": 1,
+              "quote": "加个博物馆",
+              "place": {
+                "query": "",
+                "categories": [
+                  "tourism"
+                ],
+                "keywords": [
+                  "museum"
+                ]
+              }
+            }
+          ]
+        },
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "s43",
+      "turn_index": 1,
+      "decision": "discuss",
+      "language": "zh",
+      "scale": 5,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:22:31.048Z",
+      "model_revealed_at": "2026-10-27T13:19:13.384Z",
+      "rationale": "我觉得这个原标注虽然也是一种路线——先与用户确认很难确定台阶问题，再探讨去哪些亲子景点，但是比较生硬，而且没有突出游玩的重点，更像是程序员修bug提问，而非一个playmap。模型这个是另一条路，先确认游玩的情况，然后可能会进一步确认access的问题；child_suitability和theme family也比较接近。所以这个可以讨论一下，表达方式的问题。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "family",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "亲子出游"
+          },
+          {
+            "type": "constraint",
+            "name": "wheelchair_access",
+            "value": "no_stairs",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "必须全程没有台阶"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "缺少完整无台阶资料，是否继续查看未核验候选？"
+        ],
+        "notes_add": [
+          "必须全程没有台阶"
+        ]
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preference",
+            "name": "theme",
+            "value": "family",
+            "scope": "global",
+            "hardness": "soft",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "亲子出游",
+            "effect": "set"
+          },
+          {
+            "type": "constraint",
+            "name": "wheelchair_access",
+            "value": "no_stairs",
+            "scope": "global",
+            "hardness": "hard",
+            "status": "unsupported",
+            "source": "user_explicit",
+            "quote": "必须全程没有台阶",
+            "effect": "set"
+          }
+        ],
+        "commands": {},
+        "questions": [
+          "缺少完整无台阶资料，是否继续查看未核验候选？"
+        ],
+        "notes_add": [
+          "必须全程没有台阶"
+        ]
+      },
+      "candidate_fixture": "person_b_f9_semantic_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "m01_walk_change_clear",
+      "turn_index": 3,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:28:53.412Z",
+      "model_revealed_at": "2026-10-27T13:27:55.192Z",
+      "rationale": "这三轮都很好，模型答得也不错",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "取消步行限制"
+          }
+        ],
+        "commands": {},
+        "questions": [],
+        "max_walk_minutes": null
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "max_walk_minutes",
+            "value": null,
+            "scope": "global",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "取消步行限制",
+            "effect": "clear"
+          }
+        ],
+        "commands": {},
+        "questions": [],
+        "max_walk_minutes": null
+      },
+      "candidate_fixture": "person_b_f9_multiturn_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "m03_takeaway",
+      "turn_index": 2,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:30:23.691Z",
+      "model_revealed_at": "2026-10-27T13:29:57.941Z",
+      "rationale": "可以。模型答得也对",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站保留"
+          }
+        ],
+        "commands": {},
+        "questions": []
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "Proposed interpretation; not applied.",
+        "semantic_segments": [
+          {
+            "type": "preserve",
+            "name": "preserve_visit",
+            "value": null,
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "quote": "第一站保留",
+            "effect": "none"
+          }
+        ],
+        "commands": {},
+        "questions": []
+      },
+      "candidate_fixture": "person_b_f9_multiturn_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "m10_reorder_keeps_identity",
+      "turn_index": 1,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:32:04.981Z",
+      "model_revealed_at": "2026-10-27T13:30:48.696Z",
+      "rationale": "可以。模型输出明显错了",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "替换并调整顺序",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "quote": "第二站换咖啡馆",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit"
+          },
+          {
+            "type": "operation",
+            "name": "move_visit",
+            "value": null,
+            "quote": "把第二站移到第一位",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "quote": "咖啡馆",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换咖啡馆",
+              "target_position": 2,
+              "place": {
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ],
+          "move_visit": [
+            {
+              "order": 2,
+              "quote": "把第二站移到第一位",
+              "target_position": 2,
+              "position": 1
+            }
+          ]
+        }
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "替换并调整顺序",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "cafe",
+            "quote": "咖啡馆",
+            "scope": "visit:2",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "第二站换咖啡馆",
+              "target_position": 2,
+              "place": {
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "cafe"
+                ]
+              }
+            }
+          ],
+          "move_visit": [
+            {
+              "order": 2,
+              "quote": "把第二站移到第一位",
+              "target_position": 2,
+              "position": 1
+            }
+          ]
+        }
+      },
+      "candidate_fixture": "person_b_f9_multiturn_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    },
+    {
+      "case_id": "m10_reorder_keeps_identity",
+      "turn_index": 2,
+      "decision": "keep",
+      "language": "zh",
+      "scale": 3,
+      "reviewer": "Bingsheng",
+      "confirmed_at": "2026-10-27T13:33:19.713Z",
+      "model_revealed_at": "2026-10-27T13:32:18.027Z",
+      "rationale": "可以。模型这个声称已满足的问题，之前有案例我描述过了，不再赘述。",
+      "correction_notes": "",
+      "original_gold": {
+        "acknowledgement": "替换现在的第一站",
+        "semantic_segments": [
+          {
+            "type": "operation",
+            "name": "replace_visit",
+            "value": null,
+            "quote": "现在第一站改成餐厅",
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit"
+          },
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "restaurant",
+            "quote": "餐厅",
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "现在第一站改成餐厅",
+              "target_position": 1,
+              "place": {
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "proposed_gold": null,
+      "annotation_status": "synthetic_unreviewed",
+      "structured_annotation_status": "needs_structured_review",
+      "candidate_gold": {
+        "acknowledgement": "替换现在的第一站",
+        "semantic_segments": [
+          {
+            "type": "constraint",
+            "name": "place_type",
+            "value": "restaurant",
+            "quote": "餐厅",
+            "scope": "visit:1",
+            "hardness": "hard",
+            "status": "understood",
+            "source": "user_explicit",
+            "effect": "set"
+          }
+        ],
+        "commands": {
+          "replace_visit": [
+            {
+              "order": 1,
+              "quote": "现在第一站改成餐厅",
+              "target_position": 1,
+              "place": {
+                "categories": [
+                  "food"
+                ],
+                "keywords": [
+                  "restaurant"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "candidate_fixture": "person_b_f9_multiturn_cases.jsonl",
+      "change_summary": "F9 effect, canonical field/scope and accepted per-item corrections; exact structured answer remains unreviewed."
+    }
+  ],
+  "rules_document": "docs/PERSON_B_HUMAN_REVIEW_RESPONSE_20261027.md",
+  "structured_gold_review_complete": false,
+  "candidate_turns": 28
+}

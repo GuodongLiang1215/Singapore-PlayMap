@@ -89,13 +89,15 @@ def scoped_schema():
     segment = _object({
         'type': {'type': 'string', 'enum': ['operation', 'constraint', 'preference', 'preserve', 'conflict']},
         'name': text,
-        'value': {'type': ['string', 'number', 'boolean', 'null']},
+        'value': {'type': ['string', 'number', 'boolean', 'null'],
+                  'description': 'For set fields, clear may name one member or use null for the entire field and scope. Scalar clear uses null.'},
         'scope': text,
         'hardness': {'type': 'string', 'enum': ['hard', 'soft', 'unknown']},
         'status': {'type': 'string', 'enum': ['understood', 'unresolved', 'conflicting', 'unsupported']},
         'source': {'type': 'string', 'enum': ['user_explicit', 'inferred']},
+        'effect': {'type': 'string', 'enum': ['set', 'clear', 'none']},
         'quote': {'type': 'string', 'description': 'A nonempty exact substring of the latest or pending user message. Never quote current_draft or other context.'},
-    }, ['type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote'])
+    }, ['type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'effect'])
     fields = {'acknowledgement': copy.deepcopy(text),
               'semantic_segments': array(segment)}
     fields['max_walk_minutes'] = {'type': ['integer', 'null']}
@@ -203,6 +205,7 @@ def pending_to_commands(parsed, draft):
         elif op == 'set_time':
             a['time_mode'] = a.pop('mode')
             a = {k: v for k, v in a.items() if v is not None and not (k == 'clear_departure' and v is False)}
+        a.pop('stay_profile', None)
         a = {'order': index + 1, **a}
         groups.setdefault(op, []).append(a)
     return {**data, 'commands': groups}

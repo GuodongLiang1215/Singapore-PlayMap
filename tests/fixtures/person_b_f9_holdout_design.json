@@ -1,0 +1,34 @@
+{
+  "schema": "ge5226-person-b-f9-holdout-design-v1",
+  "status": "design_only_unfrozen",
+  "annotation_status": "synthetic_unreviewed",
+  "model_calls_authorized": 0,
+  "single_turn_cases": 50,
+  "single_standard_language_counts": {"zh": 20, "en": 20, "mixed": 5},
+  "single_boundary_cases": 5,
+  "multiturn_conversations": 10,
+  "multiturn_turns": 21,
+  "planned_interpretation_attempts": 71,
+  "scales": [
+    {"scale": 1, "cases": 10, "focus": "One nearby venue, explicit type, a named spatial anchor, radius and opening time."},
+    {"scale": 2, "cases": 10, "focus": "One existing-visit edit, preservation, zero stay, invalid target and takeaway intent."},
+    {"scale": 3, "cases": 10, "focus": "Multiple new visits, independent scopes, walk cap and total-time budget."},
+    {"scale": 4, "cases": 10, "focus": "Different activity areas and time windows, dated versus undated deadlines."},
+    {"scale": 5, "cases": 10, "focus": "Open outing request with soft themes, incomplete information and unsupported hard conditions."}
+  ],
+  "multiturn_behaviours": [
+    "Explicitly set, replace and clear a walk cap without treating qualitative less-walking wishes as clear.",
+    "Set takeaway true, set false and clear the preference in separately covered add and replacement scenarios.",
+    "Continue a Pending question, cancel it and confirm a later proposal without leaking unconfirmed memory.",
+    "Replace and reorder a visit, then edit its new position while keeping constraints attached to visit identity.",
+    "Preserve one place while changing its stay; retain future-only exclusions without removing existing stops."
+  ],
+  "freeze_requirements": [
+    "Write new utterances rather than paraphrasing the reviewed development failures.",
+    "Fix initial state, events, catalogue facts, candidate choices and expected structured annotations before prediction collection.",
+    "Review each exact structured annotation independently and retain turn-level review evidence.",
+    "Record immutable fixture and prompt hashes, scorer/code versions and a separately authorized call cap.",
+    "Do not tune prompts using holdout predictions; if used for tuning, relabel the set as development data."
+  ],
+  "current_limit": "No held-out gold labels or model results exist in this design. Counts are planned coverage, not completed validation."
+}

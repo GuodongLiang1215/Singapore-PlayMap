@@ -31,3 +31,5 @@ def test_candidate_carries_duration_hours_and_source_evidence():
     assert options[0]['opening_hours_source'] == 'osm_reference'
     assert options[0]['data_source'] == 'overture'
     assert options[0]['entrance_count'] == 1
+    assert options[0]['place_types'] == ['cafe']
+    assert options[0]['place_type_basis'] == 'search_tags'

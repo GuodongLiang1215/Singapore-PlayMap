@@ -1,4 +1,4 @@
-"""F3: distinguish broad activity intent from a literal POI-name keyword.
+"""Bounded activity aliases and fine place types for catalogue retrieval.
 
 Exact, deliberately bounded aliases only. A restaurant, cafe, cuisine, halal or
 vegetarian condition is NOT an alias for all food records. No fallback drops
@@ -24,13 +24,28 @@ CATEGORY_INTENT_ALIASES = {
         '吃饭的地方', '吃饭地点', '用餐地点', '用餐场所', '餐饮地点', '餐饮场所',
         '午餐', '晚餐', '早餐',
     },
-    'nature': {'nature', 'park', 'parks', '公园', '自然', '自然景观'},
+    'nature': {'nature', '自然', '自然景观'},
 }
 ALIAS_CATEGORY = {normalise(term): cat for cat, terms in CATEGORY_INTENT_ALIASES.items() for term in terms}
 
+PLACE_TYPE_ALIASES = {
+    'park': {'park', 'parks', '公园'},
+    'cafe': {'cafe', 'cafes', 'café', 'cafés', 'coffee shop', 'coffee shops', '咖啡馆', '咖啡店'},
+    'restaurant': {'restaurant', 'restaurants', '餐厅', '餐馆'},
+    'museum': {'museum', 'museums', '博物馆'},
+}
+SUPPORTED_PLACE_TYPES = frozenset(PLACE_TYPE_ALIASES)
+PLACE_TYPE_CATEGORY = {'park': 'nature', 'cafe': 'food', 'restaurant': 'food', 'museum': 'tourism'}
+PLACE_TYPE_BY_ALIAS = {normalise(term): place_type for place_type, terms in PLACE_TYPE_ALIASES.items()
+                      for term in terms}
+
+
+def canonical_place_type(term: str) -> str | None:
+    return PLACE_TYPE_BY_ALIAS.get(normalise(term))
+
 
 def canonical_spec(spec: PlaceSpec, operation: str | None = None):
-    """Return a new spec and value-free counters; never mutate model/domain input.
+    """Return a new spec and bounded normalization facts without mutating input.
 
     Generic queries are converted only for visit discovery/replacement, not
     endpoint geocoding. Category synonyms in keywords are not extra must-match
@@ -40,12 +55,16 @@ def canonical_spec(spec: PlaceSpec, operation: str | None = None):
     query = spec.query.strip()
     normalized_count = 0
     query_normalized = False
-    query_category = ALIAS_CATEGORY.get(normalise(query))
+    query_type = canonical_place_type(query)
+    query_category = PLACE_TYPE_CATEGORY.get(query_type) or ALIAS_CATEGORY.get(normalise(query))
+    keywords = list(spec.keywords)
     if operation in ('add_visit', 'replace_visit') and query_category and (
         not categories or query_category in categories
     ):
         if not categories:
             categories.append(query_category)
+        if query_type and query_type not in keywords and len(keywords)<6:
+            keywords.append(query_type)
         query = ''
         query_normalized = True
         normalized_count += 1
@@ -53,10 +72,11 @@ def canonical_spec(spec: PlaceSpec, operation: str | None = None):
     # When only generic activity keywords are present, they can identify a class.
     # Explicit place names retain their search semantics and are never generalized.
     if not categories and not query:
-        categories = list(dict.fromkeys(ALIAS_CATEGORY[normalise(k)] for k in spec.keywords
-                                        if normalise(k) in ALIAS_CATEGORY))
+        categories = list(dict.fromkeys(category for k in keywords
+                         if (category := PLACE_TYPE_CATEGORY.get(canonical_place_type(k))
+                             or ALIAS_CATEGORY.get(normalise(k)))))
     specific = []
-    for keyword in spec.keywords:
+    for keyword in keywords:
         term = keyword.strip()
         if not term:
             continue
@@ -69,6 +89,8 @@ def canonical_spec(spec: PlaceSpec, operation: str | None = None):
     return effective, {
         'generic_intent_terms_normalized': normalized_count,
         'generic_query_normalized': query_normalized,
+        # Keep the fine type even when all six keyword positions are already occupied.
+        'query_place_type':query_type if query_normalized else None,
         'specific_keyword_count': len(specific),
         'input_keyword_count': len(spec.keywords),
         'explicit_query_present': bool(query),

@@ -11,14 +11,19 @@ from app.llm_connect.config import load_settings
 from app.llm_connect.errors import LLMConnectionError
 from app.stage2b.models import TimeSettings, Visit, PlacePoint, SGT
 from .time_updates import merge_time_updates, safe_time_diagnostic, TimeUpdateError
-from .models import (ChatRequest,Draft,Preferences,Interpretation,LocationAction,TimeAction,Selection)
+from .models import (ChatRequest,Draft,Preferences,Interpretation,LocationAction,TimeAction,Selection,SemanticSegment)
 from .catalogue import LocalCatalogue, retrieve_slot, blocked
 from .command_contract import pending_to_commands, CONTRACT_NAME
 from .proposal_status import acknowledgement, slot_label
 from .prompts import INTERPRET, SELECT, PROMPT_VERSION
 from .wire_schema import interpretation_schema, selection_schema, schema_stats, WIRE_VERSION
-from .operation_adapter import parse_interpretation, OperationFormatError, validation_from_exception, safe_validation
-from .semantic import bind_constraint_scopes, merge_active_constraints, takeaway_intent_for_action, validate_segment_command_consistency, SemanticConsistencyError
+from .operation_adapter import parse_provider_interpretation, OperationFormatError, validation_from_exception, safe_validation
+from .semantic import (bind_constraint_scopes, merge_active_constraints, synchronize_action_constraints,
+    validate_segment_command_consistency, SemanticConsistencyError, requirements_for_action,
+    requirement_outcomes, unverified_preferences, parameter_mismatches)
+from .semantic import restore_verified_preferences
+from app.verification import VERIFICATIONS
+from .requirement_fields import capability_summary
 
 # Words in the user's own request that mean "just buy something and go" (e.g. "grab a coffee to go").
 TAKEAWAY_WORDS = re.compile(r'(\bto go\b|take ?-?away|\bgrab (a|an|some)\b|\bpick up (a|an|some)\b|\bbuy (a|an|some)\b|'
@@ -90,6 +95,28 @@ class ProposalStore:
 STORE=ProposalStore()
 
 
+class MessageTurns:
+    def __init__(self, capacity=128):
+        self.capacity, self.values, self.lock = capacity, {}, threading.Lock()
+
+    def next(self, body):
+        floor = max([row.turn_index for row in body.preferences.active_constraints] +
+            ([row.turn_index for row in body.pending.interpretation.semantic_segments] if body.pending else []) + [0])
+        with self.lock:
+            if body.session_id not in self.values and len(self.values) >= self.capacity:
+                self.values.pop(next(iter(self.values)))
+            index = max(self.values.get(body.session_id, 0), floor) + 1
+            self.values[body.session_id] = index
+            return index
+
+    def clear(self, session):
+        with self.lock:
+            self.values.pop(session, None)
+
+
+MESSAGE_TURNS = MessageTurns()
+
+
 def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()):
     d=old.model_dump()
     for field in ('preferred','excluded','notes'):
@@ -100,12 +127,27 @@ def merge_preferences(old, parsed, *, turn_index=0, draft=None, new_visit_ids=()
     if draft is not None:
         active = bind_constraint_scopes(active, draft)
         segments = bind_constraint_scopes(segments, draft, new_visit_ids=new_visit_ids)
-    d['active_constraints'] = [item.model_dump(mode='json') for item in merge_active_constraints(
-        active, segments, turn_index=turn_index)]
+        if any(row.type in {'constraint','preference'} and row.effect!='none' and row.scope.startswith('visit:') for row in segments):
+            raise ChatError('AMBIGUOUS_REQUIREMENT_SCOPE','要求没有唯一对应的有效站点。多个新增地点请分别说明；原行程保留。')
+    merged = merge_active_constraints(active, segments, turn_index=turn_index)
     removed_scopes = {'visit_id:' + a.target_id for a in parsed.actions if a.op == 'remove_visit'}
     if draft is not None and any(a.op == 'clear_visits' for a in parsed.actions):
         removed_scopes.update('visit_id:' + visit.visit_id for visit in draft.visits)
-    d['active_constraints'] = [item for item in d['active_constraints'] if item['scope'] not in removed_scopes]
+    merged = [item for item in merged if item.scope not in removed_scopes]
+    if draft is not None:
+        merged = synchronize_action_constraints(merged, parsed, draft,
+            new_visit_ids=new_visit_ids, turn_index=turn_index)
+    d['active_constraints'] = [item.model_dump(mode='json') for item in merged]
+    for field, name in (('excluded', 'excluded_topic'), ('preferred', 'theme')):
+        managed = {row.value for row in old.active_constraints if row.name == name and isinstance(row.value, str)}
+        current = [row['value'] for row in d['active_constraints'] if row['name'] == name and
+                   isinstance(row['value'], str) and row['value'] in {'park','food','museum','shopping','heritage','architecture','art','nature','photography'} and
+                   (field != 'excluded' or row['hardness'] == 'hard') and
+                   (row['scope'] in {'global', 'future_visits'} if field == 'excluded'
+                    else row['scope'] == 'global')]
+        d[field] = list(dict.fromkeys([value for value in d[field] if value not in managed] + current))
+    if any(row.name == 'takeaway' and (row.effect == 'clear' or row.value is False) for row in segments):
+        d['notes'] = [note for note in d['notes'] if not TAKEAWAY_WORDS.search(note)]
     if set(d['preferred'])&set(d['excluded']):raise ChatError('PREFERENCE_CONFLICT','同一偏好同时被要求和排除，请明确以哪一条为准。')
     if any(len(x)>240 for x in d['notes']):raise ChatError('NOTE_TOO_LONG','偏好说明过长，请拆分需求。')
     return Preferences.model_validate(d)
@@ -128,10 +170,41 @@ def model_context(body,cat=None):
                        'categories':categories(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
             'finish_policy':body.draft.finish_policy,'finish':point(body.draft.finish),
             'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json'),
-            'max_walk_minutes':body.draft.max_walk_minutes,
-            'active_constraints':[item.model_dump(mode='json') for item in body.preferences.active_constraints]}
+            'max_walk_minutes':body.draft.max_walk_minutes}
 
 DISTANCE_BANDS=((1000,'<1km'),(3000,'1-3km'),(10000,'3-10km'))
+
+
+def global_exclusions_for_slot(preferences, slot):
+    rows_by_topic = {}
+    for row in preferences.active_constraints:
+        if row.name == 'excluded_topic' and isinstance(row.value, str):
+            rows_by_topic.setdefault(row.value, []).append(row)
+    result = []
+    for topic in preferences.excluded:
+        rows = rows_by_topic.get(topic, [])
+        hard_rows = [row for row in rows if row.hardness == 'hard']
+        if not rows:
+            result.append(topic)
+        elif any(row.scope == 'global' for row in hard_rows):
+            result.append(topic)
+        elif slot and slot.get('operation') == 'add_visit' and any(
+                row.scope == 'future_visits' for row in hard_rows):
+            result.append(topic)
+    return result
+
+
+def selection_preferences(preferences, slot):
+    target_scope = 'visit_id:' + str(slot.get('target_visit_id') or '')
+    applies = []
+    for row in preferences.active_constraints:
+        if row.scope == 'global' or row.scope == target_scope:
+            applies.append(row.model_dump(mode='json'))
+        elif row.scope == 'future_visits' and slot.get('operation') == 'add_visit':
+            applies.append(row.model_dump(mode='json'))
+    return {'preferred': list(preferences.preferred),
+            'excluded': global_exclusions_for_slot(preferences, slot),
+            'active_constraints': applies}
 
 def distance_band(metres):
     """Coarsen an anchor distance before it leaves the backend.
@@ -210,14 +283,16 @@ def assemble(record,choices,*,strict=False,cat=None):
         d.max_walk_minutes = parsed.max_walk_minutes
     elif 'max_walk_minutes' in parsed.model_fields_set and any(
         s.type == 'constraint' and s.name == 'max_walk_minutes' and
-        s.scope == 'global' and s.value is None for s in parsed.semantic_segments
+        s.scope == 'global' and s.effect == 'clear' for s in parsed.semantic_segments
     ):
         d.max_walk_minutes = None
     time_update=resolved_time_update(body.draft.time,parsed.actions)
     d.time=time_update.settings
     time_changes_added=False
     slots={s['action_index']:s for s in record['slots']};prefs=record['preferences'];changes=[];missing=[]
-    semantic_conflict = any(c.hardness == 'hard' and c.status == 'conflicting' for c in prefs.active_constraints)
+    semantic_conflict = any(c.hardness == 'hard' and c.status == 'conflicting' and
+        c.evidence_source != 'route' and c.source != 'route' for c in prefs.active_constraints) or any(
+        s.type=='conflict' for s in parsed.semantic_segments)
     if strict and semantic_conflict:
         raise ChatError('SEMANTIC_CONFLICT','明确约束仍有冲突，请先澄清后再采用；原行程保留。')
     expected={s['slot_id'] for s in record['slots']}
@@ -234,8 +309,7 @@ def assemble(record,choices,*,strict=False,cat=None):
                 if key:raise ChatError('UNTRUSTED_PLACE','地点选择不在本次真实检索结果中。')
                 missing.append(s['slot_id']);continue
             p=PlacePoint.model_validate(option['point'])
-            explicit_takeaway = takeaway_intent_for_action(parsed, a, body.draft)
-            takeaway = explicit_takeaway if explicit_takeaway is not None else bool(TAKEAWAY_WORDS.search(a.quote or ''))
+            takeaway = a.stay_profile == 'takeaway'
             if a.op=='set_origin':d.origin=p;changes.append('起点 → '+p.label)
             elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('结束位置 → '+p.label)
             elif a.op=='replace_visit':
@@ -245,7 +319,7 @@ def assemble(record,choices,*,strict=False,cat=None):
                     visit.stay_profile='takeaway'
                     visit.stay_minutes=None
                     changes.append('替换停留地点 → '+p.label+'（外带／顺路购买，按短时间计）')
-                elif explicit_takeaway is False:
+                elif a.stay_profile == 'regular':
                     visit.stay_profile='regular'
                     visit.stay_minutes=None
                     changes.append('替换停留地点 → '+p.label+'（取消外带，停留按一般估计）')
@@ -263,7 +337,13 @@ def assemble(record,choices,*,strict=False,cat=None):
             v=find(a.target_id)
             if a.position>len(d.visits):raise ChatError('INVALID_POSITION','新顺序超出当前停留数量。')
             d.visits.remove(v);d.visits.insert(a.position-1,v);changes.append('调整指定地点到第'+str(a.position)+'站')
-        elif a.op=='set_stay':find(a.target_id).stay_minutes=a.minutes;changes.append('调整指定站停留 → '+('类别初始估计' if a.minutes is None else str(a.minutes)+'分钟'))
+        elif a.op=='set_stay':
+            visit=find(a.target_id)
+            if a.stay_profile is not None:
+                visit.stay_profile=a.stay_profile
+            visit.stay_minutes=None if a.stay_profile=='takeaway' else a.minutes
+            changes.append('调整指定站停留 → '+('外带初值' if a.stay_profile=='takeaway' else
+                '类别初始估计' if a.minutes is None else str(a.minutes)+'分钟'))
         elif a.op=='set_finish_policy':d.finish_policy=a.value;d.finish=None;changes.append('结束方式 → '+('返回出发点' if a.value=='return_to_start' else '最后一站结束'))
         elif a.op=='set_mode':d.mode=a.value;changes.append('交通方式 → '+a.value)
         elif a.op=='set_time':
@@ -272,19 +352,43 @@ def assemble(record,choices,*,strict=False,cat=None):
         elif a.op=='clear_visits':d.visits=[];changes.append('清空停留清单（起点、模式和时间要求不变）')
     if len(d.visits)>20:raise ChatError('TOO_MANY_VISITS','当前单条行程最多20个停留点，请减少或分段。')
     d=Draft.model_validate(d.model_dump())
+    if d.model_dump()!=body.draft.model_dump():
+        prefs=unverified_preferences(prefs)
+    if d.model_dump()!=body.draft.model_dump() and not changes:
+        changes.append('更新行程条件（待确认）')
+    if prefs.model_dump()!=body.preferences.model_dump():
+        changes.append('更新已记录的要求和偏好（待确认）')
     if strict and missing:raise ChatError('CONFIRM_PLACE','请先为每个有歧义或尚未确定的地点选择真实候选。')
     warnings=list(record.get('warnings',[]))
     if semantic_conflict:warnings.append('明确约束有冲突；澄清前不能采用或计算这份草案。')
     if not d.origin:warnings.append('尚无已确认起点：可以先采用停留草案，然后在地图选起点，或继续说出起点名称。')
     if d.finish_policy=='custom' and not d.finish:warnings.append('还需要明确最后结束位置。')
     if prefs.notes:warnings.append('以下要求仅记录、尚无完整校验能力：'+'；'.join(prefs.notes))
-    conflicts=excluded_visits(d.visits,prefs.excluded,cat)
+    future_only = {row.value for row in prefs.active_constraints if row.name == 'excluded_topic' and row.scope == 'future_visits'}
+    global_excluded = [topic for topic in prefs.excluded if topic not in future_only or any(
+        row.name == 'excluded_topic' and row.value == topic and row.scope == 'global' for row in prefs.active_constraints)]
+    conflicts=excluded_visits(d.visits,global_excluded,cat)
     if conflicts:warnings.append('清单存在可能违反排除要求的地点，请替换或修改偏好：'+'、'.join(conflicts))
     if strict and conflicts:raise ChatError('EXCLUDED_VISIT_REMAINS','清单中仍有被排除类别的可识别地点，请先修改草案或明确允许。')
+    outcomes = requirement_outcomes(prefs)
+    warnings.extend(row['message'] for row in outcomes if row['hardness'] == 'hard' and row['status'] in {'unresolved', 'unsupported'})
+    missing_parameters = [row for row in outcomes if row['hardness']=='hard' and row['status']=='unresolved' and row['capability']=='parameter']
+    unresolved_targets = [row for row in parsed.semantic_segments if row.type=='operation' and row.status=='unresolved']
+    blockers = (['semantic_conflict'] if semantic_conflict else []) + (['excluded_visit_conflict'] if conflicts else [])
+    if missing_parameters or unresolved_targets:
+        blockers.append('requirement_mismatch')
+        warnings.append('还有动作所需的日期、时间或目标未明确，请先补充后再采用。')
+        if strict:raise ChatError('REQUIREMENT_NEEDS_CLARIFICATION','请先补充动作必需的日期、时间或有效站点；原行程保留。')
+    mismatches=parameter_mismatches(prefs,d)
+    if mismatches:
+        blockers.append('requirement_mismatch')
+        warnings.append('待采用参数与仍有效的明确要求不一致，请先明确替换或撤回要求：'+', '.join(mismatches))
+        if strict:raise ChatError('HARD_REQUIREMENT_CONFLICT','待采用参数不能覆盖仍有效的明确要求；请先澄清或撤回。')
     return {'draft':d.model_dump(mode='json'),'preferences':prefs.model_dump(),'changes':changes,
+        'requirement_outcomes':outcomes,'adoption_blockers':blockers,
         'unresolved_slots':missing,'warnings':list(dict.fromkeys(warnings)),
-        'can_apply':not missing and not conflicts and not semantic_conflict,
-        'ready_to_calculate':bool(d.origin and d.visits and (d.finish_policy!='custom' or d.finish)) and not missing and not conflicts and not semantic_conflict,
+        'can_apply':not missing and not blockers,
+        'ready_to_calculate':bool(d.origin and d.visits and (d.finish_policy!='custom' or d.finish)) and not missing and not blockers,
         'time_update':time_update.diagnostic,
         'time_budget_is_user_constraint':d.time.mode!='estimate', 'opening_hours_checked':False,
         'entrances_verified':False,'order_optimisation':False,'route_calculated':False}
@@ -292,13 +396,18 @@ def assemble(record,choices,*,strict=False,cat=None):
 
 def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_trace):
     if not body.consent:raise ChatError('CONSENT_REQUIRED','先阅读并勾选发送说明。开发测试请只使用公开地点和虚构需求。',403)
+    cat=cat or LocalCatalogue()
+    clean_preferences,_=restore_verified_preferences(VERIFICATIONS,body.verification_ref,
+        body.session_id,body.revision,body.draft,body.preferences,
+        catalogue_build_id=getattr(cat,'build_id',None))
+    body=body.model_copy(update={'preferences':clean_preferences},deep=True)
+    turn_index=MESSAGE_TURNS.next(body)
     settings=None
     if client is None:settings=load_settings(ROOT);client=ChatGeminiREST(settings)
     source_text=body.message+(' '+body.pending.user_message if body.pending else '')
     secret=settings.key if settings else ''
     if (secret and secret in source_text) or re.search(r'(?:AIza[\w-]{20,}|sk-[\w-]{20,}|eyJ[A-Za-z0-9_-]{15,}\.)',source_text):
         raise ChatError('POSSIBLE_SECRET','输入疑似包含密钥，未发送。请移除敏感内容。')
-    cat=cat or LocalCatalogue()
     for point in [body.draft.origin,body.draft.finish]+[v.point for v in body.draft.visits]:
         try:cat.validate_point(point)
         except ValueError:raise ChatError('CATALOGUE_CHANGED','当前行程引用的目录已改变或存在暂缓地点，请刷新并重新选点。',409) from None
@@ -329,12 +438,13 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     payload={'user_message':body.message,'current_draft':model_context(body,cat=cat),
              'preferences':body.preferences.model_dump(),'pending_request':({'user_message':body.pending.user_message,
                  'interpretation':pending_to_commands(body.pending.interpretation,body.draft)} if body.pending else None),
-             'singapore_now':datetime.now(SGT).replace(microsecond=0).isoformat()}
+             'singapore_now':datetime.now(SGT).replace(microsecond=0).isoformat(),
+             'capabilities':capability_summary()}
     raw=generate(INTERPRET,payload,interpretation_schema())
     _trace['phase']='interpretation_validation'
     if not isinstance(raw, dict) or not {'acknowledgement', 'semantic_segments', 'commands'} <= raw.keys():
         raise ChatError('MODEL_SCHEMA','模型缺少语义分段或操作字段；原行程保留。',502)
-    try:parsed,adaptation=parse_interpretation(raw,body.draft,turn_index=body.revision+1)
+    try:parsed,adaptation=parse_provider_interpretation(raw,body.draft,turn_index=turn_index)
     except OperationFormatError as error:
         _trace['validation']=error.validation
         _trace['normalization']=error.normalization
@@ -353,7 +463,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     _trace['time_update']=time_update.diagnostic
     _trace['phase']='preference_merge'
     new_ids={i:secrets.token_hex(16) for i,a in enumerate(parsed.actions) if a.op=='add_visit'}
-    prefs=merge_preferences(body.preferences, parsed, turn_index=body.revision+1,
+    prefs=merge_preferences(body.preferences, parsed, turn_index=turn_index,
                             draft=body.draft, new_visit_ids=list(new_ids.values()))
     _trace['phase']='retrieval'
     anchor=None if any(a.op=='set_origin' for a in parsed.actions) else body.draft.origin
@@ -363,7 +473,13 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
     for i,a in enumerate(parsed.actions):
         if not isinstance(a,LocationAction):continue
         if cancelled():raise ChatError('CANCELLED','已取消后续检索。',409)
-        slot=retrieve_slot(i,a,cat,prefs,anchor,existing,geo);slots.append(slot);warnings.extend(slot['notices'])
+        ledger_rows=[SemanticSegment(type=row.kind,effect='set',**row.model_dump(exclude={'kind'})) for row in prefs.active_constraints]
+        requirements=requirements_for_action(ledger_rows,a,body.draft,parsed)
+        if a.op=='add_visit':
+            requirements.extend(row for row in ledger_rows if row.scope=='visit_id:'+new_ids[i])
+        slot=retrieve_slot(i,a,cat,prefs,anchor,existing,geo,requirements=requirements)
+        slot['target_visit_id']=new_ids.get(i) if a.op=='add_visit' else a.target_id
+        slots.append(slot);warnings.extend(slot['notices'])
         if not slot['options']:warnings.append('尚未补齐：'+slot_label(slot)+'候选。可能是具体条件无匹配或目录覆盖不足；不是已确认现实中没有。未补齐前不省略此项采用。')
     generic=[s for s in slots if not s['explicit_location_confirmation'] and s['options']]
     if generic:
@@ -371,11 +487,13 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         # the backend, and anchor distances are coarsened so the start point is not exported
         # as an exact distance set. Exact metres stay local for ranking and for this browser.
         short=[{'slot_id':s['slot_id'],'categories':s['categories'],
+            'applicable_preferences': selection_preferences(prefs, s),
             'candidates':[{**{k:o[k] for k in ('candidate_key','identity','label','categories','address','basis',
                                                  'data_source','suggested_duration','opening_hours_display',
-                                                 'opening_hours_source','entrance_count')},
+                                                 'opening_hours_source','entrance_count','place_types','place_type_basis')},
                 'distance_band':distance_band(o['distance_hint_m'])} for o in s['options']]} for s in generic]
-        raw_selection=generate(SELECT,{'slots':short,'preferences':prefs.model_dump()},selection_schema())
+        raw_selection=generate(SELECT,{'slots':short,'preferences':{'preferred':prefs.preferred,
+            'excluded':global_exclusions_for_slot(prefs, None)}},selection_schema())
         _trace['phase']='selection_validation'
         try:selected=Selection.model_validate(raw_selection)
         except ValidationError as error:

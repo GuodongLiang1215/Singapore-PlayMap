@@ -9,6 +9,7 @@ from app.stage2a.models import Contract
 from app.stage2b.models import PlanRequest, MAX_VISITS
 from app.stage2b.cache import SegmentCache
 from app.stage2b.planning import calculate, PlanningError
+from app.verification import VERIFICATIONS
 
 router = APIRouter(prefix='/api/stage2b', tags=['Stage2B manually ordered itineraries'])
 cache = SegmentCache()
@@ -17,6 +18,16 @@ _counts = {'plans_completed':0,'plans_failed':0,'plans_cancelled':0}
 
 class ClearRequest(Contract):
     session_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+
+
+def plan_catalogue_build_id(body: PlanRequest):
+    points=[body.origin,body.finish]+[visit.point for visit in body.visits]
+    builds={point.catalogue_build_id for point in points
+        if point is not None and point.source=='catalogue_representative'}
+    if len(builds)>1:return None
+    try:return catalogue.snapshot(next(iter(builds),None))[1]['build_id']
+    except HTTPException:return None
+
 
 @router.get('/status')
 def status():
@@ -47,9 +58,12 @@ async def plan(body: PlanRequest, request: Request):
             'message':'核查目录版本改变或不可读。请刷新页面；原始资料没有被改动。',
             'complete_plan_created':False}) from None
     with _lock: _counts['plans_completed'] += 1
+    catalogue_build_id=plan_catalogue_build_id(body)
+    result['verification_ref']=VERIFICATIONS.record(body,result,catalogue_build_id=catalogue_build_id)
     return result
 
 @router.post('/clear-memory')
 def clear_memory(body: ClearRequest):
     cache.clear_session(body.session_id)
+    VERIFICATIONS.clear(body.session_id)
     return {'cleared':True,'scope':'this browser session only','disk_files_modified':False}

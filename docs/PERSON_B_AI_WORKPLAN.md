@@ -1,5 +1,7 @@
 # Person B：对话语义解析与约束记忆工作计划
 
+2026-10-28 更新：用户已确认 [25 话轮人工抽样复核的逐项答复](PERSON_B_HUMAN_REVIEW_RESPONSE_20261027.md)，并授权实施和收尾。[F9 实施计划](PERSON_B_F9_IMPLEMENTATION_PLAN.md) 的本地实现、回归及 I/O/API 交接文档已完成；解析质量和真实浏览器/C/D 联调仍未验收。本文保留 `51fa558` 起始方案和 F7/F8 的历史记录。
+
 ## 1. 目标和边界
 
 本计划以 commit `51fa558` 为基线，周期为 14 个工作日。B 的交付物是一条可评估、可追踪的链路：
@@ -16,23 +18,17 @@
 
 ## 0. 当前实现进度
 
-首个实现切片已经完成：
+截至 2026-10-28，本地 F9 实现和工程交接已完成：
 
-- `SemanticSegment`、`ActiveConstraint` 和严格的 provider schema 已加入；
-- `Preferences.active_constraints` 已接入 engine 和前端往返；
-- segments/commands 一致性检查会在不安全时失败关闭；
-- opening-hours 要求会保持 `unresolved`，不会被 LLM 标成已满足；
-- add/replace 两条路径都能识别 takeaway；
-- 候选已携带建议时长、营业时间来源、数据来源和入口数量；
-- 已有 50 个自动化测试通过；合成开发样例扩充到 50 个单轮、10 组多轮，共 71 话轮；
-- 新增离线评分和有调用上限的实验入口，说明见 [PERSON_B_EVALUATION.md](PERSON_B_EVALUATION.md)；
-- 本地账本按固定 visit ID 保存约束，调序后不再指向另一处地点，删除地点会清理局部约束；
-- 新增了保留要求与修改冲突、同轮 hard/soft 优先级、外带否定和步行限制撤回的回归检查；
-- 标注目前为 synthetic_unreviewed，人工 gold 复核和正式验收仍未完成。
+- 新模型输出使用严格语义段和操作契约；本地拒绝模型自报已满足、错误作用范围、无依据 hard 要求和不一致的可执行命令。
+- 约束账本按字段能力、稳定 visit ID 和明确的 set/clear 事件更新；确认候选前不改已采用 Draft，路线证据不随行程或目录变化沿用。
+- 细粒度 park/cafe/restaurant/museum 检索、候选数据来源、建议时长/营业时间证据和外带意图已接入。
+- 时间约束、区域/空间约束和活动属性按现有能力执行或明确保留为 unresolved/unsupported；没有把营业时间或无障碍要求伪装成已验证。
+- 170 个 Python 测试、23 个前端 Node 测试通过；F7 的 71 轮与 F9 修订候选的 28 轮合约检查通过，均未调用模型。复核导入 dry-run 确认 25 个已选话轮，46 个未确认话轮没有被自动升级。
+- 已新增 [输入输出契约](PERSON_B_IO_CONTRACT.md)、[API handoff](PERSON_B_API_HANDOFF.md) 和[最终验收记录](PERSON_B_FINAL_ACCEPTANCE.md)。没有手工浏览器走查、Render 验收或 C 新接口联调。
+- F9 修订 gold 仍是开发候选，holdout 目前只有设计；没有实际 Gemini 复测。F7 的 71 次模型调用授权已用完，新增模型实验须另行确认调用上限。具体限制见 [F9 实施计划](PERSON_B_F9_IMPLEMENTATION_PLAN.md) 和[评估说明](PERSON_B_EVALUATION.md)。
 
-F7 已完成 71 次真实解释请求（70 次有输出、1 次限流，无重试）。严格结构通过率 92.96%、分段 F1 0.396，尚未达标；见 [F7 基线报告](PERSON_B_F7_BASELINE_RESULTS.md)。本轮请求达到授权上限，后续先做无额外调用的本地修复。
-
-当前开发代码为 F8：补齐已支持的时间/交通字段一致性检查，复用 park/nature 领域别名，区分保留地点和保留整站，收紧 provider 必填字段。F8 只做了本地回归和旧输出重放，尚未进行新一轮模型实测。
+F7 历史基线仍是 71 次真实解释请求（70 次有输出、1 次限流，无重试），严格结构通过率 92.96%、分段 F1 0.396；见 [F7 基线报告](PERSON_B_F7_BASELINE_RESULTS.md)。这不是 F9 的模型表现。
 
 B 负责：
 

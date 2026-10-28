@@ -12,8 +12,8 @@ sys.path.insert(0, str(ROOT))
 from app.llm_connect.config import load_settings
 from app.llm_connect.errors import LLMConnectionError
 from app.stage2c.engine import CallPacer, ChatGeminiREST
-from app.stage2c.evaluation import iter_predictions, validate_fixtures
-from scripts.evaluate_person_b import read_jsonl
+from app.stage2c.evaluation import EVALUATION_MODES, iter_predictions, validate_fixtures
+from scripts.evaluate_person_b import code_provenance, read_jsonl
 
 
 def main():
@@ -21,19 +21,22 @@ def main():
     parser.add_argument('--fixtures', type=Path, action='append')
     parser.add_argument('--max-calls', type=int, required=True, help='Hard upper bound on billable attempts; no retries.')
     parser.add_argument('--output', type=Path, required=True, help='New JSONL file; will never overwrite an existing run.')
+    parser.add_argument('--mode', choices=sorted(EVALUATION_MODES), help='Explicit replay override; defaults to fixture modes.')
     args = parser.parse_args()
     if args.max_calls < 1:
         parser.error('--max-calls must be positive')
-    paths = args.fixtures or [ROOT / 'tests/fixtures/person_b_semantic_cases.jsonl',
-                              ROOT / 'tests/fixtures/person_b_multiturn_cases.jsonl']
+    paths = args.fixtures or [ROOT / 'tests/fixtures/person_b_f9_semantic_cases.jsonl',
+                              ROOT / 'tests/fixtures/person_b_f9_multiturn_cases.jsonl']
     cases = [case for path in paths for case in read_jsonl(path)]
-    validate_fixtures(cases)
+    validate_fixtures(cases, mode=args.mode)
+    provenance = code_provenance()
     settings = load_settings(ROOT)
     count = 0
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open('x', encoding='utf-8') as handle:
-        for row in iter_predictions(cases, ChatGeminiREST(settings), max_calls=args.max_calls, pace=CallPacer()):
+        for row in iter_predictions(cases, ChatGeminiREST(settings), max_calls=args.max_calls, pace=CallPacer(), mode=args.mode):
             row['model'] = settings.model
+            row.update(provenance)
             handle.write(json.dumps(row, ensure_ascii=False) + '\n')
             handle.flush()
             count += 1

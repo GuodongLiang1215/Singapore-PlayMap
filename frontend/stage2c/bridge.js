@@ -10,7 +10,7 @@
   snapshot(){
    // Blur/change events usually sync the UI first; explicitly reject invalid time forms.
    const time=readTime();if(formInvalid)throw Error('请先修正左侧尚未完成的时间输入，再发送聊天。');
-   if(JSON.stringify(time)!==JSON.stringify(trip.data.time)){trip.setTime(time);renderTrip();invalidate();}
+   if(!PlayMapTrip.sameTime(time,trip.data.time)){trip.setTime(time);renderTrip();invalidate();}
    const d=clone(trip.data);if(d.finish_policy!=='custom')d.finish=null;
    return {session_id:trip.sessionId,revision:trip.revision,draft:d};
   },

@@ -6,6 +6,7 @@ from app.stage2c.models import (
     LocationAction,
     PlaceSpec,
     SemanticSegment,
+    StayAction,
 )
 from app.stage2c.semantic import (
     SemanticConsistencyError,
@@ -81,9 +82,57 @@ def test_explicit_constraint_removal_clears_the_active_scope():
     incoming = [SemanticSegment(
         type='constraint', name='max_walk_minutes', value=None, scope='global',
         hardness='hard', status='understood', source='user_explicit', quote='取消步行限制',
+        effect='clear',
     )]
 
     assert merge_active_constraints(active, incoming, turn_index=2) == []
+
+
+def test_clearing_one_set_member_preserves_unmentioned_exclusions():
+    active = [
+        ActiveConstraint(name='excluded_topic', value=topic, scope='global', hardness='hard',
+                         quote=f'排除{topic}', turn_index=1)
+        for topic in ('museum', 'food')
+    ]
+    remove_museum = SemanticSegment(
+        type='constraint', name='excluded_topic', value='museum', scope='global',
+        hardness='hard', status='understood', source='user_explicit',
+        quote='取消博物馆排除', effect='clear',
+    )
+
+    result = merge_active_constraints(active, [remove_museum], turn_index=2)
+
+    assert [(row.name, row.value) for row in result] == [('excluded_topic', 'food')]
+    assert [(row.name, row.value) for row in active] == [
+        ('excluded_topic', 'museum'), ('excluded_topic', 'food')]
+
+
+def test_clearing_a_set_field_with_null_removes_all_members_in_that_scope():
+    active = [ActiveConstraint(
+        kind='preference', name='theme', value=value, scope='global', hardness='soft',
+        quote=value, turn_index=1,
+    ) for value in ('family', 'photography')]
+    clear_all = SemanticSegment(
+        type='preference', name='theme', value=None, scope='global', hardness='hard',
+        quote='取消所有主题偏好', effect='clear',
+    )
+
+    assert merge_active_constraints(active, [clear_all], turn_index=2) == []
+
+
+def test_soft_member_clear_does_not_cancel_the_matching_hard_set_member():
+    active = [ActiveConstraint(
+        name='excluded_topic', value='museum', scope='global', hardness='hard',
+        quote='必须排除博物馆', turn_index=1,
+    )]
+    soft_clear = SemanticSegment(
+        type='constraint', name='excluded_topic', value='museum', scope='global',
+        hardness='soft', quote='如果方便，取消博物馆排除', effect='clear',
+    )
+
+    result = merge_active_constraints(active, [soft_clear], turn_index=2)
+
+    assert [(row.value, row.hardness) for row in result] == [('museum', 'hard')]
 
 
 def test_conflicting_hard_constraints_are_kept_as_conflict():
@@ -207,6 +256,22 @@ def test_a_hard_trip_budget_is_supported_by_the_time_command_value():
         validate_segment_command_consistency([segment], parsed)
 
 
+def test_global_hard_stay_duration_cannot_be_satisfied_by_changing_only_one_visit():
+    from app.stage2c.models import Visit
+
+    draft = Draft(visits=[
+        Visit(visit_id='stop-1', point={'label':'One','latitude':1.3,'longitude':103.8,'source':'user_map','confirmed':True}),
+        Visit(visit_id='stop-2', point={'label':'Two','latitude':1.31,'longitude':103.81,'source':'user_map','confirmed':True}),
+    ])
+    segment = SemanticSegment(type='constraint', name='stay_minutes', value=30, scope='global',
+        hardness='hard', quote='每个地点停留30分钟')
+    parsed = Interpretation(acknowledgement='调整停留时间', actions=[StayAction(
+        op='set_stay', target_id='stop-1', minutes=30, quote='第一站停留30分钟')])
+
+    with pytest.raises(SemanticConsistencyError):
+        validate_segment_command_consistency([segment], parsed, draft=draft)
+
+
 def test_conflicting_hard_constraint_is_safe_when_a_question_is_returned():
     parsed = Interpretation(acknowledgement='需要澄清', questions=['第二站要咖啡馆还是博物馆？'])
     segments = [SemanticSegment(
@@ -326,7 +391,7 @@ def test_existing_executable_fields_do_not_require_an_unnecessary_question(name,
     validate_segment_command_consistency([segment], parsed)
 
 
-def test_broad_park_intent_uses_the_existing_retrieval_alias():
+def test_park_segment_is_compatible_with_nature_recall_and_supplies_the_fine_filter():
     parsed = Interpretation(acknowledgement='公园', actions=[LocationAction(
         op='add_visit', place=PlaceSpec(categories=['nature']), quote='找个公园',
     )])

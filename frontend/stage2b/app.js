@@ -85,7 +85,8 @@ function renderTrip(){
  });
  $('finish-policy').value=d.finish_policy;$('finish-panel').hidden=d.finish_policy!=='custom';$('finish-summary').textContent=d.finish?d.finish.label:'尚未选择结束位置';$('mode').value=d.mode;$('undo').disabled=!trip.history.length;
 }
-function timeInputs(){const t=trip.data.time;$('time-mode').value=t.mode;$('budget-minutes').value=t.budget_minutes??'';$('departure').value=t.departure_at?t.departure_at.slice(0,16):'';$('finish-by').value=t.finish_by?t.finish_by.slice(0,16):'';$('buffer-minutes').value=t.buffer_minutes;timeVisibility();}
+function clockInput(value){if(!value)return '';const local=value.slice(0,19);return local.endsWith(':00')?local.slice(0,16):local;}
+function timeInputs(){const t=trip.data.time;$('time-mode').value=t.mode;$('budget-minutes').value=t.budget_minutes??'';$('departure').value=clockInput(t.departure_at);$('finish-by').value=clockInput(t.finish_by);$('buffer-minutes').value=t.buffer_minutes;timeVisibility();}
 function timeVisibility(){const m=$('time-mode').value;$('budget-row').hidden=m!=='budget';$('deadline-row').hidden=m!=='window';}
 function readTime(){
  const mode=$('time-mode').value,t={mode,departure_at:T.singaporeISO($('departure').value),finish_by:mode==='window'?T.singaporeISO($('finish-by').value):null,budget_minutes:mode==='budget'?T.integer($('budget-minutes').value,'总时长预算',{min:1,max:10080}):null,buffer_minutes:T.integer($('buffer-minutes').value,'整体预留',{min:0,max:1440})};
@@ -95,13 +96,14 @@ function timeChanged(){timeVisibility();try{const t=readTime();formInvalid=false
 function cancelCalculation(){clearTimeout(autoTimer);trip.cancel();if(planController)planController.abort();planController=null;$('cancel-calculation').disabled=true;if(trip.lastSuccess){mapView.markStale();$('result-body').classList.add('is-stale');}$('plan-status').textContent='已取消等待；不再请求后续路段。已发出的一个服务商请求可能仍在结束处理。';$('plan-status').className='stale';$('export-report').disabled=true;}
 async function calculate(force){
  clearTimeout(autoTimer);let ticket;
- try{const t=readTime();for(const card of $('visits').querySelectorAll('.visit-card')){const v=trip.data.visits.find(v=>v.visit_id===card.dataset.visitId),n=T.integer(card.querySelector('input').value,'停留分钟',{min:0,max:1440,nullable:true}),p=card.querySelector('select').value;if(v&&(v.stay_minutes!==n||v.stay_profile!==p))trip.setStay(v.visit_id,n,p);}if(JSON.stringify(t)!==JSON.stringify(trip.data.time))trip.setTime(t);formInvalid=false;ticket=trip.begin(force);reportError(null);}catch(e){formInvalid=true;reportError(e);return;}
+ try{const t=readTime();for(const card of $('visits').querySelectorAll('.visit-card')){const v=trip.data.visits.find(v=>v.visit_id===card.dataset.visitId),n=T.integer(card.querySelector('input').value,'停留分钟',{min:0,max:1440,nullable:true}),p=card.querySelector('select').value;if(v&&(v.stay_minutes!==n||v.stay_profile!==p))trip.setStay(v.visit_id,n,p);}if(!T.sameTime(t,trip.data.time))trip.setTime(t);formInvalid=false;ticket=trip.begin(force);reportError(null);}catch(e){formInvalid=true;reportError(e);return;}
  if(planController)planController.abort();const controller=planController=new AbortController(),viewRevision=mapView.viewRevision;
  $('cancel-calculation').disabled=false;$('export-report').disabled=true;
  if(trip.lastSuccess){mapView.markStale();$('result-body').classList.add('is-stale');}
  const n=trip.data.visits.length+(trip.data.finish_policy==='last_stop'?0:1);$('plan-status').className='';$('plan-status').textContent=`正在按顺序请求或复用 ${n} 段路径。可以继续编辑；旧请求不会覆盖新条件。`;$('plan-version').textContent='计算中 · 版本 '+ticket.revision;
  try{const r=await api('/api/stage2b/plan',ticket.payload,controller.signal);if(!trip.accepts(ticket,r))return;
   mapView.setPlan(r,mapView.viewRevision===viewRevision);if(!trip.save(ticket,r))return;renderResult(r);$('export-report').disabled=false;
+  window.dispatchEvent(new CustomEvent('playmap:plan-complete',{detail:{plan:r,revision:trip.revision}}));
  }catch(e){if(e.name==='AbortError'||ticket.sequence!==trip.sequence)return;$('plan-status').textContent=e.message+(trip.lastSuccess?' 上一份路线与时间轴仅供对照，不是本次结果。':' 没有生成完整方案。');$('plan-status').className='error';$('plan-version').textContent='本次未完成';}
  finally{if(planController===controller){planController=null;$('cancel-calculation').disabled=true;}}
 }

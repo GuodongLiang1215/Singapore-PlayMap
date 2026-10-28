@@ -13,8 +13,8 @@ class FakeClient:
             'data': {
                 'acknowledgement': '记录每段步行限制',
                 'semantic_segments': [{
-                    'type': 'constraint', 'name': 'max_walk_minutes', 'value': '10',
-                    'scope': 'global', 'hardness': 'hard', 'status': 'satisfied',
+                    'type': 'constraint', 'name': 'max_walk_minutes', 'value': 10,
+                    'scope': 'global', 'hardness': 'hard', 'status': 'understood','effect':'set',
                     'source': 'user_explicit', 'quote': '每段步行不要超过10分钟',
                 }],
                 'max_walk_minutes': 10,
@@ -27,9 +27,9 @@ class FakeClient:
 class MismatchClient(FakeClient):
     def generate_json(self, *, instruction, payload, schema):
         result = super().generate_json(instruction=instruction, payload=payload, schema=schema)
-        result['data']['semantic_segments'][0]['name'] = 'must_be_open'
-        result['data']['semantic_segments'][0]['value'] = '14:00'
-        result['data']['semantic_segments'][0]['quote'] = '下午两点必须营业'
+        result['data']['semantic_segments'][0]['name'] = 'budget_minutes'
+        result['data']['semantic_segments'][0]['value'] = 180
+        result['data']['semantic_segments'][0]['quote'] = '整个行程最多三小时'
         result['data']['max_walk_minutes'] = None
         return result
 
@@ -50,14 +50,14 @@ def test_prepare_round_trips_a_constraint_into_the_pending_preferences():
 
     assert record['preferences'].active_constraints[0].name == 'max_walk_minutes'
     assert record['preferences'].active_constraints[0].status == 'understood'
-    assert response['preview']['preferences']['active_constraints'][0]['value'] == '10'
+    assert response['preview']['preferences']['active_constraints'][0]['value'] == 10
 
 
 def test_prepare_rejects_a_hard_constraint_without_a_command_or_question():
     body = ChatRequest(
         session_id='c' * 32,
         revision=0,
-        message='下午两点必须营业',
+        message='整个行程最多三小时',
         draft=Draft(),
         preferences=Preferences(),
         consent=True,
@@ -76,6 +76,7 @@ class ClearWalkClient(FakeClient):
             'semantic_segments': [{
                 'type': 'constraint', 'name': 'max_walk_minutes', 'value': None,
                 'scope': 'global', 'hardness': 'hard', 'quote': '取消步行限制',
+                'status':'understood','source':'user_explicit','effect':'clear',
             }],
         }, 'metadata': {'provider': 'test'}}
 
@@ -137,6 +138,7 @@ class ConflictClient(FakeClient):
             'semantic_segments': [{
                 'type': 'constraint', 'name': 'travel_mode', 'value': mode,
                 'scope': 'global', 'hardness': 'hard', 'status': 'conflicting',
+                'source':'user_explicit','effect':'set',
                 'quote': quote,
             } for mode, quote in [('walk', '必须步行'), ('drive', '必须驾车')]],
         }, 'metadata': {'provider': 'test'}}

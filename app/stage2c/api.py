@@ -8,8 +8,11 @@ from app.config import ROOT
 from app.llm_connect.config import load_settings
 from app.llm_connect.errors import LLMConnectionError
 from app.stage2a import api as geo
-from .models import ChatRequest, ResolveRequest, ForgetRequest
-from .engine import prepare, assemble, STORE, ChatError, PACER
+from .models import ChatRequest, ResolveRequest, ForgetRequest, VerificationRequest
+from .engine import prepare, assemble, STORE, ChatError, PACER, MESSAGE_TURNS
+from .semantic import restore_verified_preferences
+from app.verification import VERIFICATIONS
+from app.stage1c import api as reviewed_catalogue
 from .catalogue import LocalCatalogue
 from .wire_schema import WIRE_VERSION
 
@@ -113,5 +116,16 @@ def resolve(body:ResolveRequest):
 @router.post('/forget')
 def forget(body:ForgetRequest):
     STORE.clear(body.session_id)
+    MESSAGE_TURNS.clear(body.session_id)
+    VERIFICATIONS.clear(body.session_id)
     return {'cleared_local_pending_proposals':True,'provider_data_deletion_requested':False,
             'notice':'只清理本地内存草案；不是删除服务商已收到的内容。'}
+
+
+@router.post('/verification')
+def verification(body:VerificationRequest):
+    try:catalogue_build_id=reviewed_catalogue.snapshot()[1]['build_id']
+    except HTTPException:catalogue_build_id=None
+    preferences,diagnostic=restore_verified_preferences(VERIFICATIONS,body.verification_ref,
+        body.session_id,body.revision,body.draft,body.preferences,catalogue_build_id=catalogue_build_id)
+    return {'preferences':preferences.model_dump(mode='json'),'verification':diagnostic,'generation_requests':0}

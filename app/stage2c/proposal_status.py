@@ -28,7 +28,7 @@ def acknowledgement(parsed, slots, preview, user_message):
     if slots:
         return ('已生成地点候选草案，尚未加入实际行程。请核对并确认采用，之后再计算路线与参考总时间。' if zh else
                 'Place candidates are ready for review, but no itinerary edits have been applied. Confirm the proposal before routes and reference times are calculated.')
-    if parsed.actions or any(getattr(parsed,k) for k in ('preferred_add','preferred_remove','excluded_add','excluded_remove','notes_add','notes_remove')):
+    if parsed.actions or parsed.semantic_segments or any(getattr(parsed,k) for k in ('preferred_add','preferred_remove','excluded_add','excluded_remove','notes_add','notes_remove')):
         return ('已生成条件修改草案，尚未应用。请核对后采用；原行程和已采用条件目前保持不变。' if zh else
                 'Constraint changes are ready for review, not yet applied. Your adopted itinerary and requirements are unchanged until confirmation.')
     return parsed.acknowledgement
