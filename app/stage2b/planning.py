@@ -9,6 +9,7 @@ from app.stage2a.models import RouteRequest, distance_m
 from app.stage2a.transport import ProviderError
 from app.stage2b.models import PlanRequest, PlacePoint
 from .spatial_constraints import validate_max_walking_time
+from .opening_hours import evaluate_visit_hours
 
 # Explicit, editable project assumptions. NOT empirical visitor-duration statistics.
 BASE_STAYS = {
@@ -27,10 +28,22 @@ class PlanningError(Exception):
                 'complete_plan_created':False, 'synthetic_fallback_used':False}
 
 
-def resolve_point(point: PlacePoint, resolver: Callable | None):
+def resolve_point(point: PlacePoint, resolver: Callable | None, search_point_matcher: Callable | None = None):
     if point.source != 'catalogue_representative':
-        return {'point':point, 'category':'unknown', 'regular_hours_evidence':[],
-                'source_checked':False, 'entrance_verified':False}
+        if point.source == 'onemap_search' and resolver is not None and search_point_matcher is not None:
+            match = search_point_matcher(point.label, point.latitude, point.longitude)
+            if match:
+                result = resolver(match['entity_id'], match['build_id'])
+                entity = result['entity']
+                return {'point':point, 'category':entity.get('category') or 'unknown',
+                        'suggested_duration':entity.get('suggested_duration'),
+                        'regular_hours_evidence':entity.get('regular_hours_evidence', []),
+                        'opening_hours_display':entity.get('opening_hours_display'),
+                        'entrance_points':entity.get('entrance_points') or [],
+                        'source_checked':True, 'entrance_verified':False,
+                        'catalogue_metadata_match':match}
+        return {'point':point, 'category':'unknown', 'regular_hours_evidence':[], 'opening_hours_display':None,
+                'entrance_points':[], 'source_checked':False, 'entrance_verified':False}
     if resolver is None:
         raise PlanningError('CATALOGUE_UNAVAILABLE', '全岛目录不可读，请恢复目录，或自行确认地图／搜索位置。', 409)
     result = resolver(point.entity_id, point.catalogue_build_id)
@@ -45,15 +58,17 @@ def resolve_point(point: PlacePoint, resolver: Callable | None):
     return {'point':normalized, 'category':entity.get('category') or 'unknown',
             'suggested_duration':entity.get('suggested_duration'),
             'regular_hours_evidence':entity.get('regular_hours_evidence', []),
+            'opening_hours_display':entity.get('opening_hours_display'),
+            'entrance_points':entity.get('entrance_points') or [],
             'source_checked':True, 'entrance_verified':False}
 
 
-def prepare(request, resolver=None):
-    origin = resolve_point(request.origin, resolver)
-    finish = resolve_point(request.finish, resolver) if request.finish else None
+def prepare(request, resolver=None, search_point_matcher=None):
+    origin = resolve_point(request.origin, resolver, search_point_matcher)
+    finish = resolve_point(request.finish, resolver, search_point_matcher) if request.finish else None
     visits = []
     for v in request.visits:
-        place = resolve_point(v.point, resolver)
+        place = resolve_point(v.point, resolver, search_point_matcher)
         reviewed = place.get('suggested_duration')
         if v.stay_minutes is None and v.stay_profile == 'takeaway' and reviewed and reviewed.get('takeaway'):
             # Just buying something: short fixed time, no range.
@@ -77,7 +92,11 @@ def prepare(request, resolver=None):
             'category':place['category'], 'stay_minutes':ref, 'stay_range_minutes':[lo,hi],
             'stay_basis':basis, 'stay_profile':v.stay_profile,
             'stay_note':'用户设定时长，未独立验证是否足够。' if basis == 'user_specified' else ('外带／顺路购买，按短时间计算，可修改。' if basis == 'place_takeaway' else '按细分类别的初始假设，可修改；不是实测游览时长。' if basis == 'place_category_default' else ('景点建议时长，可修改。' if basis.startswith('place_') else '类别／通用初始假设，可修改；不是实测游览时长或置信区间。')),
-            'entrance_verified':False, 'opening_status':'not_checked',
+            'entrance_verified':False, 'entrance_candidates':place.get('entrance_points') or [],
+            'selected_entrance':None, 'routing_point':place['point'].model_dump(),
+            'entrance_selection_basis':'representative_point_no_candidate',
+            'opening_status':'not_checked',
+            'opening_hours_display':place.get('opening_hours_display'),
             'regular_hours_evidence_count':len(place['regular_hours_evidence']),
             'regular_hours_evidence':place['regular_hours_evidence']})
     points = [origin['point']] + [PlacePoint.model_validate(v['point']) for v in visits]
@@ -115,10 +134,84 @@ def validate_route(route, mode):
         raise PlanningError('INVALID_SEGMENT_RESPONSE','一段路径的模式、线形或时间未通过检查，没有用零或直线代替。',502) from None
 
 
-async def calculate(request: PlanRequest, client, cache, resolver=None, disconnected=None):
-    prepared = prepare(request, resolver)
+def _entrance_point(candidate, visit_label):
+    try:
+        lat, lon = candidate['latitude'], candidate['longitude']
+        if isinstance(lat,bool) or isinstance(lon,bool) or not isinstance(lat,(int,float)) or not isinstance(lon,(int,float)):
+            return None
+        label=(candidate.get('name') or (visit_label+' 建议通行点'))[:200]
+        return PlacePoint(latitude=lat, longitude=lon, label=label, source='user_map', confirmed=True)
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+async def _select_visit_entrances(request, prepared, client, cache, generation, disconnected=None):
+    """Choose arrival access points conservatively.
+
+    One candidate is used directly. With multiple candidates, choose the reachable
+    candidate with the shortest provider-reported travel time from the previous
+    routing point. The same selected point is also used when leaving the visit;
+    no internal park traversal is invented.
+    """
+    previous=prepared['origin']
+    selection_calls=0
+    for visit in prepared['visits']:
+        candidates=[p for p in (_entrance_point(x,visit['point']['label']) for x in visit.get('entrance_candidates',[])) if p]
+        if not candidates:
+            chosen=PlacePoint.model_validate(visit['point'])
+            basis='representative_point_no_candidate'
+        elif len(candidates)==1:
+            chosen=candidates[0]
+            basis='single_entrance_candidate'
+        else:
+            ranked=[]
+            for candidate in candidates:
+                if disconnected is not None and await disconnected():
+                    raise PlanningError('CLIENT_CANCELLED','本次页面请求已取消，未继续比较入口候选。',409)
+                if distance_m(previous.latitude,previous.longitude,candidate.latitude,candidate.longitude)<1:
+                    ranked.append((0.0,candidate));continue
+                key=cache.key(request.session_id,request.mode,previous,candidate)
+                cached=None if request.force_refresh else cache.get(key)
+                if cached is not None:
+                    route,_age=cached
+                else:
+                    try:
+                        selection_calls+=1
+                        rr=RouteRequest(origin=previous.route_location(),destination=candidate.route_location(),
+                            mode=request.mode,revision=request.revision)
+                        route=await run_in_threadpool(client.route,rr)
+                        validate_route(route,request.mode)
+                        cache.put(key,route,expected_generation=generation)
+                    except ProviderError:
+                        continue
+                try:
+                    validate_route(route,request.mode)
+                    ranked.append((route['duration_s'],candidate))
+                except PlanningError:
+                    continue
+            if ranked:
+                ranked.sort(key=lambda x:x[0])
+                chosen=ranked[0][1]
+                basis='fastest_reachable_entrance_candidate'
+            else:
+                chosen=PlacePoint.model_validate(visit['point'])
+                basis='representative_point_all_candidates_unreachable'
+        visit['routing_point']=chosen.model_dump()
+        visit['selected_entrance']=chosen.model_dump() if basis!='representative_point_no_candidate' and not basis.startswith('representative_point_all') else None
+        visit['entrance_selection_basis']=basis
+        previous=chosen
+    points=[prepared['origin']]+[PlacePoint.model_validate(v['routing_point']) for v in prepared['visits']]
+    if request.finish_policy=='return_to_start': points.append(prepared['origin'])
+    elif prepared['finish']: points.append(prepared['finish'])
+    prepared['points']=points
+    return selection_calls
+
+
+async def calculate(request: PlanRequest, client, cache, resolver=None, disconnected=None, search_point_matcher=None):
+    prepared = prepare(request, resolver, search_point_matcher)
     generation = cache.generation(request.session_id)
-    legs, cache_hits, provider_calls = [], 0, 0
+    entrance_provider_calls = await _select_visit_entrances(request, prepared, client, cache, generation, disconnected)
+    legs, cache_hits, provider_calls = [], 0, entrance_provider_calls
     for index, (a,b) in enumerate(zip(prepared['points'], prepared['points'][1:])):
         if disconnected is not None and await disconnected():
             raise PlanningError('CLIENT_CANCELLED','本次页面请求已取消，未继续发出后续路段请求。',409)
@@ -203,6 +296,11 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
             end = cursor+visit['stay_minutes']*60
             visit['arrival_offset_s'], visit['departure_offset_s'] = cursor, end
             visit['arrival_at'], visit['departure_at'] = stamp(cursor), stamp(end)
+            hours_check = evaluate_visit_hours(
+                arrival_at=visit['arrival_at'], departure_at=visit['departure_at'],
+                opening_hours_display=visit.get('opening_hours_display'))
+            visit['opening_hours_check'] = hours_check
+            visit['opening_status'] = hours_check['status']
             timeline.append({'kind':'visit','visit_id':visit['visit_id'],'visit_index':index,
                 'start_offset_s':cursor,'end_offset_s':end,'start_at':stamp(cursor),'end_at':stamp(end),
                 'duration_s':end-cursor,'title':visit['point']['label']})
@@ -224,7 +322,7 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
     cautions=[
         '按用户指定顺序逐段计算；没有自动推荐地点、优化顺序或调用LLM。',
         '通行时间沿用本次／短时复用的服务商结果；出发时刻仅用于排时间轴，不是未来时段交通预测。',
-        '未核验入口、开放时段、最后入场、票务或实时关闭；时间预算通过不等于整趟行程现实可行。',
+        '开放时段仅对可明确解析的目录营业时间做静态检查；复杂时段、最后入场、临时关闭和票务仍需核验。',
         '路线端点到所选点、场馆内部移动、驾车停车与步行接驳未单独计时；请核对位置与必要预留。',
         '建议范围仅反映设定的停留时长范围；不包含交通随机性，不是统计置信区间。',
     ]
@@ -256,8 +354,20 @@ def assemble(request, prepared, legs, cache_hits=0, provider_calls=0, ttl_second
         'walking_constraint_check': walking_check,
         'device_location_used':bool(device),'device_location_accuracy_m':radius,
         'device_accuracy_included_in_estimates':False,
-        'schedule_status':'arithmetic_estimate_only','opening_hours_checked':False,
-        'entrances_verified':False,'itinerary_feasible':None,'route_order_optimised':False,
+        'schedule_status':'arithmetic_estimate_only',
+        'opening_hours_checked':bool(start) and any(v.get('opening_hours_check',{}).get('status')!='unknown' for v in visits),
+        'opening_hours_summary':{
+            'feasible':sum(v.get('opening_status')=='feasible' for v in visits),
+            'closed_at_arrival':sum(v.get('opening_status')=='closed_at_arrival' for v in visits),
+            'insufficient_time':sum(v.get('opening_status')=='insufficient_time' for v in visits),
+            'unknown':sum(v.get('opening_status')=='unknown' for v in visits),
+        },
+        'entrances_verified':False,
+        'itinerary_feasible':(
+            False if any(v.get('opening_status') in ('closed_at_arrival','insufficient_time') for v in visits)
+            else None if any(v.get('opening_status')=='unknown' for v in visits)
+            else True
+        ),'route_order_optimised':False,
         'live_llm':False,'complete_plan_created':True,'all_legs_accounted_for':True,
         'joins':gaps,'route_calls':{'requested_segments':len(legs),'provider_calls':provider_calls,
             'cache_hits':cache_hits,'cache_ttl_seconds':ttl_seconds,
