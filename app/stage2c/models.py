@@ -86,11 +86,13 @@ class LocationAction(ActionBase):
     place: PlaceSpec
     target_id: str | None = Field(default=None,max_length=80)
     stay_profile: Literal['regular','takeaway'] | None = None
+    stay_minutes: int | None = Field(default=None,ge=0,le=1440,strict=True)
     @model_validator(mode='after')
     def required_target(self):
         if self.op=='replace_visit' and not self.target_id: raise ValueError('Replacement target required')
         if self.op!='replace_visit' and self.target_id is not None: raise ValueError('Unexpected target')
         if self.op not in ('add_visit','replace_visit') and self.stay_profile is not None: raise ValueError('Unexpected stay profile')
+        if self.op != 'add_visit' and self.stay_minutes is not None: raise ValueError('Only a new visit accepts an initial stay duration')
         if self.op in ('set_origin','set_finish') and not self.place.query.strip(): raise ValueError('An explicit endpoint name is required')
         return self
 

@@ -1,7 +1,8 @@
 """Small provider-facing schemas, separate from strict LOCAL domain validation.
 
 Do not send the full Action union grammar to the constrained decoder. All
-operations remain available. F4 assigns a separate argument object to each operation.
+operations remain available in the general contract. A live empty draft omits
+clear_visits because it has no adopted stops to clear. F4 assigns a separate argument object to each operation.
 command_contract.py compiles typed commands; operation_adapter.py resolves
 explicit target_position values; models.py and engine.py still validate real
 operations, bounds, fields, references and action evidence before adoption.
@@ -39,10 +40,10 @@ def _nullable(kind: str) -> dict:
     return {'type': [kind, 'null']}
 
 
-def interpretation_schema() -> dict:
+def interpretation_schema(*, has_existing_visits=True) -> dict:
     # F4 uses operation-scoped arrays instead of a shared argument envelope.
     from .command_contract import scoped_schema
-    return scoped_schema()
+    return scoped_schema(has_existing_visits=has_existing_visits)
 
 
 def selection_schema() -> dict:
