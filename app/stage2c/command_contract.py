@@ -10,18 +10,19 @@ from __future__ import annotations
 import copy
 from typing import get_args
 from .models import Category, Topic, Interpretation
+from .scope_contract import PROVIDER_SCOPES, SCOPE_DESCRIPTION
 
 OPERATIONS = (
     'set_origin', 'set_finish', 'add_visit', 'replace_visit',
-    'remove_visit', 'move_visit', 'set_stay', 'set_finish_policy',
-    'set_mode', 'set_time', 'clear_visits',
+    'remove_visit', 'move_visit', 'set_stay', 'set_mode',
+    'set_finish_policy', 'set_time', 'clear_visits',
 )
 TARGET_OPERATIONS = frozenset({'replace_visit', 'remove_visit', 'move_visit', 'set_stay'})
 LOCATION_OPERATIONS = frozenset({'set_origin', 'set_finish', 'add_visit', 'replace_visit'})
 CONTRACT_NAME = 'operation_scoped_commands_v1'
 ROOT_FIELDS = frozenset(set(Interpretation.model_fields) - {'actions'})
 ARGUMENTS = {
-    'set_origin': {'place'}, 'set_finish': {'place'}, 'add_visit': {'place'},
+    'set_origin': {'place'}, 'set_finish': {'place'}, 'add_visit': {'place', 'stay_minutes'},
     'replace_visit': {'target_position', 'place'},
     'remove_visit': {'target_position'}, 'move_visit': {'target_position', 'position'},
     'set_stay': {'target_position', 'minutes'},
@@ -31,11 +32,12 @@ ARGUMENTS = {
     'clear_visits': set(),
 }
 REQUIRED = {op: ({'order', 'quote'} | fields) for op, fields in ARGUMENTS.items()}
+REQUIRED['add_visit'] = {'order', 'quote', 'place'}
 REQUIRED['set_time'] = {'order', 'quote'}
 DESCRIPTIONS = {
     'set_origin': 'Explicitly named departure point only.',
     'set_finish': 'Explicitly named custom end point only.',
-    'add_visit': 'One requested new visit per entry.',
+    'add_visit': 'One requested new visit per entry. Include stay_minutes only when explicitly requested for this new stop.',
     'replace_visit': 'Replace a current visit location; preserve its stay and other visits.',
     'remove_visit': 'Remove the indicated current visit.',
     'move_visit': 'Move a current visit to position; target_position refers to the original snapshot.',
@@ -43,7 +45,7 @@ DESCRIPTIONS = {
     'set_finish_policy': 'Change return/end policy only.',
     'set_mode': 'Change transport mode only.',
     'set_time': 'Partial time change. A duration alone sets budget semantics. Preserve unspecified fields; do not invent a budget.',
-    'clear_visits': 'Clear visits only when explicitly requested.',
+    'clear_visits': 'Delete all current stops only when the user explicitly requests their removal. Returning to the start is set_finish_policy, never clear_visits.',
 }
 
 
@@ -52,7 +54,7 @@ def _object(properties, required):
             'additionalProperties': False}
 
 
-def scoped_schema():
+def scoped_schema(*, has_existing_visits=True):
     """Provider schema: no refs, discriminated unions or all-purpose envelopes.
 
     Cardinality, exact target range, timestamps and business constraints are
@@ -73,6 +75,8 @@ def scoped_schema():
         'target_position': {'type': 'integer'},
         'position': {'type': 'integer'},
         'minutes': {'type': ['integer', 'null']},
+        'stay_minutes': {'type': ['integer', 'null'],
+                         'description': 'Explicit duration for this new stop, in minutes (0 to 1440). Omitted/null uses the initial stay estimate. Match a stay_minutes constraint scoped to this new visit.'},
         'finish_policy': {'type': 'string', 'enum': ['last_stop', 'return_to_start']},
         'transport_mode': {'type': 'string', 'enum': ['walk', 'drive', 'cycle', 'public_transport']},
         'time_mode': {'type': ['string', 'null'], 'description': 'estimate, budget or window. Optional: a supplied budget implies budget mode; a supplied finish implies window. Without either, omitted/null preserves the current mode.'},
@@ -84,18 +88,23 @@ def scoped_schema():
     }
     commands = {}
     for op in OPERATIONS:
+        if op == 'clear_visits' and not has_existing_visits:
+            continue  # No adopted stops exist to clear in this snapshot.
         fields = {k: copy.deepcopy(v) for k, v in specs.items() if k in ARGUMENTS[op] | {'order', 'quote'}}
         commands[op] = array(_object(fields, [k for k in fields if k in REQUIRED[op]]))
+        commands[op]['description'] = DESCRIPTIONS[op]
     segment = _object({
         'type': {'type': 'string', 'enum': ['operation', 'constraint', 'preference', 'preserve', 'conflict']},
         'name': text,
         'value': {'type': ['string', 'number', 'boolean', 'null'],
                   'description': 'For set fields, clear may name one member or use null for the entire field and scope. Scalar clear uses null.'},
-        'scope': text,
+        'scope': {'type': 'string', 'enum': list(PROVIDER_SCOPES),
+                  'description': SCOPE_DESCRIPTION},
         'hardness': {'type': 'string', 'enum': ['hard', 'soft', 'unknown']},
         'status': {'type': 'string', 'enum': ['understood', 'unresolved', 'conflicting', 'unsupported']},
         'source': {'type': 'string', 'enum': ['user_explicit', 'inferred']},
-        'effect': {'type': 'string', 'enum': ['set', 'clear', 'none']},
+        'effect': {'type': 'string', 'enum': ['set', 'clear', 'none'],
+                   'description': 'Only constraint/preference rows use set or clear to update requirements. operation, preserve and conflict rows MUST use none; commands separately describe edits.'},
         'quote': {'type': 'string', 'description': 'A nonempty exact substring of the latest or pending user message. Never quote current_draft or other context.'},
     }, ['type', 'name', 'value', 'scope', 'hardness', 'status', 'source', 'quote', 'effect'])
     fields = {'acknowledgement': copy.deepcopy(text),
@@ -206,6 +215,10 @@ def pending_to_commands(parsed, draft):
             a['time_mode'] = a.pop('mode')
             a = {k: v for k, v in a.items() if v is not None and not (k == 'clear_departure' and v is False)}
         a.pop('stay_profile', None)
+        # This default is part of LocationAction, but only add_visit owns it
+        # on the provider wire. Never teach irrelevant null fields via Pending.
+        if op != 'add_visit' or a.get('stay_minutes') is None:
+            a.pop('stay_minutes', None)
         a = {'order': index + 1, **a}
         groups.setdefault(op, []).append(a)
     return {**data, 'commands': groups}

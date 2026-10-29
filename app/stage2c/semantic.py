@@ -10,7 +10,7 @@ from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime
 
-from .models import ActiveConstraint, Interpretation, SemanticSegment, StayAction
+from .models import ActiveConstraint, FinishAction, Interpretation, ModeAction, SemanticSegment, StayAction
 from .retrieval_rules import ALIAS_CATEGORY, normalise, canonical_place_type
 from .requirement_fields import FIELDS
 
@@ -153,6 +153,16 @@ def synchronize_action_constraints(active, parsed, draft, *, new_visit_ids=(), t
             scope = 'visit_id:' + action.target_id
         if not scope or scope == 'visit_id:':
             continue
+        if action.op == 'add_visit' and action.stay_minutes is not None:
+            # Keep the precise semantic quote/provenance when it already accounts
+            # for this command. Do not erase conflicting rows awaiting clarification.
+            # A typed proposal does not upgrade a tentative/inferred semantic
+            # request into a mandatory, user-explicit requirement.
+            if not any(row.name == 'stay_minutes' and row.scope == scope and
+                       row.value == action.stay_minutes for row in current):
+                current.append(ActiveConstraint(name='stay_minutes', value=action.stay_minutes,
+                    scope=scope, hardness='hard', status='understood', source='user_explicit',
+                    quote=action.quote, turn_index=turn_index))
         if action.op == 'set_stay':
             current = [row for row in current if not (row.name == 'stay_minutes' and row.scope == scope)]
             if action.minutes is not None:
@@ -193,6 +203,18 @@ def _matches_scope(segment, action, draft, parsed=None):
             return 0 <= index < len(draft.visits) and getattr(action, 'target_id', None) == draft.visits[index].visit_id
         return getattr(action, 'target_id', None) == position
     return segment.quote in getattr(action, 'quote', '')
+
+
+def _new_visit_for_scope(scope, parsed):
+    """Resolve new-stop ordinals among additions, never among all commands."""
+    additions = [action for action in parsed.actions if action.op == 'add_visit']
+    if scope == 'visit:new':
+        return additions[0] if len(additions) == 1 else None
+    if scope.startswith('visit:new:'):
+        ordinal = scope.removeprefix('visit:new:')
+        if ordinal.isdigit() and 1 <= int(ordinal) <= len(additions):
+            return additions[int(ordinal) - 1]
+    return None
 
 
 def _location_constraint_supported(segment: SemanticSegment, parsed: Interpretation, draft) -> bool:
@@ -242,9 +264,97 @@ def compile_takeaway_actions(parsed, draft):
     return parsed.model_copy(update={'actions': actions}, deep=True)
 
 
+def compile_global_parameter_actions(parsed: Interpretation, draft):
+    """Compile two explicit global requirements without inferring missing intent."""
+    actions = list(parsed.actions)
+    count = 0
+    supported = {
+        'transport_mode': (ModeAction, 'set_mode', {'walk', 'drive', 'cycle', 'public_transport'}, {'set_mode'}),
+        'finish_policy': (FinishAction, 'set_finish_policy', {'last_stop', 'return_to_start'},
+                          {'set_finish_policy', 'set_finish'}),
+    }
+    for name, (model, operation, values, mutators) in supported.items():
+        rows = [row for row in parsed.semantic_segments if row.name == name]
+        if not rows or any(action.op in mutators for action in actions):
+            continue
+        # A soft/inferred/uncertain/clearing/other-scope row cannot lend its
+        # authority to a stronger row. Exact duplicate explicit rows are harmless.
+        if any(row.type != 'constraint' or row.scope != 'global' or row.hardness != 'hard' or
+               row.status != 'understood' or row.source != 'user_explicit' or row.effect != 'set' or
+               not isinstance(row.value, str) or row.value not in values for row in rows):
+            continue
+        if any(row.value != rows[0].value for row in rows):
+            continue
+        row = rows[0]
+        if _retained_parameter_supported(row, parsed, draft):
+            continue
+        actions.append(model(op=operation, value=row.value, quote=row.quote))
+        count += 1
+    # Revalidate the whole action list (including takeaway additions), and retain
+    # omitted-vs-explicit-null fields such as max_walk_minutes.
+    data = parsed.model_dump(exclude_unset=True)
+    data['actions'] = [action.model_dump(exclude_unset=True) for action in actions]
+    return Interpretation.model_validate(data), count
+
+
+def _retained_parameter_supported(segment, parsed, draft):
+    """An already matching setting needs no no-op command if it cannot be changed."""
+    if draft is None or segment.effect != 'set' or segment.value is None:
+        return False
+    name, actions = segment.name, parsed.actions
+    if name == 'stay_minutes':
+        position = segment.scope.removeprefix('visit:')
+        if not segment.scope.startswith('visit:') or not position.isdigit():
+            return False
+        if not 1 <= int(position) <= len(draft.visits):
+            return False
+        visit = draft.visits[int(position) - 1]
+        for action in actions:
+            if action.op == 'clear_visits':
+                return False
+            if getattr(action, 'target_id', None) != visit.visit_id:
+                continue
+            if action.op in {'remove_visit', 'set_stay'}:
+                return False
+            if action.op == 'replace_visit' and action.stay_profile is not None:
+                return False  # Both regular/takeaway profile edits reset the override.
+        return visit.stay_minutes == segment.value
+    if segment.scope != 'global':
+        return False
+    if name in {'transport_mode', 'travel_mode'}:
+        return not any(a.op == 'set_mode' for a in actions) and draft.mode == segment.value
+    if name == 'finish_policy':
+        return (not any(a.op in {'set_finish_policy', 'set_finish'} for a in actions) and
+                draft.finish_policy == segment.value)
+    if name == 'max_walk_minutes':
+        return ('max_walk_minutes' not in parsed.model_fields_set and
+                draft.max_walk_minutes == segment.value)
+    if name in {'budget_minutes', 'departure_at', 'finish_by'}:
+        # Even mode-only time commands can clear fields. Keep this fallback
+        # conservative; explicit commands still use their normal matching path.
+        if any(a.op == 'set_time' for a in actions):
+            return False
+        expected = segment.value
+        if name in {'departure_at', 'finish_by'}:
+            try:
+                expected = datetime.fromisoformat(expected)
+                if expected.utcoffset() is None:
+                    return False
+            except (TypeError, ValueError):
+                return False
+        return getattr(draft.time, name) == expected
+    return False
+
+
 def _constraint_supported(segment: SemanticSegment, parsed: Interpretation, draft) -> bool:
     if segment.effect == 'none':
         return True
+    if _retained_parameter_supported(segment, parsed, draft):
+        return True
+    if segment.name == 'stay_minutes' and segment.scope.startswith('visit:new'):
+        action = _new_visit_for_scope(segment.scope, parsed)
+        return (segment.effect == 'set' and action is not None and
+                action.stay_minutes is not None and action.stay_minutes == segment.value)
     if segment.name == 'max_walk_minutes':
         if segment.value is None:
             return parsed.max_walk_minutes is None and 'max_walk_minutes' in parsed.model_fields_set
@@ -392,8 +502,9 @@ def validate_segment_command_consistency(segments, parsed: Interpretation, *, dr
     for segment in segments:
         if not historical and segment.name == 'stay_minutes' and segment.effect != 'none':
             position = segment.scope.removeprefix('visit:')
-            if not segment.scope.startswith('visit:') or not position.isdigit() or int(position) < 1:
-                raise SemanticConsistencyError('Stay duration must identify one current visit')
+            current_visit = segment.scope.startswith('visit:') and position.isdigit() and int(position) >= 1
+            if not current_visit and _new_visit_for_scope(segment.scope, parsed) is None:
+                raise SemanticConsistencyError('Stay duration must identify one current or new visit')
         if segment.type == 'preserve':
             for action in parsed.actions:
                 forbidden = PRESERVED_OPERATIONS.get(segment.name, set())

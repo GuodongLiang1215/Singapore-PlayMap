@@ -312,8 +312,12 @@ def assemble(record,choices,*,strict=False,cat=None):
                 if not s['explicit_location_confirmation'] and any((v.point.entity_id and v.point.entity_id==p.entity_id) or
                     (v.point.latitude==p.latitude and v.point.longitude==p.longitude) for v in d.visits):
                     raise ChatError('DUPLICATE_SUGGESTION','This candidate duplicates an existing stop. Please select another place.')
-                d.visits.append(Visit(visit_id=record['new_ids'][i],point=p,stay_profile='takeaway' if takeaway else 'regular'))
-                changes.append('Add stop → '+p.label+(' (takeaway or quick purchase; using a short stop estimate)' if takeaway else ' (using an editable initial stay estimate)'))
+                d.visits.append(Visit(visit_id=record['new_ids'][i],point=p,stay_minutes=a.stay_minutes,
+                                      stay_profile='takeaway' if takeaway else 'regular'))
+                stay_note = (' ('+str(a.stay_minutes)+' minutes, as requested)' if a.stay_minutes is not None else
+                    ' (takeaway or quick purchase; using a short stop estimate)' if takeaway else
+                    ' (using an editable initial stay estimate)')
+                changes.append('Add stop → '+p.label+stay_note)
         elif a.op=='remove_visit':d.visits=[v for v in d.visits if v.visit_id!=a.target_id];changes.append('Remove the selected stop')
         elif a.op=='move_visit':
             v=find(a.target_id)
@@ -422,7 +426,7 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
                  'interpretation':pending_to_commands(body.pending.interpretation,body.draft)} if body.pending else None),
              'singapore_now':datetime.now(SGT).replace(microsecond=0).isoformat(),
              'capabilities':capability_summary()}
-    raw=generate(INTERPRET,payload,interpretation_schema())
+    raw=generate(INTERPRET,payload,interpretation_schema(has_existing_visits=bool(body.draft.visits)))
     _trace['phase']='interpretation_validation'
     if not isinstance(raw, dict) or not {'acknowledgement', 'semantic_segments', 'commands'} <= raw.keys():
         raise ChatError('MODEL_SCHEMA','The model response is missing required meaning or command fields. Your itinerary is unchanged.',502)
@@ -519,7 +523,7 @@ def _safe_trace(trace):
         'schema':trace.get('schema'),
         'validation':safe_validation(trace.get('validation')),
         'time_update':safe_time_diagnostic(trace.get('time_update')),
-        'normalization':{k:norm[k] for k in ('neutral_fields_omitted','target_positions_resolved','scoped_commands_compiled')
+        'normalization':{k:norm[k] for k in ('neutral_fields_omitted','target_positions_resolved','scoped_commands_compiled','audit_effects_normalized','parameter_actions_compiled')
                          if type(norm.get(k)) is int and 0<=norm[k]<=1000},
         'automatic_retry':False,'structured_output_enabled':True,
         'local_validation_enabled':True,'raw_output_included':False,

@@ -1,9 +1,10 @@
-"""Translate the provider's flat action envelope into strict local operations.
+"""Translate the provider's scoped commands into strict local operations.
 
 This is an explicit wire adapter, not JSON repair or a fallback model. It:
 * omits only known, irrelevant, content-free placeholders;
 * resolves a supplied 1-based target_position against the current draft;
-* validates each action using its actual op, then validates the whole update.
+* compiles scoped takeaway and explicit supported global mode/finish constraints;
+* validates each action and the complete update, including compiled actions.
 No inferred target, category, time, coordinates, quote or extra API call is used.
 Raw model output/input/validation exception messages are never diagnostic output.
 """
@@ -14,6 +15,7 @@ from pydantic import ValidationError
 from .models import (Interpretation, LocationAction, RemoveAction, MoveAction,
                      StayAction, FinishAction, ModeAction, TimeAction, ClearAction,
                      SemanticSegment)
+from .scope_contract import GLOBAL_SCOPE_REQUIREMENTS, is_provider_scope
 
 ACTION_MODELS = {
     'set_origin': LocationAction, 'set_finish': LocationAction,
@@ -23,6 +25,7 @@ ACTION_MODELS = {
     'set_mode': ModeAction, 'set_time': TimeAction, 'clear_visits': ClearAction,
 }
 TARGET_OPS = frozenset({'replace_visit', 'remove_visit', 'move_visit', 'set_stay'})
+AUDIT_SEGMENT_TYPES = frozenset({'operation', 'preserve', 'conflict'})
 KNOWN_FIELDS = frozenset(
     {k for cls in ACTION_MODELS.values() for k in cls.model_fields} | {'target_position'})
 PATH_PARTS = frozenset(KNOWN_FIELDS | set(Interpretation.model_fields) |
@@ -196,11 +199,95 @@ def parse_interpretation(raw, draft, *, turn_index=0):
     return parsed, norm
 
 
+def _check_audit_set(row, parsed, draft, *, prefix, normalization):
+    """Prove a redundant audit update refers to an actual command or kept object.
+
+    Requirement names and unrecognized preservation instructions are not audit
+    metadata we can safely repair. Ambiguous scopes/values remain errors.
+    """
+    kind, name, scope, value = (row[key] for key in ('type', 'name', 'scope', 'value'))
+    if kind == 'conflict':
+        # Semantic validation and strict assembly always retain/block conflicts.
+        return
+
+    def reject(field):
+        _fail(prefix + (field,), 'irrelevant_field_value', norm=normalization)
+
+    if row['status'] != 'understood':
+        reject('status')
+    if kind == 'preserve':
+        from .semantic import PRESERVED_OPERATIONS
+        if name not in PRESERVED_OPERATIONS:
+            reject('name')
+        points = []
+        if name == 'preserve_origin' and scope == 'origin' and draft.origin is not None:
+            points = [draft.origin]
+        elif name == 'preserve_visits' and scope == 'global':
+            points = [visit.point for visit in draft.visits]
+        elif name in {'preserve_visit', 'preserve_location'}:
+            match = re.fullmatch(r'visit:([1-9]\d?)', scope)
+            if match and int(match[1]) <= len(draft.visits):
+                points = [draft.visits[int(match[1]) - 1].point]
+        if not points:
+            reject('scope')
+        if value is None:
+            return
+        if name == 'preserve_visits':
+            if value != [point.label for point in points]:
+                reject('value')
+        elif not isinstance(value, str) or value not in {points[0].label, points[0].entity_id}:
+            reject('value')
+        return
+
+    if name not in ACTION_MODELS:
+        reject('name')
+    commands = [action for action in parsed.actions if action.op == name]
+    if not commands:
+        reject('name')
+    matches = []
+    for action in commands:
+        if name in TARGET_OPS:
+            scopes = {f'visit:{i}' for i, visit in enumerate(draft.visits, 1)
+                      if visit.visit_id == action.target_id}
+        elif name == 'add_visit':
+            index = commands.index(action) + 1
+            scopes = {f'visit:new:{index}'} | ({'visit:new'} if len(commands) == 1 else set())
+        else:
+            scopes = {{'set_origin': 'origin', 'set_finish': 'finish'}.get(name, 'global')}
+        if scope in scopes:
+            matches.append(action)
+    if len(matches) != 1:
+        reject('scope')
+    if value is None:
+        return
+    action = matches[0]
+    if isinstance(action, LocationAction):
+        expected = action.place.query
+        if not expected:
+            reject('value')
+    elif name in {'set_mode', 'set_finish_policy'}:
+        expected = action.value
+    elif name == 'set_stay':
+        expected = action.minutes
+    elif name == 'move_visit':
+        expected = action.position
+    else:
+        # Time updates may contain several independent fields. Do not infer
+        # which one an untyped value refers to; clear/remove need no value.
+        reject('value')
+    if type(value) is not type(expected) or value != expected:
+        reject('value')
+
+
 def parse_provider_interpretation(raw, draft, *, turn_index=0):
     """Keep current model permissions narrower than saved-state permissions.
 
     Saved local state can contain checker evidence. A live model cannot reuse
     those permissions. Historical replay deliberately uses parse_interpretation.
+    Audit-only segments do not update the requirement ledger. A redundant
+    effect='set' can become 'none' only when its known command/target/value or
+    preservation scope is accounted for. Conflict rows remain blocking.
+    No values are discarded and explicit clears cannot be normalized.
     """
     if not isinstance(raw, dict):
         _fail(('<root>',), 'invalid_structure')
@@ -226,17 +313,19 @@ def parse_provider_interpretation(raw, draft, *, turn_index=0):
             _fail(prefix + ('effect',), 'literal_error')
         if not isinstance(row['quote'], str) or not row['quote'].strip():
             _fail(prefix + ('quote',), 'string_too_short')
-        if not isinstance(row['scope'], str) or not re.fullmatch(
-            r'global|origin|finish|future_visits|visit:(?:[1-9]\d?|new(?::[1-9]\d?)?)|time_window:[1-9]\d?', row['scope']
-        ):
+        if not is_provider_scope(row['scope']):
             _fail(prefix + ('scope',), 'value_error')
-        if row['type'] in {'operation', 'preserve', 'conflict'} and row['effect'] != 'none':
+        if row['type'] in AUDIT_SEGMENT_TYPES and row['effect'] == 'clear':
             _fail(prefix + ('effect',), 'irrelevant_field_value')
-        if row['effect'] == 'set' and row['value'] is None:
+        if row['type'] not in AUDIT_SEGMENT_TYPES and row['effect'] == 'set' and row['value'] is None:
             _fail(prefix + ('value',), 'value_error')
     from .requirement_fields import FIELDS, canonical_requirement_name
     data = copy.deepcopy(raw)
+    audit_effects_normalized = 0
     for index, row in enumerate(data['semantic_segments']):
+        if row['type'] in AUDIT_SEGMENT_TYPES and row['effect'] == 'set':
+            row['effect'] = 'none'
+            audit_effects_normalized += 1
         row['name'] = canonical_requirement_name(row['name'])
         name = row['name']
         field = FIELDS.get(name)
@@ -255,7 +344,7 @@ def parse_provider_interpretation(raw, draft, *, turn_index=0):
                 _fail(('semantic_segments', index, 'value'), 'value_error')
             if field and field.cardinality == 'set' and not isinstance(row['value'], str):
                 _fail(('semantic_segments', index, 'value'), 'string_type')
-        if row['name'] in {'max_walk_minutes', 'budget_minutes', 'departure_at', 'finish_by', 'transport_mode', 'finish_policy'} and row['scope'] != 'global':
+        if row['name'] in GLOBAL_SCOPE_REQUIREMENTS and row['scope'] != 'global':
             _fail(('semantic_segments', index, 'scope'), 'value_error')
         if row['effect'] != 'set':
             continue
@@ -265,6 +354,25 @@ def parse_provider_interpretation(raw, draft, *, turn_index=0):
                 _fail(('semantic_segments', index, 'value'), 'int_type')
         if name == 'takeaway' and row['effect'] == 'set' and type(value) is not bool:
             _fail(('semantic_segments', index, 'value'), 'bool_type')
-    parsed, normalization = parse_interpretation(data, draft, turn_index=turn_index)
-    from .semantic import compile_takeaway_actions
-    return compile_takeaway_actions(parsed, draft), normalization
+    try:
+        parsed, normalization = parse_interpretation(data, draft, turn_index=turn_index)
+    except OperationFormatError as error:
+        error.normalization['audit_effects_normalized'] = audit_effects_normalized
+        raise
+    normalization['audit_effects_normalized'] = audit_effects_normalized
+    for index, row in enumerate(rows):
+        if row['type'] in AUDIT_SEGMENT_TYPES and row['effect'] == 'set':
+            _check_audit_set(row, parsed, draft, prefix=('semantic_segments', index),
+                             normalization=normalization)
+    from .semantic import compile_takeaway_actions, compile_global_parameter_actions
+    normalization['parameter_actions_compiled'] = 0
+    try:
+        parsed = compile_takeaway_actions(parsed, draft)
+        parsed, parameter_count = compile_global_parameter_actions(parsed, draft)
+        normalization['parameter_actions_compiled'] = parameter_count
+        # Revalidate copies as well as newly constructed models. Preserve unset
+        # fields: an omitted walking limit must not turn into an explicit clear.
+        parsed = Interpretation.model_validate(parsed.model_dump(exclude_unset=True))
+    except ValidationError as error:
+        raise OperationFormatError(validation_from_exception(error), normalization) from None
+    return parsed, normalization
