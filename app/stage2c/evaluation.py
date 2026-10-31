@@ -20,7 +20,7 @@ from .prompts import INTERPRET, PROMPT_VERSION
 from .semantic import SemanticConsistencyError, bind_constraint_scopes, validate_segment_command_consistency
 from .wire_schema import WIRE_VERSION, interpretation_schema
 
-SCORER_VERSION = 'person-b-f9-v2'
+SCORER_VERSION = 'person-b-f9-v3'
 EVALUATION_MODES = {'f7_snapshot', 'f9_snapshot', 'f9_confirmed_state'}
 
 
@@ -175,7 +175,15 @@ class _ReplayState:
         record = {'body': body, 'parsed': parsed, 'preferences': preferences, 'merged_preferences': preferences,
                   'slots': deepcopy(turn.get('slots', [])), 'warnings': [], 'new_ids': new_ids,
                   'new_visit_ids': new_ids, 'build_id': 'fixed-evaluation-catalogue'}
-        preview = assemble(record, turn.get('choices', {}), strict=True, cat=self.catalogue)
+        try:
+            preview = assemble(record, turn.get('choices', {}), strict=True, cat=self.catalogue)
+        except ChatError as error:
+            if error.code != 'NO_CHANGES':
+                raise
+            # Older fixtures can label an idempotent action as confirm. Keep the
+            # historical annotation, but replay today's no-op contract honestly:
+            # no adoption, revision increment, or confirmation-success credit.
+            return 'unchanged'
         if not preview['can_apply']:
             return 'rejected'
         draft = Draft.model_validate(preview['draft'])
@@ -197,6 +205,7 @@ def _record_event(row, state, turn, index, parsed, body, counts=None):
     if turn['event'] == 'confirm':
         counts['confirmations'] += 1
         counts['confirmation_success'] += result == 'confirmed'
+        counts['unchanged_confirmations'] += result == 'unchanged'
     if 'gold_adopted_draft' in turn:
         counts['adopted_draft_turns'] += 1
         row['adopted_draft_exact'] = state.draft == Draft.model_validate(turn['gold_adopted_draft'])
@@ -523,6 +532,7 @@ def _score_report(cases, predictions, mode, received, results, counts, total):
         'metric_coverage': {'content_gold_segments': counts['gold_content'],
                             'clear_effect_turns': counts['clear_turns'],
                             'confirmation_events': counts['confirmations'],
+                            'unchanged_confirmation_events': counts['unchanged_confirmations'],
                             'adopted_draft_turns': counts['adopted_draft_turns'],
                             'target_turns': counts['target_turns'], 'ledger_turns': counts['ledger_turns'],
                             **{f'gold_effect_{effect}': counts[f'gold_effect_{effect}']
@@ -565,6 +575,7 @@ def validate_fixtures(cases, *, mode=None):
     """
     seen = set()
     turns = 0
+    unchanged_confirmations = 0
     for case in cases:
         if case['case_id'] in seen:
             raise ValueError('Duplicate case identifier')
@@ -583,8 +594,9 @@ def validate_fixtures(cases, *, mode=None):
                 validate_segment_command_consistency(parsed.semantic_segments, parsed, draft=draft,
                     historical=case_mode=='f7_snapshot')
                 outcome = state.event(turn, index, parsed, body)
-                if case_mode == 'f9_confirmed_state' and turn['event'] == 'confirm' and outcome != 'confirmed':
+                if case_mode == 'f9_confirmed_state' and turn['event'] == 'confirm' and outcome not in {'confirmed','unchanged'}:
                     raise ValueError('Gold confirmation could not be applied')
+                unchanged_confirmations += outcome == 'unchanged'
             except (ChatError, SemanticConsistencyError, ValueError) as error:
                 raise ValueError(f"Invalid annotation: {case['case_id']} turn {index}") from error
             if 'gold_active_constraints' in turn:
@@ -594,8 +606,11 @@ def validate_fixtures(cases, *, mode=None):
                     raise ValueError(f"Ledger annotation mismatch: {case['case_id']} turn {index}")
             if 'gold_adopted_draft' in turn and state.draft != Draft.model_validate(turn['gold_adopted_draft']):
                 raise ValueError(f"Draft annotation mismatch: {case['case_id']} turn {index}")
-    return {'kind': 'fixture_contract_check', 'cases': len(cases), 'turns': turns,
-            'model_calls': 0, 'human_review_required': any(c.get('annotation_status') != 'human_reviewed' for c in cases)}
+    result = {'kind': 'fixture_contract_check', 'cases': len(cases), 'turns': turns,
+              'model_calls': 0, 'human_review_required': any(c.get('annotation_status') != 'human_reviewed' for c in cases)}
+    if unchanged_confirmations:
+        result['unchanged_confirmation_events'] = unchanged_confirmations
+    return result
 
 
 def iter_predictions(cases, client, *, max_calls, pace=None, mode=None):

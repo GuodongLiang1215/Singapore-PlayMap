@@ -12,7 +12,7 @@ from app.llm_connect.errors import LLMConnectionError
 from app.stage2b.models import TimeSettings, Visit, PlacePoint, SGT
 from .time_updates import merge_time_updates, safe_time_diagnostic, TimeUpdateError
 from .models import (ChatRequest,Draft,Preferences,Interpretation,LocationAction,TimeAction,Selection,SemanticSegment)
-from .catalogue import LocalCatalogue, retrieve_slot, blocked, global_exclusions_for_slot
+from .catalogue import LocalCatalogue, retrieve_slot, blocked, global_exclusions_for_slot, same_replacement_place
 from .command_contract import pending_to_commands, CONTRACT_NAME
 from .proposal_status import acknowledgement, slot_label
 from .prompts import INTERPRET, SELECT, PROMPT_VERSION
@@ -21,7 +21,7 @@ from .operation_adapter import parse_provider_interpretation, OperationFormatErr
 from .semantic import (bind_constraint_scopes, merge_active_constraints, synchronize_action_constraints,
     validate_segment_command_consistency, SemanticConsistencyError, requirements_for_action,
     requirement_outcomes, unverified_preferences, parameter_mismatches)
-from .semantic import restore_verified_preferences
+from .semantic import restore_verified_preferences, preference_intent
 from app.verification import VERIFICATIONS
 from .requirement_fields import capability_summary
 
@@ -163,12 +163,15 @@ def model_context(body,cat=None):
         elif p.source=='device_location':label='Current device location (unnamed)'
         else:label='Location confirmed on the map'
         return {'label':label,'source':p.source,'has_confirmed_coordinates':True,'entrance_verified':False}
-    def categories(v):
+    def place_metadata(v):
+        from .catalogue import entity_place_types
         e=cat.by_id.get(v.point.entity_id) if cat is not None and v.point.source=='catalogue_representative' else None
-        return [c for c in e.get('categories',[]) if c in ('nature','food','heritage','monument','tourism')] if e else []
+        types,basis=entity_place_types(e) if e else ([],None)
+        return {'categories':[c for c in e.get('categories',[]) if c in ('nature','food','heritage','monument','tourism')] if e else [],
+                'place_types':types,'place_type_basis':basis}
     return {'origin':point(body.draft.origin),
             'visits':[{'visit_id':v.visit_id,'position':i+1,'place':point(v.point),
-                       'categories':categories(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
+                       **place_metadata(v),'stay_minutes':v.stay_minutes,'stay_profile':v.stay_profile} for i,v in enumerate(body.draft.visits)],
             'finish_policy':body.draft.finish_policy,'finish':point(body.draft.finish),
             'mode':body.draft.mode,'time':body.draft.time.model_dump(mode='json'),
             'max_walk_minutes':body.draft.max_walk_minutes}
@@ -296,6 +299,8 @@ def assemble(record,choices,*,strict=False,cat=None):
             elif a.op=='set_finish':d.finish=p;d.finish_policy='custom';changes.append('End point → '+p.label)
             elif a.op=='replace_visit':
                 visit=find(a.target_id)
+                if same_replacement_place(p,visit.point):
+                    raise ChatError('SAME_REPLACEMENT_PLACE','This is the current stop, not a different replacement. Choose another place. Your itinerary is unchanged.')
                 visit.point=p
                 if takeaway:
                     visit.stay_profile='takeaway'
@@ -338,11 +343,15 @@ def assemble(record,choices,*,strict=False,cat=None):
         elif a.op=='clear_visits':d.visits=[];changes.append('Clear all stops (starting point, transport mode and time requirements unchanged)')
     if len(d.visits)>20:raise ChatError('TOO_MANY_VISITS','An itinerary can contain up to 20 stops. Remove some stops or split the trip.')
     d=Draft.model_validate(d.model_dump())
-    if d.model_dump()!=body.draft.model_dump():
+    draft_changed=d.model_dump()!=body.draft.model_dump()
+    if draft_changed:
         prefs=unverified_preferences(prefs)
-    if d.model_dump()!=body.draft.model_dump() and not changes:
+    requirements_changed=preference_intent(prefs)!=preference_intent(body.preferences)
+    if not draft_changed:
+        changes=[]
+    if draft_changed and not changes:
         changes.append('Update itinerary settings (pending confirmation)')
-    if prefs.model_dump()!=body.preferences.model_dump():
+    if requirements_changed:
         changes.append('Update recorded requirements and preferences (pending confirmation)')
     if strict and missing:raise ChatError('CONFIRM_PLACE','Choose a retrieved candidate for every unresolved or ambiguous place first.')
     warnings=list(record.get('warnings',[]))
@@ -370,7 +379,13 @@ def assemble(record,choices,*,strict=False,cat=None):
         blockers.append('requirement_mismatch')
         warnings.append('The proposed settings conflict with active requirements. Explicitly replace or withdraw these requirements first: '+', '.join(mismatches))
         if strict:raise ChatError('HARD_REQUIREMENT_CONFLICT','The proposed settings cannot override active requirements. Clarify or withdraw those requirements first.')
+    has_changes=draft_changed or requirements_changed
+    if not has_changes and not missing and not blockers:
+        blockers.append('no_changes')
+        if strict:raise ChatError('NO_CHANGES','No new itinerary or requirement changes were proposed. Your itinerary is unchanged. Clarify the change you want in chat.')
     return {'draft':d.model_dump(mode='json'),'preferences':prefs.model_dump(),'changes':changes,
+        'has_changes':has_changes,
+        'semantic_changes':{'itinerary':draft_changed,'requirements':requirements_changed},
         'requirement_outcomes':outcomes,'adoption_blockers':blockers,
         'unresolved_slots':missing,'warnings':list(dict.fromkeys(warnings)),
         'can_apply':not missing and not blockers,
@@ -465,7 +480,9 @@ def _prepare(body,geo,*,client=None,cat=None,pace=None,cancelled=lambda:False,_t
         requirements=requirements_for_action(ledger_rows,a,body.draft,parsed)
         if a.op=='add_visit':
             requirements.extend(row for row in ledger_rows if row.scope=='visit_id:'+new_ids[i])
-        slot=retrieve_slot(i,a,cat,prefs,anchor,existing,geo,requirements=requirements)
+        replacement_target=next((v.point for v in body.draft.visits if v.visit_id==a.target_id),None) if a.op=='replace_visit' else None
+        slot=retrieve_slot(i,a,cat,prefs,anchor,existing,geo,requirements=requirements,
+                           replacement_target=replacement_target)
         slot['target_visit_id']=new_ids.get(i) if a.op=='add_visit' else a.target_id
         slots.append(slot);warnings.extend(slot['notices'])
         if not slot['options']:warnings.append('Still missing: '+slot_label(slot)+' candidates. Your conditions may have no catalogue match, or coverage may be incomplete. This does not prove that no such place exists. This item will not be omitted from the proposal.')

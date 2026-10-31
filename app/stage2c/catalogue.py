@@ -25,6 +25,25 @@ def text_has(text,term):
     if re.fullmatch(r'[a-z0-9 ]+',term):return re.search(r'(?<!\w)'+re.escape(term)+r'(?!\w)',text) is not None
     return term in text
 
+
+def same_replacement_place(candidate, target):
+    """Compare known identities, or exact coordinates when an identity is absent.
+
+    Accept catalogue dictionaries or PlacePoint models. Distinct known entities
+    can share a representative coordinate; labels and nearby points never prove
+    identity. This helper neither guesses a location nor changes either input.
+    """
+    if candidate is None or target is None:return False
+    def field(point,name):
+        return point.get(name) if isinstance(point,dict) else getattr(point,name,None)
+    candidate_id,target_id=field(candidate,'entity_id'),field(target,'entity_id')
+    if candidate_id and target_id:return candidate_id==target_id
+    coords=[field(point,name) for point in (candidate,target) for name in ('latitude','longitude')]
+    if not all(isinstance(value,(int,float)) and not isinstance(value,bool) and isfinite(value) for value in coords):
+        return False
+    return coords[:2]==coords[2:]
+
+
 def source_place_type(subtype):
     subtype=norm(subtype).replace(' ','_')
     if subtype in {'park','national_park','state_park','public_park','city_park','dog_park'}:return 'park'
@@ -183,7 +202,7 @@ class LocalCatalogue:
         return options,notices,held
 
     def search_detailed(self,spec,prefs,anchor,existing,limit=8,normalization=None,requirements=(),
-                        radius_m=None,distance_first=False):
+                        radius_m=None,distance_first=False,replacement_target=None):
         query=norm(spec.query); tokens=query.split();explicit=bool(query)
         required_types,unknown_types,preferred_types,hard_keywords=compile_requirements(
             spec,requirements,(normalization or {}).get('query_place_type'))
@@ -217,6 +236,7 @@ class LocalCatalogue:
             if not isinstance(e.get('latitude'),(int,float)) or not isinstance(e.get('longitude'),(int,float)):continue
             diagnostic['eligible_rows']+=1
             if blocked(e,prefs.excluded):continue
+            if same_replacement_place(e,replacement_target):continue
             if not explicit and e['entity_id'] in existing:continue
             diagnostic['after_exclusions']+=1
             cats=e.get('categories',[e.get('category')]); name=norm(e['display_title'])
@@ -298,14 +318,16 @@ def global_exclusions_for_slot(preferences, slot):
     return result
 
 
-def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=()):
+def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=(),*,replacement_target=None):
     prefs=prefs.model_copy(update={'excluded':global_exclusions_for_slot(prefs,{'operation':action.op})},deep=True)
     requirements=tuple(requirements)
     anchor,radius_m,spatial=resolve_spatial_requirement(requirements,anchor,cat,geo)
     spec,normalization=canonical_spec(action.place,action.op)
+    replacement_target=replacement_target if action.op=='replace_visit' else None
     options,notices,held,diagnostic=cat.search_detailed(spec,prefs,anchor,existing,normalization=normalization,
                                                      requirements=requirements,radius_m=radius_m,
-                                                     distance_first=bool(spatial) and not spec.query)
+                                                     distance_first=bool(spatial) and not spec.query,
+                                                     replacement_target=replacement_target)
     spatial_pending=spatial is not None and spatial['status']!='applied'
     if spatial_pending:options=[]
     if spatial:notices.append(spatial['message'])
@@ -322,6 +344,7 @@ def retrieve_slot(index,action,cat,prefs,anchor,existing,geo,requirements=()):
                 _,_,_,hard_keywords=compile_requirements(spec,requirements)
                 keywords=[word for word in spec.keywords if not canonical_place_type(word)]
                 for x in result['results']:
+                    if same_replacement_place(x,replacement_target):continue
                     if blocked({'display_title':x['label'],'categories':[]},prefs.excluded):continue
                     text=norm(x['label']+' '+x.get('address',''))
                     if not all(text_has(text,word) for word in hard_keywords):continue

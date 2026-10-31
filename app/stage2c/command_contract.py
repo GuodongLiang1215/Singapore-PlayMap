@@ -38,7 +38,7 @@ DESCRIPTIONS = {
     'set_origin': 'Explicitly named departure point only.',
     'set_finish': 'Explicitly named custom end point only.',
     'add_visit': 'One requested new visit per entry. Include stay_minutes only when explicitly requested for this new stop.',
-    'replace_visit': 'Replace a current visit location; preserve its stay and other visits.',
+    'replace_visit': 'Replace a current visit location; preserve its stay and other visits. For another/different cafe or park, use an empty query with type keywords, not the old venue name. Ask which stop only if the target is ambiguous.',
     'remove_visit': 'Remove the indicated current visit.',
     'move_visit': 'Move a current visit to position; target_position refers to the original snapshot.',
     'set_stay': 'Set visit minutes; null resets to the declared initial estimate.',

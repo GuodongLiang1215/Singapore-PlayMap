@@ -50,7 +50,11 @@ def test_soft_clear_cannot_erase_a_hard_walk_limit_from_memory_or_draft():
                                        hardness='soft', effect='clear')],
     }, message, draft=Draft(max_walk_minutes=10), preferences=walking_preferences())
 
-    result = assemble(record, {}, strict=True)
+    result = assemble(record, {})
+    assert not result['has_changes'] and not result['can_apply']
+    with pytest.raises(ChatError) as error:
+        assemble(record, {}, strict=True)
+    assert error.value.code == 'NO_CHANGES'
 
     assert result['draft']['max_walk_minutes'] == 10
     assert [(row['name'], row['value'], row['hardness']) for row in
@@ -284,7 +288,12 @@ def test_soft_takeaway_changes_preserve_the_hard_profile_and_note(effect, value)
                                       effect=effect, hardness='soft', source='inferred')]},
         message, draft=draft, preferences=prefs)
 
-    result = assemble(record, {}, strict=True)
+    result = assemble(record, {}, strict=effect == 'set')
+    if effect == 'clear':
+        assert not result['has_changes'] and not result['can_apply']
+        with pytest.raises(ChatError) as error:
+            assemble(record, {}, strict=True)
+        assert error.value.code == 'NO_CHANGES'
 
     assert result['draft']['visits'][0]['stay_profile'] == 'takeaway'
     assert result['preferences']['notes'] == prefs.notes
