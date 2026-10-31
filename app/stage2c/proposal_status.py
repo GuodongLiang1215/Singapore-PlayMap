@@ -1,5 +1,6 @@
 """Execution/adoption status is authored by application state, not model prose."""
 from __future__ import annotations
+import re
 LABELS = {'nature':'parks and nature','food':'dining','heritage':'heritage sites',
           'monument':'monuments','tourism':'attractions'}
 
@@ -9,6 +10,19 @@ def slot_label(slot):
     if categories:
         return '/'.join(LABELS.get(c,c) for c in categories)
     return 'location'
+
+
+def clarification_question(parsed):
+    if parsed.questions:
+        return ' '.join(parsed.questions)
+    # Some otherwise valid responses put their clarification only in the ack.
+    # Keep an explicit question sentence, never an accompanying success claim.
+    sentences=re.split(r'(?<=[.!?])\s+|[\r\n]+',parsed.acknowledgement.strip())
+    for sentence in reversed(sentences):
+        if (re.match(r'^(which|what|where|when|how|would|could|can|do|does|did|is|are|should)\b',sentence,re.I)
+                and sentence.endswith('?') and not re.search(r'[.!?]',sentence[:-1])):
+            return sentence
+    return ''
 
 
 def acknowledgement(parsed, slots, preview, user_message):
@@ -42,6 +56,10 @@ def acknowledgement(parsed, slots, preview, user_message):
         return f'The proposal is incomplete. No matching candidates were found for {labels}. Resolve all requested places before confirming. Your itinerary is unchanged.'
     if slots:
         return 'Place candidates are ready for review. Confirm the proposal to update your itinerary and calculate routes and estimated times.'
+    if preview.get('has_changes') is False:
+        question=clarification_question(parsed)
+        return ('No new itinerary or requirement changes have been proposed. Your itinerary is unchanged.'+
+                (' '+question if question else ' Tell me what you would like to change.'))
     if parsed.actions or parsed.semantic_segments or any(getattr(parsed,k) for k in ('preferred_add','preferred_remove','excluded_add','excluded_remove','notes_add','notes_remove')):
         return 'Proposed changes are ready for review. Your itinerary and requirements remain unchanged until you confirm.'
     return parsed.acknowledgement

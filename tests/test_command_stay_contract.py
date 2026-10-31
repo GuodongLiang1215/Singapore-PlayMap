@@ -107,4 +107,4 @@ def test_complete_prompt_examples_follow_provider_schema_field_order():
         examples.append(example)
         check(example, schema)
         start = index + length
-    assert len(examples) == 3
+    assert len(examples) == 4

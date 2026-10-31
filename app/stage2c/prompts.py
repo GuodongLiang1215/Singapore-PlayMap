@@ -1,5 +1,5 @@
 """Versioned interpretation and candidate selection contracts."""
-PROMPT_VERSION = '2C1-F9.3-EN'
+PROMPT_VERSION = '2C1-F9.4-EN'
 INTERPRET = r"""Help plan a Singapore outing. Return only the specified JSON.
 Input contains the adopted current_draft, preferences.active_constraints once,
 pending_request (unadopted), latest user_message, singapore_now and local capabilities.
@@ -90,6 +90,21 @@ clear_departure, buffer_minutes; clear_visits: no extra fields.
 No generic value argument. target_position is 1-based among visits, not origin.
 Replacement preserves visit identity and stay unless explicitly edited. Don't reorder
 other visits. Keep-location allows a stay edit. Do not remove and mutate the same visit.
+"Change another cafe", "switch to a different park" and equivalent requests ask
+the app to DISCOVER a replacement; they do not require the user to name a new venue.
+Identify the existing target from its current position, source-backed place_types,
+or adopted scoped place_type requirements. A broad food category alone does not
+identify a cafe. If exactly one current stop matches the referenced type, emit
+replace_visit for that stop, using an empty query and the requested type in keywords
+and a hard scoped place_type requirement. Do not copy the old venue name into query:
+the backend will exclude that venue and retrieve alternatives. If multiple or no
+current stops match and the user did not identify one, ask which stop; emit an
+unresolved operation with effect=none and no replacement command. Do not invent a
+target or add an extra visit. "Can you change the cafe?" is still an edit request;
+"How would I change the cafe?" asks for an explanation, not an immediate edit.
+Do not replace a stop when the user explicitly says to keep it or not to change it.
+Keep existing spatial requirements; if their reference is unresolved, say that
+clarification is still needed, rather than silently dropping or resolving them.
 For "Visit Alpha Park for 30 minutes, then Beta Food Centre for 45 minutes", use two
 add_visit entries with stay_minutes 30 and 45, plus matching stay_minutes constraints
 at visit:new:1 and visit:new:2. Keep all requested budget, mode and return commands.
@@ -136,6 +151,13 @@ settings are inherited, and the first visit may be explicitly protected:
 {"acknowledgement":"Review the replacement; the other accepted settings are retained.",
  "semantic_segments":[{"type":"preserve","name":"preserve_visit","value":null,"scope":"visit:1","hardness":"hard","status":"understood","source":"user_explicit","effect":"none","quote":"all other settings"}],
  "commands":{"replace_visit":[{"order":1,"quote":"Replace only stop 2 with Gamma Food Centre","place":{"query":"Gamma Food Centre","categories":["food"]},"target_position":2}]}}
+
+Generic replacement example: the current itinerary has a park at position 1 and
+its only cafe at position 2. User says "change another cafe". Discover an alternative
+for position 2; retain the start, park, stay durations, time and other requirements:
+{"acknowledgement":"Review a different cafe for stop 2; the other settings are retained.",
+ "semantic_segments":[{"type":"constraint","name":"place_type","value":"cafe","scope":"visit:2","hardness":"hard","status":"understood","source":"user_explicit","effect":"set","quote":"cafe"}],
+ "commands":{"replace_visit":[{"order":1,"quote":"change another cafe","place":{"query":"","categories":["food"],"keywords":["cafe"]},"target_position":2}]}}
 
 Dated discovery example (the date and station here are illustrative, never copy
 them into another request): singapore_now is 2030-12-31T20:00:00+08:00 and the

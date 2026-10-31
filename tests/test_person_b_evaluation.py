@@ -167,7 +167,7 @@ def test_f9_content_distinguishes_setting_false_from_clearing_a_value():
     assert report['metrics']['normalized_content_micro_f1'] == 0
     assert report['metrics']['clear_effect_accuracy'] == 0
     assert report['prediction_prompt_versions'] == ['2C1-F7']
-    assert report['scorer_version'] == 'person-b-f9-v2'
+    assert report['scorer_version'] == 'person-b-f9-v3'
     assert report['evaluation_modes'] == ['f9_snapshot']
 
 
@@ -342,7 +342,11 @@ def test_f9_targets_follow_actual_confirmation_state_after_an_incorrect_move():
 
     assert report['metrics']['target_sequence_accuracy'] == 0
     assert report['cases'][1]['commands_exact'] is False
-    assert report['cases'][1]['adopted_revision'] == 2
+    assert report['cases'][0]['event_result'] == 'unchanged'
+    assert report['cases'][0]['adopted_revision'] == 0
+    assert report['cases'][1]['adopted_revision'] == 1
+    assert report['metric_coverage']['unchanged_confirmation_events'] == 1
+    assert report['metrics']['confirmation_success_rate'] == 0.5
 
 
 def test_f9_revision_fixtures_preserve_review_scope_and_are_not_human_gold():
@@ -356,6 +360,7 @@ def test_f9_revision_fixtures_preserve_review_scope_and_are_not_human_gold():
 
     assert report['cases'] == 24
     assert report['turns'] == 28
+    assert report['unchanged_confirmation_events'] == 1
     assert report['human_review_required'] is True
     assert sum(turn['text_review_confirmed'] for case in cases for turn in case['turns']) == 25
     assert all(case['annotation_status'] == 'synthetic_unreviewed' for case in cases)

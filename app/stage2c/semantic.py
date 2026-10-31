@@ -408,6 +408,21 @@ def unverified_preferences(preferences):
     return clean
 
 
+def preference_intent(preferences):
+    """Compare adopted meaning independently of checker and turn metadata.
+
+    Rechecking evidence, repeating a quote, or changing list order is not a new
+    requested edit. Hardness and declared/inferred source still affect meaning.
+    """
+    import json
+    fields=('kind','name','value','scope','hardness','source')
+    rows={json.dumps({key:getattr(row,key) for key in fields},sort_keys=True,
+                     ensure_ascii=False,separators=(',',':'))
+          for row in preferences.active_constraints}
+    return tuple(tuple(sorted(set(getattr(preferences,key))))
+                 for key in ('preferred','excluded','notes'))+(tuple(sorted(rows)),)
+
+
 def restore_verified_preferences(store,ref,session_id,revision,draft,preferences,*,catalogue_build_id=None):
     from app.verification import condition_fingerprint
     clean=unverified_preferences(preferences)
@@ -500,6 +515,11 @@ def validate_segment_command_consistency(segments, parsed: Interpretation, *, dr
             for segment in segments):
         raise SemanticConsistencyError('Walking parameter has no matching requirement')
     for segment in segments:
+        if (not historical and segment.type=='operation' and segment.name=='replace_visit'
+                and segment.status=='understood' and not any(
+                    action.op=='replace_visit' and _matches_scope(segment,action,draft,parsed)
+                    for action in parsed.actions)):
+            raise SemanticConsistencyError('Understood replacement has no matching command')
         if not historical and segment.name == 'stay_minutes' and segment.effect != 'none':
             position = segment.scope.removeprefix('visit:')
             current_visit = segment.scope.startswith('visit:') and position.isdigit() and int(position) >= 1

@@ -122,9 +122,11 @@
  function proposalDraftForDisplay(){
   const draft=clone(proposal.preview.draft||bridge.currentData()),choices=selections();
   for(const slot of proposal.slots){
-   if(!slot.target_visit_id)continue;
    const selected=slot.options.find(option=>option.candidate_key===choices[slot.slot_id]);
    if(!selected)continue;
+   if(slot.operation==='set_origin'){draft.origin=selected.point;continue;}
+   if(slot.operation==='set_finish'){draft.finish=selected.point;draft.finish_policy='custom';continue;}
+   if(!slot.target_visit_id)continue;
    const visit=draft.visits.find(item=>item.visit_id===slot.target_visit_id);
    if(visit)visit.point=selected.point;
    else draft.visits.push({visit_id:slot.target_visit_id,point:selected.point});
@@ -132,14 +134,47 @@
   return draft;
  }
  function chosenEnough(){return !!proposal&&PlayMapChatState.proposalDiagnostic(proposal,selections()).all_slots_selected;}
- function hasProposedChanges(){return !!proposal&&(proposal.interpretation.actions.length>0||proposal.preview.changes.length>0||JSON.stringify(proposal.preview.preferences)!==JSON.stringify(preferences));}
- function canAdopt(){return !!proposalContext&&contextCurrent(proposalContext)&&chosenEnough()&&!PlayMapChatState.adoptionBlocked(proposal)&&hasProposedChanges();}
+ function canonical(value){
+  if(Array.isArray(value))return value.map(canonical);
+  if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort()
+   .filter(key=>value[key]!=null).map(key=>[key,canonical(value[key])]));
+  return value;
+ }
+ function draftSignature(value){
+  const draft=clone(value);
+  if(draft.finish_policy!=='custom')draft.finish=null;
+  if(draft.time)for(const key of ['departure_at','finish_by']){
+   const instant=Date.parse(draft.time[key]);
+   if(draft.time[key]&&Number.isFinite(instant))draft.time[key]=instant;
+  }
+  return JSON.stringify(canonical(draft));
+ }
+ function preferenceSignature(value){
+  const p=value||{},unordered=items=>[...new Set((items||[]).map(item=>JSON.stringify(canonical(item))))].sort();
+  return JSON.stringify({preferred:unordered(p.preferred),excluded:unordered(p.excluded),notes:unordered(p.notes),
+   active_constraints:unordered((p.active_constraints||[]).map(row=>({kind:row.kind||'constraint',name:row.name,
+    value:row.value,scope:row.scope||'global',hardness:row.hardness||'unknown',source:row.source||'user_explicit'})))});
+ }
+ function itineraryChanged(){return !!proposal&&draftSignature(proposalDraftForDisplay())!==draftSignature(bridge.currentData());}
+ function requirementsChanged(){
+  const known=proposal?.preview.semantic_changes?.requirements;
+  return typeof known==='boolean'?known:preferenceSignature(proposal?.preview.preferences)!==preferenceSignature(preferences);
+ }
+ function hasProposedChanges(){return !!proposal&&(itineraryChanged()||requirementsChanged());}
+ function effectiveProposal(){
+  // A later candidate choice can change an initially unchanged preview. Only
+  // its no-change marker is obsolete; real semantic blockers still apply.
+  const blockers=proposal?.preview.adoption_blockers;
+  return blockers?.includes('no_changes')&&itineraryChanged()?{...proposal,
+   preview:{...proposal.preview,adoption_blockers:blockers.filter(reason=>reason!=='no_changes')}}:proposal;
+ }
+ function canAdopt(){return !!proposalContext&&contextCurrent(proposalContext)&&chosenEnough()&&!PlayMapChatState.adoptionBlocked(effectiveProposal())&&hasProposedChanges();}
  function updateReadiness(){
   if(!proposal)return;
   metrics.lastProposal=PlayMapChatState.proposalDiagnostic(proposal,selections());
   const area=el('chat-readiness');
-  area.textContent=PlayMapChatState.readinessText(proposal,selections());
-  area.className=metrics.lastProposal.unresolved_slot_count||PlayMapChatState.adoptionBlocked(proposal)?'warning small':'small';
+  area.textContent=PlayMapChatState.readinessText(effectiveProposal(),selections());
+  area.className=metrics.lastProposal.unresolved_slot_count||PlayMapChatState.adoptionBlocked(effectiveProposal())?'warning small':'small';
   if(!hasProposedChanges())area.textContent='No changes to adopt in this turn. The current itinerary and requirements are unchanged.';
   el('chat-apply').disabled=!!controller||!canAdopt();
   el('chat-apply').textContent=proposal.interpretation.actions.some(action=>action.op==='add_visit')?'Confirm stops and calculate route':'Save draft and calculate route';

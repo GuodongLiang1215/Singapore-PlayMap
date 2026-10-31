@@ -521,7 +521,8 @@ test('an explicit clearing-only proposal can remove a legacy walking limit after
   await chat.element('chat-apply').click();
   assert.equal(chat.draft.max_walk_minutes, 10);
   const candidate = proposal({base_revision: chat.revision, slots: [], interpretation: {actions: [], max_walk_minutes: null},
-    preview: {can_apply: true, adoption_blockers: [], changes: ['Remove the per-leg walking limit'], warnings: [], preferences: emptyPreferences()}});
+    preview: {draft: {...chat.draft, max_walk_minutes: null}, can_apply: true, adoption_blockers: [],
+      changes: ['Remove the per-leg walking limit'], warnings: [], preferences: emptyPreferences()}});
   await chat.send('取消步行时间上限', candidate);
   assert.equal(chat.element('chat-apply').disabled, false);
   assert.equal(chat.draft.max_walk_minutes, 10);
