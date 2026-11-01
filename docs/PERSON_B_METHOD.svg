@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Person B: grounded dialogue-to-plan pipeline</title>
+<desc id="desc">Gemini interprets requests. Local rules maintain scoped constraints and retrieve real POIs. Optional candidate selection precedes user confirmation. The browser applies state and invokes the existing planner. Adopted state feeds the next turn. New C alternative-search APIs are not integrated.</desc>
+<rect width="1600" height="900" fill="#f7f9fc"/>
+<text x="50" y="35" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#3562bc">PERSON B  /  AI METHOD</text>
+<text x="50" y="65" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700" fill="#172b4d">From multi-turn requests to grounded planning proposals</text>
+<text x="50" y="113" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#57657a">Gemini proposes meaning and choices; local code controls state and execution.</text>
+<rect x="50" y="159" width="985" height="59" rx="16" fill="#edf1f7" stroke="none"/>
+<text x="70" y="171" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#344054">INPUT   User message + adopted Draft / Preferences + unadopted Pending</text>
+<rect x="1080" y="159" width="470" height="59" rx="16" fill="#e8f5ef" stroke="none"/>
+<text x="1098" y="169" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700" fill="#15513e">DATA   A&#x27;s POI catalogue</text>
+<text x="1098" y="194" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#15513e">Named-place lookup may use OneMap</text>
+<polyline points="285,218 285,255" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="285.0,255.0 282.2,249.1 287.8,249.1" fill="#7b8aa1"/>
+<polyline points="1315,218 1315,255" fill="none" stroke="#318467" stroke-width="2"/>
+<polygon points="1315.0,255.0 1312.2,249.1 1317.8,249.1" fill="#318467"/>
+<rect x="50" y="255" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="68" y="273" width="39" height="34" rx="9" fill="#e8efff" stroke="none"/>
+<text x="80" y="276" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3562bc">1</text>
+<text x="119" y="273" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">INTERPRET</text>
+<text x="119" y="307" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#3562bc">GEMINI  /  CALL 1</text>
+<text x="74" y="343" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Intent segments + typed commands</text>
+<text x="74" y="371" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Scope, hardness, source and quote</text>
+<text x="74" y="399" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">No coordinates or verified claims</text>
+<rect x="565" y="255" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="583" y="273" width="39" height="34" rx="9" fill="#e8f5ef" stroke="none"/>
+<text x="595" y="276" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#318467">2</text>
+<text x="634" y="273" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">VALIDATE &amp; REMEMBER</text>
+<text x="634" y="307" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#318467">LOCAL  /  PROPOSAL COPY</text>
+<text x="589" y="343" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Schema, quote and command checks</text>
+<text x="589" y="371" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Bind positions to stable visit IDs</text>
+<text x="589" y="399" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Merge constraints deterministically</text>
+<rect x="1080" y="255" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="1098" y="273" width="39" height="34" rx="9" fill="#e8f5ef" stroke="none"/>
+<text x="1110" y="276" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#318467">3</text>
+<text x="1149" y="273" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">RETRIEVE POIs</text>
+<text x="1149" y="307" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#318467">LOCAL  /  ONE SLOT PER OPERATION</text>
+<text x="1104" y="343" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Type evidence + text + exclusions</text>
+<text x="1104" y="371" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Straight-line radius when specified</text>
+<text x="1104" y="399" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Rank; 8 local options, up to 12 total</text>
+<polyline points="520,344 565,344" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="565.0,344.0 559.1,346.8 559.1,341.2" fill="#7b8aa1"/>
+<polyline points="1035,344 1080,344" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="1080.0,344.0 1074.1,346.8 1074.1,341.2" fill="#7b8aa1"/>
+<polyline points="1315,433 1315,506" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="1315.0,506.0 1312.2,500.1 1317.8,500.1" fill="#7b8aa1"/>
+<rect x="1088" y="449" width="450" height="30" fill="#f7f9fc"/>
+<text x="1088" y="453" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" fill="#57657a">Generic options: SELECT; otherwise skip</text>
+<rect x="1080" y="506" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="1098" y="524" width="39" height="34" rx="9" fill="#e8efff" stroke="none"/>
+<text x="1110" y="527" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3562bc">4</text>
+<text x="1149" y="524" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">SELECT CANDIDATES</text>
+<text x="1149" y="558" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#3562bc">GEMINI  /  OPTIONAL CALL 2</text>
+<text x="1104" y="594" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Real options + per-slot preferences</text>
+<text x="1104" y="622" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Return existing candidate keys only</text>
+<text x="1104" y="650" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Local check for coverage / duplicates</text>
+<rect x="565" y="506" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="583" y="524" width="39" height="34" rx="9" fill="#fff1db" stroke="none"/>
+<text x="595" y="527" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#b46b10">5</text>
+<text x="634" y="524" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">PREVIEW &amp; CONFIRM</text>
+<text x="634" y="558" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#b46b10">USER + LOCAL RESOLVE</text>
+<text x="589" y="594" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Show options, requirements, conflicts</text>
+<text x="589" y="622" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">User chooses; resolve checks ticket</text>
+<text x="589" y="650" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Browser applies Draft + Preferences</text>
+<rect x="50" y="506" width="470" height="178" rx="16" fill="#ffffff" stroke="#d9e1ec"/>
+<rect x="68" y="524" width="39" height="34" rx="9" fill="#edf1f7" stroke="none"/>
+<text x="80" y="527" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#66758b">6</text>
+<text x="119" y="524" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172b4d">HAND OFF &amp; VERIFY</text>
+<text x="119" y="558" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#66758b">EXISTING PLANNER  /  LOCAL EVIDENCE</text>
+<text x="74" y="594" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Stage2B computes routes and time</text>
+<text x="74" y="622" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Only matched evidence can verify</text>
+<text x="74" y="650" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#25344d">Understanding is not satisfaction</text>
+<polyline points="1080,595 1035,595" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="1035.0,595.0 1040.9,592.2 1040.9,597.8" fill="#7b8aa1"/>
+<polyline points="565,595 520,595" fill="none" stroke="#7b8aa1" stroke-width="2"/>
+<polygon points="520.0,595.0 525.9,592.2 525.9,597.8" fill="#7b8aa1"/>
+<polyline points="800,684 800,735 25,735 25,188 50,188" fill="none" stroke="#c98220" stroke-width="2"/>
+<polygon points="50.0,188.0 44.1,190.8 44.1,185.2" fill="#c98220"/>
+<text x="105" y="703" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#945c14">Adopted state returns as next-turn context; Pending remains separate.</text>
+<rect x="50" y="770" width="1500" height="87" rx="16" fill="#edf1f7" stroke="none"/>
+<text x="72" y="783" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#344054">GUARDRAILS</text>
+<text x="260" y="783" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054">Invalid or incomplete proposals do not overwrite the adopted itinerary.</text>
+<text x="72" y="818" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#344054">BOUNDARIES</text>
+<text x="260" y="818" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054">No new C alternative-search loop; no F9 independent accuracy result yet.</text>
+<text x="50" y="870" dominant-baseline="text-before-edge" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#66758b">Singapore PlayMap  |  2C1-F9.1  |  main df453d3  |  Prepared 2026-10-30</text>
+</svg>

@@ -1,0 +1,26 @@
+flowchart TB
+    I["输入：当前原话 + 已采用 Draft / Preferences + 未采用 Pending"]
+    I --> L1["1 · INTERPRET / Gemini\n语义段 + 按操作分组的 commands"]
+    L1 --> V["2 · 本地校验与约束副本\nSchema / quote / 一致性；稳定站点 ID；hard / soft 更新"]
+    V --> R["3 · 每操作槽检索\n类别与来源细类、关键词、适用排除、直线半径；排序"]
+    A["A 的本地 POI 目录\n专名查询可补充 OneMap"] --> R
+    R --> G{"有通用候选槽？"}
+    G -->|是| L2["4 · SELECT / Gemini\n每槽真实候选 + 适用偏好 → candidate_key"]
+    G -->|否| P["5 · 提案预览\n候选 / 约束状态 / 冲突 / ticket"]
+    L2 --> K["本地检查候选 key、覆盖和重复"]
+    K --> P
+    P --> U["6 · 用户选择并确认\nresolve 复查版本与已知阻断；浏览器一起采用 Draft + Preferences"]
+    U --> C["已有 Stage2B 路线 / 时间计算\n匹配的确定性证据才能更新 satisfied"]
+    U -->|采用状态进入下一轮| I
+    V -.-> E["校验失败 / 冲突 / 候选不足\n阻止不完整采用，保留已采用状态"]
+    R -.-> E
+    K -.-> E
+    C -.-> B["当前边界：C 新替代搜索未接入\n步行超限不自动触发路线约束重搜；F9 准确率未验收"]
+    classDef llm fill:#e8efff,stroke:#3562bc,color:#17386b;
+    classDef local fill:#e8f5ef,stroke:#318467,color:#15513e;
+    classDef user fill:#fff1db,stroke:#c98220,color:#704711;
+    classDef other fill:#f0f2f6,stroke:#7c8797,color:#344054;
+    class L1,L2 llm;
+    class V,R,K local;
+    class U,P user;
+    class I,A,C,E,B other;
